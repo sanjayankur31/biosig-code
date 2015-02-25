@@ -273,6 +273,7 @@ if (VERBOSE_LEVEL > 7) fprintf(stdout,"%s (line %i) %p %p %i %i\n", __FILE__, __
 			CHANNEL_TYPE *hc = hdr->CHANNEL + ns;
 			hc->SPR = 0;
 			hc->GDFTYP = 0;
+			hc->OnOff = 1;
 		}
 		size_t EventN = 0;
 		hdr->SPR = 0;
@@ -309,8 +310,6 @@ if (VERBOSE_LEVEL > 7) fprintf(stdout,"%s (line %i) NS=%i nCol=%i\n", __FILE__, 
 				if (hc->GDFTYP < 16) hc->GDFTYP = 16;
 			}
 
-			hc->OnOff  = TEMPCHANNEL[k].OnOff;
-
 			if (!flag_traces_of_first_sweep_done) {
 				hc->Cal    = TEMPCHANNEL[k].Cal;
 				hc->Off    = TEMPCHANNEL[k].Off;
@@ -337,7 +336,7 @@ if (VERBOSE_LEVEL > 7) fprintf(stdout,"%s (line %i) NS=%i nCol=%i\n", __FILE__, 
 					}
 				}
 
-				// add segment break in event table.
+				// ... add segment break in event table.
 				if ( hdr->EVENT.N + 1 >= EventN ) {
 					EventN += max(EventN, 16);
 					hdr->EVENT.POS = (uint32_t*)realloc(hdr->EVENT.POS, EventN * sizeof(*hdr->EVENT.POS));
