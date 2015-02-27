@@ -42,6 +42,11 @@
 ## make mexw64 mex/mexSLOAD.mexw64   - requires MCE-W64 and GNUMEX libraries from Matlab/Win64
 ## make win64/sigviewer.exe 	- requires sources of SigViewer and MCE-W64, make suitesparse zlib qt 
 
+##### Target: MacOSX w/ homebrew
+## make install_homebrew	installs libbiosig and save2gdf
+	# requires: brew tap homebrew/dupes
+	#	    brew install libiconv
+
 ###############################
 # whether dynamic or static linking is used, can be controlled with
 # LIBEXT. Setting it to 'a' links statically, 'so' links dynamically
@@ -52,21 +57,21 @@ LIBEXT        = a
 
 ### User-specified options: its likely you want to change this
 # settings for cross compiler: tested with MXE and mce-w64 with make suitesparse zlib qt ; 
-CROSS   = $(HOME)/src/mxe.github.schloegl/usr/bin/i686-pc-mingw32
+CROSS   = $(HOME)/src/mxe.github.schloegl/usr/bin/i686-w64-mingw32.static
 ## local MXE
 ifeq "$(wildcard $(CROSS)-gcc)" ""
-CROSS   = $(HOME)/src/mxe/usr/bin/i686-pc-mingw32
+CROSS   = $(HOME)/src/mxe/usr/bin/i686-w64-mingw32.static
 endif
 ifeq "$(wildcard $(CROSS)-gcc)" ""
-CROSS         = $(shell pwd)/../mxe/usr/bin/i686-pc-mingw32
+CROSS         = $(shell pwd)/../mxe/usr/bin/i686-w64-mingw32.static
 endif
 ifeq "$(wildcard $(CROSS)-gcc)" ""
-CROSS         = /usr/local/src/mxe/usr/bin/i686-pc-mingw32
+CROSS         = /usr/local/src/mxe/usr/bin/i686-w64-mingw32.static
 endif
 
-CROSS64       = $(HOME)/src/mxe.github.schloegl/usr/bin/x86_64-w64-mingw32
+CROSS64       = $(HOME)/src/mxe.github.schloegl/usr/bin/x86_64-w64-mingw32.static
 ifeq "$(wildcard $(CROSS64)-gcc)" ""
-CROSS64       = $(shell pwd)/../mce-w64/usr/bin/x86_64-static-mingw32
+CROSS64       = $(shell pwd)/../mce-w64/usr/bin/x86_64-static-mingw32.static
 endif
 IO_H_FILE   := $(subst /bin/,//,$(CROSS))/include/io.h
 IO_H_FILE64 := $(subst /bin/,//,$(CROSS64))/include/io.h
@@ -80,16 +85,13 @@ PathToSigViewerWIN64 = ../sigviewer4win64
 
 CFLAGS       += -fstack-protector -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -pipe -fPIC -Wall -fno-builtin-memcmp -O2 -Wextra
 CXXFLAGS      = $(CFLAGS)
-INCPATH       = -I/opt/local/include/
-LFLAGS        = -L/opt/local/lib/
 
 ## TARGET dependencies
 ifeq (,$(TARGET))
-	CC      := gcc	
+	CC      := gcc
 	CXX     := g++
 	LD      := ld
 	AR      := ar rcs
-	PREFIX  := /usr/bin/
 ifneq (Darwin,$(shell uname))
 	LFLAGS  += -Wl,-z,relro,-z,now
 endif
@@ -98,7 +100,6 @@ else ifeq (intel,$(TARGET))
 	CXX     := /opt/intel/bin/icc
 	LD      := /opt/intel/bin/xild
 	AR      := /opt/intel/bin/xiar crs
-	PREFIX  := /usr/bin/
 else 
 	PREFIX  := $(dir $(shell which $(TARGET)-gcc))
 	CC      := $(TARGET)-gcc
@@ -123,14 +124,17 @@ ifeq (Darwin,$(shell uname))
 	##
 	CFLAGS      += -I/usr/local/Cellar/libiconv/1.14/include
 	#LFLAGS      += -dynamiclib -undefined suppress -flat_namespace
-	LFLAGS      += -L/usr/local/Cellar/libiconv/1.14/lib/
-	LIBS        += -liconv
-	DLEXT        = a
+	LFLAGS      += -arch x86_64 -macosx_version_min 10.9 -L/usr/local/Cellar/libiconv/1.14/lib/
+	LIBS        += -liconv -lstdc++
+	DLEXT        = dylib
 else
 	LDFLAGS     += -shared -fPIC
 	DLEXT        = so
 endif
 
+ifeq (,$(PREFIX))
+	PREFIX  := /usr/bin/
+endif
 
 DEFINES_ALL   = #-D=NDEBUG
 
@@ -387,18 +391,14 @@ endif
 
 MinGW64OBJECTS  = $(patsubst win32/%.obj, win64/%.obj, $(MinGWOBJECTS))
 
-LIB_OBJECTS = libbiosig.a libbiosig2.a libgdf.a libgdftime.a libphysicalunits.a libbiosig.so libbiosig2.so libgdftime.so libphysicalunits.so
+LIB_OBJECTS = libbiosig.a libbiosig2.a libgdf.a libgdftime.a libphysicalunits.a libbiosig.$(DLEXT) libbiosig2.$(DLEXT) libgdftime.$(DLEXT) libphysicalunits.$(DLEXT)
 
 first: $(IO_H_FILE2) save2gdf libbiosig.a libbiosig.so
 all:   first mex4o biosig4python sigviewer win32 win64 win32/sigviewer.exe win64/sigviewer.exe #biosig_client biosig_server mma java tcl perl php ruby #sigviewer 
 
 .PHONY : io.h libbiosig lib
 
-ifneq (Darwin,$(uname))
 libbiosig lib: $(LIB_OBJECTS)
-else
-libbiosig lib: $(patsubst %.so, %.dylib, $(LIB_OBJECTS))
-endif
 
 #############################################################
 #	Compilation: Implicit, default rules
@@ -629,7 +629,7 @@ libphysicalunits.def: physicalunits.o
 libphysicalunits.so: physicalunits.o
 	$(CC) -shared -fPIC -Wl,-soname,"$@" $(LDLIBS) -o "$@" "$<"
 libphysicalunits.dylib: physicalunits.o
-	$(CC) $(LDFLAGS) $(LDLIBS) "$<" -o "$@"
+	$(LD) -dylib $(LFLAGS) $(LIBS) "$<" -o "$@"
 
 libgdftime.a: gdftime.o
 	-$(DELETE) "$@"
@@ -639,10 +639,9 @@ libgdftime.def: gdftime.o
 libgdftime.so: gdftime.o
 	$(CC) -shared -fPIC -Wl,-soname,$@.${MAJOR_VERSION}.${MINOR_VERSION} $(LDLIBS) \
 		-o $@.${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} $<
-	/sbin/ldconfig -n .
 	ln -sf $@.${MAJOR_VERSION}.${MINOR_VERSION} $@
 libgdftime.dylib: gdftime.o
-	$(CC) $(LDFLAGS) $(LDLIBS) -o "$@"
+	$(LD) -dylib $(LFLAGS) $(LIBS) -o "$@"
 
 libgdf.a: gdf.o getlogin.o gdftime.o physicalunits.o
 	-$(DELETE) "$@"
@@ -653,27 +652,23 @@ libgdf.def: gdf.o getlogin.o gdftime.o physicalunits.o
 libgdf.so: gdf.o gdftime.o physicalunits.o
 	$(CC) -shared -fPIC -Wl,-soname,$@.${MAJOR_VERSION}.${MINOR_VERSION} $(LDLIBS) \
 		-o $@.${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} gdf.o getlogin.o gdftime.o physicalunits.o
-	/sbin/ldconfig -n .
 	ln -sf $@.${MAJOR_VERSION}.${MINOR_VERSION} "$@"
 libgdf.dylib: gdf.o gdftime.o physicalunits.o
-	$(CC) $(LDFLAGS) $(LDLIBS) "$<" -o "$@"
+	$(LD) -dylib $(LFLAGS) $(LIBS) "$<" -o "$@"
 
 libbiosig.a: $(OBJECTS) t240/libcnsfef.a libbiosig.pc
 	-$(DELETE) libbiosig.a
 	$(AR) libbiosig.a $(OBJECTS) t240/*.o
-	-touch ../sigviewer/src/file_context.cpp	# trigger to rebuild sigviewer
 libbiosig.def: $(OBJECTS) t240/libcnsfef.a libbiosig.pc
 	$(CXX) -o libbiosig.dll -s -shared -fPIC  $(OBJECTS) t240/libcnsfef.a $(LIBS) -Wl,--subsystem,windows,--output-def,libbiosig.def,--out-implib,libbiosig.dll.a
-
 
 libbiosig.so: $(OBJECTS) t240/libcnsfef.a libbiosig.pc
 	$(CXX) -shared -fPIC -Wl,-soname,$@.${MAJOR_VERSION}.${MINOR_VERSION} $(LDLIBS) \
 		-o $@.${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} $(OBJECTS) t240/*.o
-	/sbin/ldconfig -n .
 	ln -sf "$@.${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING}" "$@"
 
 libbiosig.dylib: $(OBJECTS)
-	$(CC) $(LDFLAGS) $(LDLIBS) $(OBJECTS) t240/*.o -o "$@"
+	$(LD) -dylib $(LFLAGS) $(LIBS) -o "$@"
 
 
 libbiosig.pc :
@@ -695,22 +690,19 @@ libbiosig2.a: $(OBJECTS) biosig2.o t240/libcnsfef.a
 libbiosig2.def: $(OBJECTS) biosig2.o t240/libcnsfef.a
 	$(CXX) -o libbiosig2.dll -s -shared -fPIC  $(OBJECTS) biosig2.o t240/libcnsfef.a $(LIBS) -Wl,--subsystem,windows,--output-def,libbiosig2.def,--out-implib,libbiosig2.dll.a
 
-
 libbiosig2.so: $(OBJECTS) biosig2.o t240/libcnsfef.a
 	$(CXX) -shared -fPIC -Wl,-soname,libbiosig2.so.${MAJOR_VERSION}.${MINOR_VERSION} $(LDLIBS) \
 		-o libbiosig2.so.${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} $(OBJECTS) biosig2.o t240/*.o
-	/sbin/ldconfig -n .
 	ln -s "$@.${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING}"  "$@"
 
 libbiosig2.dylib: $(OBJECTS)  biosig2.o t240/libcnsfef.a
-	$(CC) $(LDFLAGS) $(LDLIBS) $(OBJECTS) t240/*.o -o "$@"
-
+	$(LD) -dylib $(OBJECTS) biosig2.o t240/*.o $(LFLAGS) $(LIBS) -lstdc++ -o "$@"
 
 save2gdf: save2gdf.o libbiosig.$(LIBEXT)
-	$(CXX) $(CXXFLAGS) save2gdf.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o save2gdf
+	$(CXX) $(LFLAGS) save2gdf.o -L. -lbiosig $(LIBS) -o save2gdf
 
 pdp2gdf: pdp2gdf.o libbiosig.$(LIBEXT)
-	$(CXX) $(CXXFLAGS) pdp2gdf.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o pdp2gdf
+	$(LD) pdp2gdf.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o pdp2gdf
 
 bscs: biosig_client biosig_server sandbox.o biosig.o
 biosig_client: biosig_client.c libbiosig.$(LIBEXT) biosig-network.o
@@ -935,14 +927,20 @@ install_libbiosig.a: libbiosig.a libbiosig2.a libphysicalunits.a libgdftime.a
 
 install_libbiosig: libbiosig2.$(DLEXT) libbiosig.$(DLEXT) libphysicalunits.$(DLEXT) libgdftime.$(DLEXT)  install_libbiosig.a
 	# do not install libbiosig.so, only static version should be installed
-	install libbiosig.so.${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} $(LIB)
-	ln -sf $(LIB)/libbiosig.so.${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} $(LIB)/libbiosig.so.${MAJOR_VERSION}.${MINOR_VERSION}
-	ln -sf $(LIB)/libbiosig.so.${MAJOR_VERSION}.${MINOR_VERSION} $(LIB)/libbiosig.so
-	install libphysicalunits.so	$(LIB)
-	install libgdftime.so	$(LIB)
-	install libbiosig2.so.${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} $(LIB)
-	ln -sf $(LIB)/libbiosig2.so.${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} $(LIB)/libbiosig2.so.${MAJOR_VERSION}.${MINOR_VERSION}
-	ln -sf $(LIB)/libbiosig2.so.${MAJOR_VERSION}.${MINOR_VERSION} $(LIB)/libbiosig2.so
+	install libbiosig.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} $(LIB)
+	ln -sf $(LIB)/libbiosig.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} $(LIB)/libbiosig.so.${MAJOR_VERSION}.${MINOR_VERSION}
+	ln -sf $(LIB)/libbiosig.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION} $(LIB)/libbiosig.$(DLEXT)
+	install libphysicalunits.$(DLEXT)	$(LIB)
+	install libgdftime.$(DLEXT)	$(LIB)
+	install libbiosig2.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} $(LIB)
+	ln -sf $(LIB)/libbiosig2.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} $(LIB)/libbiosig2.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}
+	ln -sf $(LIB)/libbiosig2.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION} $(LIB)/libbiosig2.$(DLEXT)
+
+install_homebrew: save2gdf libbiosig2.$(DLEXT) libbiosig.$(DLEXT) libphysicalunits.$(DLEXT) libgdftime.$(DLEXT) libbiosig.a libbiosig2.a libphysicalunits.a libgdftime.a
+	install -d $(PREFIX)/include/ $(PREFIX)/bin/ $(PREFIX)/lib/
+	install biosig.h biosig2.h biosig-dev.h 	$(PREFIX)/include/
+	install save2gdf 				$(PREFIX)/bin/
+	install libbiosig2.$(DLEXT) libbiosig.$(DLEXT) libphysicalunits.$(DLEXT) libgdftime.$(DLEXT) libbiosig.a libbiosig2.a libphysicalunits.a libgdftime.a $(PREFIX)/lib/
 
 install: save2gdf libbiosig.a doc/save2gdf.1 install_libbiosig
 	install -d 			$(BIN) $(LIB) $(INC)
