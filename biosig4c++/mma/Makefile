@@ -13,11 +13,12 @@
  
 ###########################################
 ## set Mathematica variables
-MLINKDIR = /usr/local/Wolfram/gridMathematicaServer/7.0/
-MLINKDIR = /usr/local/Wolfram/Mathematica/8.0/
+MLINKDIR = /usr/local/Wolfram/gridMathematicaServer/7.0
+MLINKDIR = /usr/local/Wolfram/Mathematica/8.0
+MLINKDIR = /usr/local/Wolfram/Mathematica/9.0
 
-ifneq ($(shell which mathematica), )
-    MLINKDIR := $(dir $(shell readlink -f $(shell which mathematica) ) )
+ifeq ($(wildcard $(MLINKDIR)/Executables/mathematica),)
+    MLINKDIR := $(dir $(shell readlink -f $(shell which mathematica) ) )..
 endif
 SYS       = Linux-x86-64# Set this value with the result of evaluating $SystemID
 MLLIB     = ML64i3 # ML32i3 # Set this to ML64i3 if using a 64-bit system
@@ -30,8 +31,8 @@ SYSwin64     = Windows-x86-64# Set this value with the result of evaluating $Sys
 MLLIBwin64   = ml64i3m# Set this to ML64i3 if using a 64-bit system
 ###########################################
 
-CADDSDIR  = ${MLINKDIR}../SystemFiles/Links/MathLink/DeveloperKit/${SYS}/CompilerAdditions/
-INCDIR    = -I${CADDSDIR} -I${MLINKDIR}../SystemFiles/IncludeFiles/C/
+CADDSDIR  = ${MLINKDIR}/SystemFiles/Links/MathLink/DeveloperKit/${SYS}/CompilerAdditions
+INCDIR    = -I${CADDSDIR} -I${MLINKDIR}/SystemFiles/IncludeFiles/C/
 LIBDIR    = ${CADDSDIR}
 
 EXTRALIBS = -lm -lrt -lstdc++ $(LDLIBS) # Set these with appropriate libs for your system.
