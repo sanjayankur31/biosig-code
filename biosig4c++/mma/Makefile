@@ -16,12 +16,18 @@
 MLINKDIR = /usr/local/Wolfram/gridMathematicaServer/7.0
 MLINKDIR = /usr/local/Wolfram/Mathematica/8.0
 MLINKDIR = /usr/local/Wolfram/Mathematica/9.0
+#MLINKDIR = /usr/local/Wolfram/Mathematica/10.0
 
 ifeq ($(wildcard $(MLINKDIR)/Executables/mathematica),)
     MLINKDIR := $(dir $(shell readlink -f $(shell which mathematica) ) )..
 endif
 SYS       = Linux-x86-64# Set this value with the result of evaluating $SystemID
-MLLIB     = ML64i3 # ML32i3 # Set this to ML64i3 if using a 64-bit system
+
+# automated detection of most recent MLINTERFACE, without starting mathematica
+# 10.0 supports 3 and 4, 9.0 and earlier supports only 3,
+MLIVER := $(shell ${CC} mliver.c -I${MLINKDIR}/SystemFiles/Links/MathLink/DeveloperKit/${SYS}/CompilerAdditions/ -E -o - | tail -1)
+
+MLLIB     = ML64i${MLIVER} # ML32i3 # Set this to ML64i3 if using a 64-bit system
 #
 # Windows
 #MLINKDIR  = /usr/local/Wolfram/gridMathematicaServer/7.0/SystemFiles/Links/MathLink/DeveloperKit
@@ -31,11 +37,19 @@ SYSwin64     = Windows-x86-64# Set this value with the result of evaluating $Sys
 MLLIBwin64   = ml64i3m# Set this to ML64i3 if using a 64-bit system
 ###########################################
 
+ifneq ($(wildcard ${MLINKDIR}/SystemFiles/Libraries/${SYS}/libuuid*),)
+LIBDIR   += -L${MLINKDIR}/SystemFiles/Libraries/$(SYS)
+EXTRALIBS += -luuid
+endif
 CADDSDIR  = ${MLINKDIR}/SystemFiles/Links/MathLink/DeveloperKit/${SYS}/CompilerAdditions
 INCDIR    = -I${CADDSDIR} -I${MLINKDIR}/SystemFiles/IncludeFiles/C/
-LIBDIR    = ${CADDSDIR}
+LIBDIR   += -L${CADDSDIR}
 
-EXTRALIBS = -lm -lrt -lstdc++ $(LDLIBS) # Set these with appropriate libs for your system.
+EXTRALIBS += -lm -ldl -lrt -lstdc++ $(LDLIBS) # Set these with appropriate libs for your system.
+
+ifneq (${MLIVER},)
+CFLAGS += -DMLINTERFACE=${MLIVER}
+endif
 
 MPREP     = ${CADDSDIR}/mprep
 
@@ -44,7 +58,8 @@ win win32 : sload.exe
 
 
 .c.o:
-	${CC} -c ${INCDIR} "$<"
+	${CC} ${CFLAGS} -c ${INCDIR} "$<"
+	#${CC} -c ${INCDIR} "$<"
 
 sloadtm.c: sload.tm
 	${MPREP} "$<" -o "$@"
@@ -52,7 +67,7 @@ sloadtm.c: sload.tm
 	sed -i 's# __DATE__# ",__DATE__," ",__TIME__,"#' "$@"
 
 sload: sload.o sloadtm.o
-	${CC} sloadtm.o sload.o -lbiosig2 -L${LIBDIR} -l${MLLIB} ${EXTRALIBS} -o "$@"
+	${CC} sloadtm.o sload.o -lbiosig2 ${LIBDIR} -l${MLLIB} ${EXTRALIBS} -o "$@"
 	# copy to users directory if available
 	#-cp "$@" ~/K/Software/MathematicaTools/
 	#-cp "$@" ~/K/Software/MathematicaTools/sload-$(shell date +%Y%m%d)
