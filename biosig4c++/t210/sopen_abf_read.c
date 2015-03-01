@@ -1,7 +1,7 @@
 /*
 
     $Id: sopen_abf_read.c,v 1.2 2009-02-12 16:15:17 schloegl Exp $
-    Copyright (C) 2012,2013 Alois Schloegl <alois.schloegl@gmail.com>
+    Copyright (C) 2012,2013,2014,2015 Alois Schloegl <alois.schloegl@gmail.com>
 
     This file is part of the "BioSig for C/C++" repository 
     (biosig4c++) at http://biosig.sf.net/ 
@@ -64,7 +64,7 @@ EXTERN_C void sread_atf(HDRTYPE* hdr) {
 
 		if (VERBOSE_LEVEL>8) fprintf(stdout,"SREAD ATF 2 %i\t<%s>\n",(unsigned)ln,line );
 
-		if ((hdr->NRec * hdr->SPR) <= (ln+1) ) {
+		if ((hdr->NRec * hdr->SPR) <= (long)(ln+1) ) {
 			hdr->NRec = max(1024, ln*2);
 			hdr->AS.rawdata = realloc(hdr->AS.rawdata, hdr->NRec * hdr->SPR * hdr->AS.bpb);
 		}
@@ -88,7 +88,6 @@ EXTERN_C void sread_atf(HDRTYPE* hdr) {
 	hdr->NRec = ln;
 	hdr->AS.first  = 0;
 	hdr->AS.length = hdr->NRec;
-
 }
 
 EXTERN_C void sopen_abf_read(HDRTYPE* hdr) {	
@@ -102,16 +101,34 @@ EXTERN_C void sopen_abf_read(HDRTYPE* hdr) {
 
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"sopen_abf_read 101\n");
 
+	if (VERBOSE_LEVEL>7) fprintf(stderr,"%s (line %i) %li %i %i %li\n",__FILE__,__LINE__,
+                sizeof(struct ABFFileHeader),ABF_OLDHEADERSIZE, ABF_HEADERSIZE,
+                offsetof(struct ABFFileHeader, lHeaderSize));
+
+	if (VERBOSE_LEVEL>7) fprintf(stderr,"%s (line %i) %i %li %i\n",__FILE__,__LINE__,
+		ABF_BLOCKSIZE, offsetof(struct ABFFileHeader, lDataSectionPtr),
+		lei32p(hdr->AS.Header + offsetof(struct ABFFileHeader, lDataSectionPtr)) );
+
 		size_t count = hdr->HeadLen; 	
 		hdr->VERSION = lef32p(hdr->AS.Header + offsetof(struct ABFFileHeader, fFileVersionNumber));
 
 		hdr->HeadLen = (hdr->VERSION < 1.6) ? ABF_OLDHEADERSIZE : ABF_HEADERSIZE;
+		if (hdr->VERSION < 1.6) {
+			biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "ABF < v1.6 not supported"); return;
+		}
+
+		assert(ABF_HEADERSIZE==sizeof(struct ABFFileHeader));
+
 		if (count < hdr->HeadLen) {
 			hdr->AS.Header = (uint8_t*) realloc(hdr->AS.Header, hdr->HeadLen);
 			count         += ifread(hdr->AS.Header+count, 1, hdr->HeadLen-count, hdr);
 		}
+
+	if (VERBOSE_LEVEL>7) fprintf(stderr,"%s (line %i) %p %i %li %i \n",__FILE__,__LINE__,
+		hdr->AS.Header, hdr->HeadLen, count, leu32p(hdr->AS.Header + offsetof(struct ABFFileHeader, lHeaderSize)) );
+
 		hdr->HeadLen = count;
-		assert(hdr->HeadLen == leu32p(hdr->AS.Header + offsetof(struct ABFFileHeader, lHeaderSize)));
+		//assert(hdr->HeadLen == leu32p(hdr->AS.Header + offsetof(struct ABFFileHeader, lHeaderSize)));
 
 		{
 			struct tm t;
@@ -132,6 +149,8 @@ EXTERN_C void sopen_abf_read(HDRTYPE* hdr) {
 		case 0: gdftyp = 3; break;
 		case 1: gdftyp = 16; break;
 		}
+
+	if (VERBOSE_LEVEL>7) fprintf(stderr,"%s (line %i)\n",__FILE__,__LINE__);
 
 		size_t slen;
 		slen = min(MAX_LENGTH_MANUF, sizeof(((struct ABFFileHeader*)(hdr->AS.Header))->sCreatorInfo));
@@ -212,6 +231,8 @@ EXTERN_C void sopen_abf_read(HDRTYPE* hdr) {
 		}
 
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"sopen_abf_read 201\n");
+	if (VERBOSE_LEVEL>7) fprintf(stderr,"%s (line %i)\n",__FILE__,__LINE__);
+
 
 		hdr->NS = lei16p(hdr->AS.Header + offsetof(struct ABFFileHeader, nADCNumChannels));
 		if (lei16p(hdr->AS.Header + offsetof(struct ABFFileHeader, nDigitalEnable)))
