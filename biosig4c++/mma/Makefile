@@ -13,9 +13,10 @@
  
 ###########################################
 ## set Mathematica variables
-MLINKDIR = /usr/local/Wolfram/gridMathematicaServer/7.0
-MLINKDIR = /usr/local/Wolfram/Mathematica/8.0
-MLINKDIR = /usr/local/Wolfram/Mathematica/9.0
+
+#MLINKDIR = /usr/local/Wolfram/gridMathematicaServer/7.0
+#MLINKDIR = /usr/local/Wolfram/Mathematica/8.0
+#MLINKDIR = /usr/local/Wolfram/Mathematica/9.0
 #MLINKDIR = /usr/local/Wolfram/Mathematica/10.0
 
 ifeq ($(wildcard $(MLINKDIR)/Executables/mathematica),)
@@ -78,7 +79,7 @@ sload: sload.o sloadtm.o
 ###########################################
 
 CCw32        = $(CROSS)-gcc
-CADDSDIRwin  = ${MLINKDIR}../SystemFiles/Links/MathLink/DeveloperKit/${SYSwin}/CompilerAdditions/mldev32
+CADDSDIRwin  = ${MLINKDIR}/SystemFiles/Links/MathLink/DeveloperKit/${SYSwin}/CompilerAdditions/mldev32
 INCDIRwin    = -I${CADDSDIRwin}/include  -I${MLINKDIR}../SystemFiles/IncludeFiles/C/
 LIBDIRwin    = ${CADDSDIRwin}/lib
 
@@ -107,7 +108,7 @@ sload.exe : sload.obj sloadtm.obj
 ###########################################
 
 CCw64         = $(CROSS64)-gcc
-CADDSDIRwin64 = ${MLINKDIR}../SystemFiles/Links/MathLink/DeveloperKit/${SYSwin64}/CompilerAdditions/mldev64
+CADDSDIRwin64 = ${MLINKDIR}/SystemFiles/Links/MathLink/DeveloperKit/${SYSwin64}/CompilerAdditions/mldev64
 INCDIRwin64   = -I${CADDSDIRwin64}/include -I${MLINKDIR}../SystemFiles/IncludeFiles/C/
 LIBDIRwin64   = ${CADDSDIRwin64}/lib
 
