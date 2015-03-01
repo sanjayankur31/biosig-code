@@ -107,28 +107,22 @@ EXTERN_C void sopen_abf_read(HDRTYPE* hdr) {
 
 	if (VERBOSE_LEVEL>7) fprintf(stderr,"%s (line %i) %i %li %i\n",__FILE__,__LINE__,
 		ABF_BLOCKSIZE, offsetof(struct ABFFileHeader, lDataSectionPtr),
-		lei32p(hdr->AS.Header + offsetof(struct ABFFileHeader, lDataSectionPtr)) );
+		ABF_BLOCKSIZE*lei32p(hdr->AS.Header + offsetof(struct ABFFileHeader, lDataSectionPtr)) );
 
 		size_t count = hdr->HeadLen; 	
 		hdr->VERSION = lef32p(hdr->AS.Header + offsetof(struct ABFFileHeader, fFileVersionNumber));
 
-		hdr->HeadLen = (hdr->VERSION < 1.6) ? ABF_OLDHEADERSIZE : ABF_HEADERSIZE;
-		if (hdr->VERSION < 1.6) {
-			biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "ABF < v1.6 not supported"); return;
-		}
-
-		assert(ABF_HEADERSIZE==sizeof(struct ABFFileHeader));
-
+		hdr->HeadLen = ABF_BLOCKSIZE * lei32p(hdr->AS.Header + offsetof(struct ABFFileHeader, lDataSectionPtr));
 		if (count < hdr->HeadLen) {
 			hdr->AS.Header = (uint8_t*) realloc(hdr->AS.Header, hdr->HeadLen);
 			count         += ifread(hdr->AS.Header+count, 1, hdr->HeadLen-count, hdr);
 		}
-
-	if (VERBOSE_LEVEL>7) fprintf(stderr,"%s (line %i) %p %i %li %i \n",__FILE__,__LINE__,
-		hdr->AS.Header, hdr->HeadLen, count, leu32p(hdr->AS.Header + offsetof(struct ABFFileHeader, lHeaderSize)) );
-
+		if ( count < (hdr->VERSION < 1.6 ? ABF_OLDHEADERSIZE : ABF_HEADERSIZE)
+		  || count < hdr->HeadLen )
+		{
+			biosigERROR(hdr, B4C_INCOMPLETE_FILE, "Reading ABF Header block failed"); return;
+		}
 		hdr->HeadLen = count;
-		//assert(hdr->HeadLen == leu32p(hdr->AS.Header + offsetof(struct ABFFileHeader, lHeaderSize)));
 
 		{
 			struct tm t;
@@ -158,15 +152,18 @@ EXTERN_C void sopen_abf_read(HDRTYPE* hdr) {
 		strncpy(hdr->ID.Manufacturer._field, (char*)hdr->AS.Header + offsetof(struct ABFFileHeader, sCreatorInfo), slen);
 		hdr->ID.Manufacturer._field[slen] = 0;
 		hdr->ID.Manufacturer.Name = hdr->ID.Manufacturer._field;
-		slen = min(MAX_LENGTH_RID, sizeof(((struct ABFFileHeader*)(hdr->AS.Header))->sFileComment));
-		strncpy(hdr->ID.Recording,(char*)hdr->AS.Header + offsetof(struct ABFFileHeader, sFileComment), slen);
-		hdr->ID.Recording[slen] = 0;
+
+		if (hdr->Version > 1.5) {
+			slen = min(MAX_LENGTH_RID, sizeof(((struct ABFFileHeader*)(hdr->AS.Header))->sFileComment));
+			strncpy(hdr->ID.Recording,(char*)hdr->AS.Header + offsetof(struct ABFFileHeader, sFileComment), slen);
+			hdr->ID.Recording[slen] = 0;
+		}
 
 		if (VERBOSE_LEVEL>7) {
 			fprintf(stdout,"sCreatorInfo:\t%s\n",hdr->AS.Header + offsetof(struct ABFFileHeader, sCreatorInfo));
 			fprintf(stdout,"_sFileComment:\t%s\n",hdr->AS.Header + offsetof(struct ABFFileHeader, _sFileComment));
-			fprintf(stdout,"sFileComment:\t%s\n",hdr->AS.Header + offsetof(struct ABFFileHeader, sFileComment));
-			fprintf(stdout,"sFileComment:\t%s\n",hdr->AS.Header + offsetof(struct ABFFileHeader, sFileComment));
+			if (hdr->Version > 1.5)
+				fprintf(stdout,"sFileComment:\t%s\n",hdr->AS.Header + offsetof(struct ABFFileHeader, sFileComment));
 
 
 			fprintf(stdout,"\nlHeaderSize:\t%i\n",lei32p(hdr->AS.Header + offsetof(struct ABFFileHeader, lHeaderSize)));
@@ -248,17 +245,16 @@ EXTERN_C void sopen_abf_read(HDRTYPE* hdr) {
 		uint32_t k1=0,k;	// ABF is 32 bits only, no need for more
 		for (k=0; k < ABF_ADCCOUNT + ABF_DACCOUNT; k++) {
 			CHANNEL_TYPE *hc = hdr->CHANNEL+k1;
-			hc->bufptr = NULL;
-			hc->LeadIdCode = 0;
 			if ((k < ABF_ADCCOUNT) && (lei16p(hdr->AS.Header + offsetof(struct ABFFileHeader, nADCSamplingSeq) + 2 * k) >= 0)) {
 				hc->OnOff = 1;
-
+				hc->bufptr = NULL;
+				hc->LeadIdCode = 0;
 				int ll = min(ABF_ADCNAMELEN, MAX_LENGTH_LABEL);
 				strncpy(hc->Label, (char*)hdr->AS.Header + offsetof(struct ABFFileHeader, sADCChannelName) + k*ABF_ADCNAMELEN, ll);
 				while (ll > 0 && isspace(hc->Label[--ll]));
 				hc->Label[ll+1] = 0;
-
-				char units[ABF_ADCUNITLEN+1]; {
+				char units[ABF_ADCUNITLEN+1];
+				{
 					memcpy(units, (char*)hdr->AS.Header + offsetof(struct ABFFileHeader, sADCUnits) + k*ABF_ADCUNITLEN, ABF_ADCUNITLEN);
 					units[ABF_ADCUNITLEN] = 0;
 					int p=ABF_ADCUNITLEN; 	while ( (0<p) && isspace(units[--p])) units[p]=0;  // remove trailing white space
@@ -266,21 +262,27 @@ EXTERN_C void sopen_abf_read(HDRTYPE* hdr) {
 				}
 				hc->LowPass  = lef32p(hdr->AS.Header + offsetof(struct ABFFileHeader, fSignalLowpassFilter) + 4 * k);
 				hc->HighPass = lef32p(hdr->AS.Header + offsetof(struct ABFFileHeader, fSignalHighpassFilter) + 4 * k);
+				hc->Notch    = NAN;
+				hc->TOffset  = NAN;
+				hc->XYZ[0]   = 0;
+				hc->XYZ[1]   = 0;
+				hc->XYZ[2]   = 0;
 				hc->GDFTYP   = gdftyp;
 				hc->SPR      = hdr->SPR;
 				hc->bi       = k1*GDFTYP_BITS[gdftyp]/8;
-
+				hc->bi8      = k1*GDFTYP_BITS[gdftyp];
 				double PhysMax = lef32p(hdr->AS.Header + offsetof(struct ABFFileHeader, fADCRange));
 				double DigMax  = (double)lei32p(hdr->AS.Header + offsetof(struct ABFFileHeader, lADCResolution));
 				double fTotalScaleFactor = lef32p(hdr->AS.Header + offsetof(struct ABFFileHeader, fInstrumentScaleFactor) + 4 * k)
 							 * lef32p(hdr->AS.Header + offsetof(struct ABFFileHeader, fADCProgrammableGain) + 4 * k);
-
 				hc->Off      = -lef32p(hdr->AS.Header + offsetof(struct ABFFileHeader, fInstrumentOffset) + 4 * k);
 				if (lei16p(hdr->AS.Header + offsetof(struct ABFFileHeader, nSignalType) + 2 * k) != 0) {
 					hc->Off           -= lef32p(hdr->AS.Header + offsetof(struct ABFFileHeader, fInstrumentOffset) + 4 * k);
 					fTotalScaleFactor *= lef32p(hdr->AS.Header + offsetof(struct ABFFileHeader, fSignalGain) + 4 * k);
 				}
-				if (lei16p(hdr->AS.Header + offsetof(struct ABFFileHeader, nTelegraphEnable) + 2 * k) != 0) {
+				if (hdr->Version > 1.5 &&
+				    lei16p(hdr->AS.Header + offsetof(struct ABFFileHeader, nTelegraphEnable) + 2 * k) != 0) 
+				{
 					fTotalScaleFactor *= lef32p(hdr->AS.Header + offsetof(struct ABFFileHeader, fTelegraphAdditGain) + 4 * k);
 				}
 				hc->Cal      = PhysMax / (fTotalScaleFactor * DigMax);
@@ -289,7 +291,6 @@ EXTERN_C void sopen_abf_read(HDRTYPE* hdr) {
 				hc->DigMin   = -hc->DigMax;
 				hc->PhysMax  = hc->DigMax * hc->Cal;
 				hc->PhysMin  = hc->DigMin * hc->Cal;
-
 				if (VERBOSE_LEVEL>7) {
 					fprintf(stdout,"==== CHANNEL %i [%s] ====\n",k,units);
 					fprintf(stdout,"nSignalType:\t%i\n",lei16p(hdr->AS.Header + offsetof(struct ABFFileHeader, nSignalType) + 2 * k));
@@ -311,7 +312,6 @@ EXTERN_C void sopen_abf_read(HDRTYPE* hdr) {
 				k1++;
 			}
 			else if (k < ABF_ADCCOUNT) {
-				hc->OnOff = 0;
 				// do not increase k1;
 				if (VERBOSE_LEVEL>7) {
 					fprintf(stdout,"==== CHANNEL %i ====\n",k);
@@ -333,6 +333,8 @@ EXTERN_C void sopen_abf_read(HDRTYPE* hdr) {
 			}
 			else if ( (k1 < ABF_ADCCOUNT+ABF_DACCOUNT) && (k < hdr->NS) ) {
 				hc->OnOff = 1;
+				hc->bufptr = NULL;
+				hc->LeadIdCode = 0;
 				strncpy(hc->Label, (char*)hdr->AS.Header + offsetof(struct ABFFileHeader, sDACChannelName) + (k-ABF_ADCCOUNT)*ABF_DACNAMELEN,
 					min(ABF_DACNAMELEN,MAX_LENGTH_LABEL));
 				hc->Label[ABF_DACNAMELEN] = 0;
@@ -343,8 +345,17 @@ EXTERN_C void sopen_abf_read(HDRTYPE* hdr) {
 					int p=ABF_ADCUNITLEN; 	while ( (0<p) && isspace(units[--p])) units[p]=0;  // remove trailing white space
 					hc->PhysDimCode = PhysDimCode(units);
 				}
+				hc->HighPass = NAN;
+				hc->LowPass  = NAN;
+				hc->Notch    = NAN;
+				hc->TOffset  = NAN;
+				hc->XYZ[0]   = 0;
+				hc->XYZ[1]   = 0;
+				hc->XYZ[2]   = 0;
 				hc->GDFTYP   = gdftyp;
 				hc->SPR = hdr->SPR;
+				hc->bi       = k1*GDFTYP_BITS[gdftyp]/8;
+				hc->bi8      = k1*GDFTYP_BITS[gdftyp];
 
 				double PhysMax = lef32p(hdr->AS.Header + offsetof(struct ABFFileHeader, fDACRange));
 				double DigMax  = (double)lei32p(hdr->AS.Header + offsetof(struct ABFFileHeader, lDACResolution));
