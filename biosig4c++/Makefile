@@ -393,7 +393,7 @@ MinGW64OBJECTS  = $(patsubst win32/%.obj, win64/%.obj, $(MinGWOBJECTS))
 
 LIB_OBJECTS = libbiosig.a libbiosig2.a libgdf.a libgdftime.a libphysicalunits.a libbiosig.$(DLEXT) libbiosig2.$(DLEXT) libgdftime.$(DLEXT) libphysicalunits.$(DLEXT)
 
-first: $(IO_H_FILE2) save2gdf libbiosig.a libbiosig.so
+first: $(IO_H_FILE2) save2gdf lib
 all:   first mex4o biosig4python sigviewer win32 win64 win32/sigviewer.exe win64/sigviewer.exe #biosig_client biosig_server mma java tcl perl php ruby #sigviewer 
 
 .PHONY : io.h libbiosig lib
@@ -627,7 +627,9 @@ libphysicalunits.def: physicalunits.o
 	$(CXX) -o libphysicalunits.dll -s -shared -fPIC "$<" $(LIBS) -Wl,--subsystem,windows,--output-def,libphysicalunits.def,--out-implib,libphysicalunits.dll.a
 
 libphysicalunits.so: physicalunits.o
-	$(CC) -shared -fPIC -Wl,-soname,"$@" $(LDLIBS) -o "$@" "$<"
+	$(CC) -shared -fPIC -Wl,-soname,"$@.${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING}" \
+		-o "$@.${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING}" "$<"
+	ln -sf "$@.${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING}" "$@"
 libphysicalunits.dylib: physicalunits.o
 	$(LD) -dylib $(LFLAGS) $(LIBS) "$<" -o "$@"
 
@@ -638,8 +640,8 @@ libgdftime.def: gdftime.o
 	$(CC) -o libgdftime.dll -s -shared -fPIC "$@" -Wl,--subsystem,windows,--output-def,libgdftime.def,--out-implib,libgdftime.dll.a
 libgdftime.so: gdftime.o
 	$(CC) -shared -fPIC -Wl,-soname,$@.${MAJOR_VERSION}.${MINOR_VERSION} $(LDLIBS) \
-		-o $@.${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} $<
-	ln -sf $@.${MAJOR_VERSION}.${MINOR_VERSION} $@
+		-o $@.${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} "$<"
+	ln -sf $@.${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} "$@"
 libgdftime.dylib: gdftime.o
 	$(LD) -dylib $(LFLAGS) $(LIBS) -o "$@"
 
@@ -693,7 +695,7 @@ libbiosig2.def: $(OBJECTS) biosig2.o t240/libcnsfef.a
 libbiosig2.so: $(OBJECTS) biosig2.o t240/libcnsfef.a
 	$(CXX) -shared -fPIC -Wl,-soname,libbiosig2.so.${MAJOR_VERSION}.${MINOR_VERSION} $(LDLIBS) \
 		-o libbiosig2.so.${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} $(OBJECTS) biosig2.o t240/*.o
-	ln -s "$@.${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING}"  "$@"
+	ln -sf "$@.${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING}"  "$@"
 
 libbiosig2.dylib: $(OBJECTS)  biosig2.o t240/libcnsfef.a
 	$(LD) -dylib $(OBJECTS) biosig2.o t240/*.o $(LFLAGS) $(LIBS) -lstdc++ -o "$@"
@@ -753,7 +755,7 @@ ifdef MEX_EXT
 mex: mex4o mex4m mexw32 mexw64
 mex4m: $(patsubst mex/%.cpp, mex/%.$(MEX_EXT), $(MEX_OBJECTS))
 mex/%.$(MEX_EXT): mex/%.cpp Makefile biosig.h biosig-dev.h libbiosig.a
-	$(MEX) $(MEX_OPTION) $(DEFINES) "$<" -lbiosig $(LFLAGS) $(LIBS) -o "$@"
+	$(MEX) $(MEX_OPTION) $(DEFINES) "$<" -L. -lbiosig $(LFLAGS) $(LIBS) -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 else
 mex: mex4o mexw32 mexw64
@@ -913,28 +915,26 @@ install_octave: mexSLOAD.mex
 
 install_libbiosig.a: libbiosig.a libbiosig2.a libphysicalunits.a libgdftime.a
 	install -d 			$(BIN) $(INC) $(LIB)/pkgconfig/
+	install biosig-dev.h	    	$(INC)
 	install biosig.h    		$(INC)
-	install gdftime.h    		$(INC)
-	install biosig-dev.h    	$(INC)
-	install physicalunits.h    	$(INC)
-	install gdftime.h    		$(INC)
-	install libbiosig.a		$(LIB)
-	install libbiosig.pc		$(LIB)/pkgconfig/
-	install libphysicalunits.a 	$(LIB)
 	install biosig2.h    		$(INC)
+	install gdftime.h    		$(INC)
+	install physicalunits.h    	$(INC)
+	install libbiosig.a		$(LIB)
 	install libbiosig2.a		$(LIB)
 	install libgdftime.a		$(LIB)
+	install libphysicalunits.a 	$(LIB)
+	install libbiosig.pc		$(LIB)/pkgconfig/
 
 install_libbiosig: libbiosig2.$(DLEXT) libbiosig.$(DLEXT) libphysicalunits.$(DLEXT) libgdftime.$(DLEXT)  install_libbiosig.a
-	# do not install libbiosig.so, only static version should be installed
-	install libbiosig.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} $(LIB)
-	ln -sf $(LIB)/libbiosig.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} $(LIB)/libbiosig.so.${MAJOR_VERSION}.${MINOR_VERSION}
-	ln -sf $(LIB)/libbiosig.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION} $(LIB)/libbiosig.$(DLEXT)
+	install libbiosig.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} 	$(LIB)
+	install libbiosig2.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} 	$(LIB)
+	install libgdftime.$(DLEXT)      	$(LIB)
 	install libphysicalunits.$(DLEXT)	$(LIB)
-	install libgdftime.$(DLEXT)	$(LIB)
-	install libbiosig2.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} $(LIB)
-	ln -sf $(LIB)/libbiosig2.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} $(LIB)/libbiosig2.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}
-	ln -sf $(LIB)/libbiosig2.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION} $(LIB)/libbiosig2.$(DLEXT)
+	ln -sf $(LIB)/libbiosig.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} 	$(LIB)/libbiosig.so.${MAJOR_VERSION}.${MINOR_VERSION}
+	ln -sf $(LIB)/libbiosig.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION} 	$(LIB)/libbiosig.$(DLEXT)
+	ln -sf $(LIB)/libbiosig2.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} 	$(LIB)/libbiosig2.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}
+	ln -sf $(LIB)/libbiosig2.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}	$(LIB)/libbiosig2.$(DLEXT)
 
 install_homebrew: save2gdf libbiosig2.$(DLEXT) libbiosig.$(DLEXT) libphysicalunits.$(DLEXT) libgdftime.$(DLEXT) libbiosig.a libbiosig2.a libphysicalunits.a libgdftime.a
 	install -d $(PREFIX)/include/ $(PREFIX)/bin/ $(PREFIX)/lib/
@@ -944,15 +944,11 @@ install_homebrew: save2gdf libbiosig2.$(DLEXT) libbiosig.$(DLEXT) libphysicaluni
 
 install: save2gdf libbiosig.a doc/save2gdf.1 install_libbiosig
 	install -d 			$(BIN) $(LIB) $(INC)
-	install save2gdf 		$(BIN)
-	install heka2itx 		$(BIN)
+	install save2gdf  		$(BIN)
+	install heka2itx  		$(BIN)
 	install save2aecg 		$(BIN)
 	install save2scp  		$(BIN)
 	-install bin/ttl2trig  		$(BIN)
-	#install rec2bin  		$(BIN)
-	#install bin2rec  		$(BIN)
-	install biosig.h physicalunits.h $(INC)
-	install libbiosig.a libphysicalunits.a libgdftime.a $(LIB)
 	mkdir -p  			$(DESTDIR)/usr/share/man/man1
 	install doc/*.1  		$(DESTDIR)/usr/share/man/man1
 	#install libbiosig.man 		$(DESTDIR)/usr/share/
