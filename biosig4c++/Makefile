@@ -122,10 +122,9 @@ ifeq (Darwin,$(shell uname))
 	##	brew tap homebrew/dupes
 	##	brew install libiconv
 	##
-	CFLAGS      += -I/usr/local/Cellar/libiconv/1.14/include
-	#LFLAGS      += -dynamiclib -undefined suppress -flat_namespace
-	LFLAGS      += -arch x86_64 -macosx_version_min 10.9 -L/usr/local/Cellar/libiconv/1.14/lib/
-	LIBS        += -liconv -lstdc++
+	CFLAGS      += -I/usr/local/opt/libiconv/include
+	LDLIBS      += -L/usr/local/opt/libiconv/lib/ -liconv
+	LFLAGS      += -arch x86_64 -macosx_version_min 10.9
 	DLEXT        = dylib
 else
 	LDFLAGS     += -shared -fPIC
@@ -217,7 +216,7 @@ VERBOSE	     := -V0
 
 ##########################################################
 ## set Matlab and Octave variables
-ifneq ($(shell which matlab), )
+ifneq ($(shell which matlab),)
 ifndef MATLABDIR
   #MATLABDIR  := $(dir $(shell readlink -f $(shell which matlab) ) )
   MATLABDIR  := /usr/local/MATLAB/R2011b/bin/
@@ -684,7 +683,8 @@ libbiosig.pc :
 	echo "Description: Biosig library"  >>libbiosig.pc
 	echo "Version: ${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING}" >>libbiosig.pc
 	echo "URL: http://biosig.sf.net"    >>libbiosig.pc
-	echo "Libs: -L$(PREFIX)/lib -lbiosig2 $(LDLIBS)"  >>libbiosig.pc
+	echo "Libs: -L$(PREFIX)/lib -lbiosig $(LDLIBS)"  >>libbiosig.pc
+	#echo "Libs.private: -liconv"  >>libbiosig.pc
 	echo "Cflags: -I$(PREFIX)/include" >>libbiosig.pc
 
 libbiosig2.a: $(OBJECTS) biosig2.o t240/libcnsfef.a
@@ -701,11 +701,11 @@ libbiosig2.so: $(OBJECTS) biosig2.o t240/libcnsfef.a
 libbiosig2.dylib: $(OBJECTS)  biosig2.o t240/libcnsfef.a
 	$(LD) -dylib $(OBJECTS) biosig2.o t240/*.o $(LFLAGS) $(LIBS) -lstdc++ -o "$@"
 
-save2gdf: save2gdf.o libbiosig.$(LIBEXT)
-	$(CXX) $(LFLAGS) save2gdf.o -L. -lbiosig $(LIBS) -o save2gdf
+save2gdf: save2gdf.o
+	$(CXX) save2gdf.o $(shell pkg-config --libs libbiosig) -o save2gdf
 
-pdp2gdf: pdp2gdf.o libbiosig.$(LIBEXT)
-	$(LD) pdp2gdf.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o pdp2gdf
+pdp2gdf: pdp2gdf.o
+	$(CXX) pdp2gdf.o $(shell pkg-config --libs libbiosig) -o pdp2gdf
 
 bscs: biosig_client biosig_server sandbox.o biosig.o
 biosig_client: biosig_client.c libbiosig.$(LIBEXT) biosig-network.o
@@ -755,19 +755,19 @@ mexw64: $(patsubst mex/%.cpp, mex/%.mexw64, $(MEX_OBJECTS))
 ifdef MEX_EXT
 mex: mex4o mex4m mexw32 mexw64
 mex4m: $(patsubst mex/%.cpp, mex/%.$(MEX_EXT), $(MEX_OBJECTS))
-mex/%.$(MEX_EXT): mex/%.cpp Makefile biosig.h biosig-dev.h libbiosig.a
-	$(MEX) $(MEX_OPTION) $(DEFINES) "$<" -L. -lbiosig $(LFLAGS) $(LIBS) -o "$@"
+mex/%.$(MEX_EXT): mex/%.cpp
+	$(MEX) $(MEX_OPTION) $(DEFINES) "$<" $(shell pkg-config -libs libbiosig) -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 else
 mex: mex4o mexw32 mexw64
 endif
 
-mex/%.mex: mex/%.cpp Makefile biosig.h biosig-dev.h libbiosig.$(DLEXT)
-	$(OCT) $(DEFINES) -v -g --mex "$<" -L. -lbiosig  $(LFLAGS) $(LIBS) -o "$@"
+mex/%.mex: mex/%.cpp
+	$(OCT) $(DEFINES) -v -g --mex "$<" $(shell pkg-config --libs libbiosig) -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
 mex/%.oct: mex/%.cpp Makefile biosig.h biosig-dev.h libbiosig.$(DLEXT)
-	$(OCT) $(DEFINES) "$<" -L. -lbiosig $(LFLAGS) $(LIBS) -o "$@"
+	$(OCT) $(DEFINES) "$<" $(shell pkg-config -libs libbiosig) -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
 mex/%.mexw32: mex/%.cpp Makefile biosig.h biosig-dev.h
