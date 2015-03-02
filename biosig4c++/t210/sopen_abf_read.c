@@ -260,6 +260,7 @@ EXTERN_C void sopen_abf_read(HDRTYPE* hdr) {
 					int p=ABF_ADCUNITLEN; 	while ( (0<p) && isspace(units[--p])) units[p]=0;  // remove trailing white space
 					hc->PhysDimCode = PhysDimCode(units);
 				}
+				hc->Transducer[0] = '\0';
 				hc->LowPass  = lef32p(hdr->AS.Header + offsetof(struct ABFFileHeader, fSignalLowpassFilter) + 4 * k);
 				hc->HighPass = lef32p(hdr->AS.Header + offsetof(struct ABFFileHeader, fSignalHighpassFilter) + 4 * k);
 				hc->Notch    = NAN;
@@ -307,7 +308,8 @@ EXTERN_C void sopen_abf_read(HDRTYPE* hdr) {
 					fprintf(stdout,"fSignalOffset:\t%f\n",lef32p(hdr->AS.Header + offsetof(struct ABFFileHeader, fSignalOffset) + 4 * k));
 					fprintf(stdout,"fSignalLowpassFilter:\t%f\n",lef32p(hdr->AS.Header + offsetof(struct ABFFileHeader, fSignalLowpassFilter) + 4 * k));
 					fprintf(stdout,"fSignalHighpassFilter:\t%f\n",lef32p(hdr->AS.Header + offsetof(struct ABFFileHeader, fSignalHighpassFilter) + 4 * k));
-					fprintf(stdout,"fTelegraphAdditGain:\t%f\n",lef32p(hdr->AS.Header + offsetof(struct ABFFileHeader, fTelegraphAdditGain) + 4 * k));
+					if (hdr->Version > 1.5)
+						fprintf(stdout,"fTelegraphAdditGain:\t%f\n",lef32p(hdr->AS.Header + offsetof(struct ABFFileHeader, fTelegraphAdditGain) + 4 * k));
 				}
 				k1++;
 			}
@@ -345,6 +347,7 @@ EXTERN_C void sopen_abf_read(HDRTYPE* hdr) {
 					int p=ABF_ADCUNITLEN; 	while ( (0<p) && isspace(units[--p])) units[p]=0;  // remove trailing white space
 					hc->PhysDimCode = PhysDimCode(units);
 				}
+				hc->Transducer[0] = '\0';
 				hc->HighPass = NAN;
 				hc->LowPass  = NAN;
 				hc->Notch    = NAN;
