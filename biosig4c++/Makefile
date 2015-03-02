@@ -133,7 +133,7 @@ else
 endif
 
 ifeq (,$(PREFIX))
-	PREFIX  := /usr/bin/
+	PREFIX  := /usr/local
 endif
 
 DEFINES_ALL   = #-D=NDEBUG
@@ -282,9 +282,9 @@ endif
 
 ####### Output directory
 OBJ	      = ./obj
-INC	      = $(DESTDIR)/usr/include
-BIN	      = $(DESTDIR)/usr/bin
-LIB	      = $(DESTDIR)/usr/lib
+INC	      = $(DESTDIR)/$(PREFIX)/include
+BIN	      = $(DESTDIR)/$(PREFIX)/bin
+LIB	      = $(DESTDIR)/$(PREFIX)/lib
 
 
 ####### Files
@@ -674,17 +674,18 @@ libbiosig.dylib: $(OBJECTS)
 
 
 libbiosig.pc :
-	echo "# Defines libbiosig.pc"      > libbiosig.pc
-	echo "prefix=$(BIN)"               >>libbiosig.pc
-	echo "exec_prefix=$(BIN)"          >>libbiosig.pc
-	echo "libdir=$(LIB)"               >>libbiosig.pc
-	echo "includedir=$(LIB)/../include\n" >>libbiosig.pc
-	echo "Name: libbiosig"		   >>libbiosig.pc
-	echo "Description: Biosig library" >>libbiosig.pc
+	echo "# Defines libbiosig.pc"       > libbiosig.pc
+	echo "prefix=$(PREFIX)"             >>libbiosig.pc
+	echo "exec_prefix=$(PREFIX)"        >>libbiosig.pc
+	echo "libdir=$(PREFIX)/lib"         >>libbiosig.pc
+	echo "includedir=$(PREFIX)/include" >>libbiosig.pc
+	echo                                >>libbiosig.pc
+	echo "Name: libbiosig"		    >>libbiosig.pc
+	echo "Description: Biosig library"  >>libbiosig.pc
 	echo "Version: ${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING}" >>libbiosig.pc
-	echo "URL: http://biosig.sf.net"   >>libbiosig.pc
-	echo "Libs: $(LDLIBS)"             >>libbiosig.pc
-	echo "Cflags: $(DEFINES)"          >>libbiosig.pc
+	echo "URL: http://biosig.sf.net"    >>libbiosig.pc
+	echo "Libs: -L$(PREFIX)/lib -lbiosig2 $(LDLIBS)"  >>libbiosig.pc
+	echo "Cflags: -I$(PREFIX)/include" >>libbiosig.pc
 
 libbiosig2.a: $(OBJECTS) biosig2.o t240/libcnsfef.a
 	-$(DELETE) libbiosig2.a
@@ -909,9 +910,9 @@ install_ttl2trig: bin/ttl2trig
 	install bin/ttl2trig $(BIN)
 
 install_octave: mexSLOAD.mex 
-	mkdir -p  			$(DESTDIR)/usr/share/octave/site-m/
-	install mex/mexSLOAD.mex* 	$(DESTDIR)/usr/share/octave/site-m/
-	install mex/mexSOPEN.mex* 	$(DESTDIR)/usr/share/octave/site-m/
+	mkdir -p  			$(DESTDIR)/$(PREFIX)/share/octave/site-m/
+	install mex/mexSLOAD.mex* 	$(DESTDIR)/$(PREFIX)/share/octave/site-m/
+	install mex/mexSOPEN.mex* 	$(DESTDIR)/$(PREFIX)/share/octave/site-m/
 
 install_libbiosig.a: libbiosig.a libbiosig2.a libphysicalunits.a libgdftime.a
 	install -d 			$(BIN) $(INC) $(LIB)/pkgconfig/
@@ -936,12 +937,6 @@ install_libbiosig: libbiosig2.$(DLEXT) libbiosig.$(DLEXT) libphysicalunits.$(DLE
 	ln -sf $(LIB)/libbiosig2.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} 	$(LIB)/libbiosig2.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}
 	ln -sf $(LIB)/libbiosig2.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}	$(LIB)/libbiosig2.$(DLEXT)
 
-install_homebrew: save2gdf libbiosig2.$(DLEXT) libbiosig.$(DLEXT) libphysicalunits.$(DLEXT) libgdftime.$(DLEXT) libbiosig.a libbiosig2.a libphysicalunits.a libgdftime.a
-	install -d $(PREFIX)/include/ $(PREFIX)/bin/ $(PREFIX)/lib/
-	install biosig.h biosig2.h biosig-dev.h 	$(PREFIX)/include/
-	install save2gdf 				$(PREFIX)/bin/
-	install libbiosig2.$(DLEXT) libbiosig.$(DLEXT) libphysicalunits.$(DLEXT) libgdftime.$(DLEXT) libbiosig.a libbiosig2.a libphysicalunits.a libgdftime.a $(PREFIX)/lib/
-
 install: save2gdf libbiosig.a doc/save2gdf.1 install_libbiosig
 	install -d 			$(BIN) $(LIB) $(INC)
 	install save2gdf  		$(BIN)
@@ -949,9 +944,9 @@ install: save2gdf libbiosig.a doc/save2gdf.1 install_libbiosig
 	install save2aecg 		$(BIN)
 	install save2scp  		$(BIN)
 	-install bin/ttl2trig  		$(BIN)
-	mkdir -p  			$(DESTDIR)/usr/share/man/man1
-	install doc/*.1  		$(DESTDIR)/usr/share/man/man1
-	#install libbiosig.man 		$(DESTDIR)/usr/share/
+	mkdir -p  			$(DESTDIR)/$(PREFIX)/share/man/man1
+	install doc/*.1  		$(DESTDIR)/$(PREFIX)/share/man/man1
+	#install libbiosig.man 		$(DESTDIR)/$(PREFIX)/share/
 	#$(MAKE)  install_sigviewer
 	#$(MAKE)  install_octave
 
@@ -974,11 +969,11 @@ uninstall remove:
 	-$(DELETE) $(LIB)/libbiosig2.*
 	-$(DELETE) $(LIB)/libphysicalunits.*
 	-$(DELETE) $(LIB)/libgdftime.*
-	-$(DELETE) $(DESTDIR)/usr/share/man/man1/save2gdf.1
-	-$(DELETE) $(DESTDIR)/usr/share/man/man1/mexSLOAD.1
-	-$(DELETE) $(DESTDIR)/usr/share/man/man1/sigviewer.1
-	#-$(DELETE) $(DESTDIR)/usr/share/man/man1/rec2bin.1
-	#-$(DELETE) $(DESTDIR)/usr/share/man/man1/bin2rec.1
+	-$(DELETE) $(DESTDIR)/$(PREFIX)/share/man/man1/save2gdf.1
+	-$(DELETE) $(DESTDIR)/$(PREFIX)/share/man/man1/mexSLOAD.1
+	-$(DELETE) $(DESTDIR)/$(PREFIX)/share/man/man1/sigviewer.1
+	#-$(DELETE) $(DESTDIR)/$(PREFIX)/share/man/man1/rec2bin.1
+	#-$(DELETE) $(DESTDIR)/$(PREFIX)/share/man/man1/bin2rec.1
 
 
 #############################################################
