@@ -281,9 +281,9 @@ endif
 
 ####### Output directory
 OBJ	      = ./obj
-INC	      = $(DESTDIR)/$(PREFIX)/include
-BIN	      = $(DESTDIR)/$(PREFIX)/bin
-LIB	      = $(DESTDIR)/$(PREFIX)/lib
+INC	      = $(DESTDIR)$(PREFIX)/include
+BIN	      = $(DESTDIR)$(PREFIX)/bin
+LIB	      = $(DESTDIR)$(PREFIX)/lib
 
 
 ####### Files
@@ -910,9 +910,9 @@ install_ttl2trig: bin/ttl2trig
 	install bin/ttl2trig $(BIN)
 
 install_octave: mexSLOAD.mex 
-	mkdir -p  			$(DESTDIR)/$(PREFIX)/share/octave/site-m/
-	install mex/mexSLOAD.mex* 	$(DESTDIR)/$(PREFIX)/share/octave/site-m/
-	install mex/mexSOPEN.mex* 	$(DESTDIR)/$(PREFIX)/share/octave/site-m/
+	mkdir -p  			$(DESTDIR)$(PREFIX)/share/octave/site-m/
+	install mex/mexSLOAD.mex* 	$(DESTDIR)$(PREFIX)/share/octave/site-m/
+	install mex/mexSOPEN.mex* 	$(DESTDIR)$(PREFIX)/share/octave/site-m/
 
 install_libbiosig.a: libbiosig.a libbiosig2.a libphysicalunits.a libgdftime.a
 	install -d 			$(BIN) $(INC) $(LIB)/pkgconfig/
@@ -944,9 +944,9 @@ install: save2gdf libbiosig.a doc/save2gdf.1 install_libbiosig
 	install save2aecg 		$(BIN)
 	install save2scp  		$(BIN)
 	-install bin/ttl2trig  		$(BIN)
-	mkdir -p  			$(DESTDIR)/$(PREFIX)/share/man/man1
-	install doc/*.1  		$(DESTDIR)/$(PREFIX)/share/man/man1
-	#install libbiosig.man 		$(DESTDIR)/$(PREFIX)/share/
+	mkdir -p  			$(DESTDIR)$(PREFIX)/share/man/man1
+	install doc/*.1  		$(DESTDIR)$(PREFIX)/share/man/man1
+	#install libbiosig.man 		$(DESTDIR)$(PREFIX)/share/
 	#$(MAKE)  install_sigviewer
 	#$(MAKE)  install_octave
 
@@ -969,11 +969,11 @@ uninstall remove:
 	-$(DELETE) $(LIB)/libbiosig2.*
 	-$(DELETE) $(LIB)/libphysicalunits.*
 	-$(DELETE) $(LIB)/libgdftime.*
-	-$(DELETE) $(DESTDIR)/$(PREFIX)/share/man/man1/save2gdf.1
-	-$(DELETE) $(DESTDIR)/$(PREFIX)/share/man/man1/mexSLOAD.1
-	-$(DELETE) $(DESTDIR)/$(PREFIX)/share/man/man1/sigviewer.1
-	#-$(DELETE) $(DESTDIR)/$(PREFIX)/share/man/man1/rec2bin.1
-	#-$(DELETE) $(DESTDIR)/$(PREFIX)/share/man/man1/bin2rec.1
+	-$(DELETE) $(DESTDIR)$(PREFIX)/share/man/man1/save2gdf.1
+	-$(DELETE) $(DESTDIR)$(PREFIX)/share/man/man1/mexSLOAD.1
+	-$(DELETE) $(DESTDIR)$(PREFIX)/share/man/man1/sigviewer.1
+	#-$(DELETE) $(DESTDIR)$(PREFIX)/share/man/man1/rec2bin.1
+	#-$(DELETE) $(DESTDIR)$(PREFIX)/share/man/man1/bin2rec.1
 
 
 #############################################################
