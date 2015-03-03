@@ -105,7 +105,7 @@ else ifeq (intel,$(TARGET))
 	LD      := /opt/intel/bin/xild
 	AR      := /opt/intel/bin/xiar crs
 else 
-	PREFIX  := $(dir $(shell which $(TARGET)-gcc))
+	prefix  := $(dir $(shell which $(TARGET)-gcc))
 	CC      := $(TARGET)-gcc
 	CXX     := $(TARGET)-g++
 	LD      := $(TARGET)-ld
@@ -145,8 +145,8 @@ else
 	SONAME_POSTFIX = .$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}
 endif
 
-ifeq (,$(PREFIX))
-	PREFIX  := /usr/local
+ifeq (,$(prefix))
+	prefix  := /usr/local
 endif
 
 DEFINES_ALL   = #-D=NDEBUG
@@ -295,9 +295,9 @@ endif
 
 ####### Output directory
 OBJ	      = ./obj
-INC	      = $(DESTDIR)$(PREFIX)/include
-BIN	      = $(DESTDIR)$(PREFIX)/bin
-LIB	      = $(DESTDIR)$(PREFIX)/lib
+INC	      = $(DESTDIR)$(prefix)/include
+BIN	      = $(DESTDIR)$(prefix)/bin
+LIB	      = $(DESTDIR)$(prefix)/lib
 
 
 ####### Files
@@ -447,7 +447,7 @@ sandbox.o: test0/sandbox.c  biosig.h biosig-dev.h
 
 ## exclude conflicting definition of sopen from mingw's io.h
 io.h: 
-	$(SED) '/ sopen/ s#^#//#' $(PREFIX)../$(TARGET)/include/io.h > io.h
+	$(SED) '/ sopen/ s#^#//#' $(prefix)../$(TARGET)/include/io.h > io.h
 
 win32/io.h: $(IO_H_FILE)
 	$(SED) '/ sopen/ s#^#//#' $(IO_H_FILE) > "$@"
@@ -690,18 +690,18 @@ libbiosig.dylib: $(OBJECTS)
 
 libbiosig.pc :
 	echo "# Defines libbiosig.pc"       > libbiosig.pc
-	echo "prefix=$(PREFIX)"             >>libbiosig.pc
-	echo "exec_prefix=$(PREFIX)"        >>libbiosig.pc
-	echo "libdir=$(PREFIX)/lib"         >>libbiosig.pc
-	echo "includedir=$(PREFIX)/include" >>libbiosig.pc
+	echo "prefix=$(prefix)"             >>libbiosig.pc
+	echo "exec_prefix=$(prefix)"        >>libbiosig.pc
+	echo "libdir=$(prefix)/lib"         >>libbiosig.pc
+	echo "includedir=$(prefix)/include" >>libbiosig.pc
 	echo                                >>libbiosig.pc
 	echo "Name: libbiosig"		    >>libbiosig.pc
 	echo "Description: Biosig library"  >>libbiosig.pc
 	echo "Version: ${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING}" >>libbiosig.pc
 	echo "URL: http://biosig.sf.net"    >>libbiosig.pc
-	echo "Libs: -L$(PREFIX)/lib -lbiosig $(LDLIBS)"  >>libbiosig.pc
+	echo "Libs: -L$(prefix)/lib -lbiosig $(LDLIBS)"  >>libbiosig.pc
 	#echo "Libs.private: -liconv"  >>libbiosig.pc
-	echo "Cflags: -I$(PREFIX)/include" >>libbiosig.pc
+	echo "Cflags: -I$(prefix)/include" >>libbiosig.pc
 
 libbiosig2.a: $(OBJECTS) biosig2.o t240/libcnsfef.a
 	-$(DELETE) libbiosig2.a
@@ -921,9 +921,9 @@ install_ttl2trig: bin/ttl2trig
 	install bin/ttl2trig $(BIN)
 
 install_octave: mexSLOAD.mex 
-	mkdir -p  			$(DESTDIR)$(PREFIX)/share/octave/site-m/
-	install mex/mexSLOAD.mex* 	$(DESTDIR)$(PREFIX)/share/octave/site-m/
-	install mex/mexSOPEN.mex* 	$(DESTDIR)$(PREFIX)/share/octave/site-m/
+	mkdir -p  			$(DESTDIR)$(prefix)/share/octave/site-m/
+	install mex/mexSLOAD.mex* 	$(DESTDIR)$(prefix)/share/octave/site-m/
+	install mex/mexSOPEN.mex* 	$(DESTDIR)$(prefix)/share/octave/site-m/
 
 install_headers: biosig-dev.h biosig.h biosig2.h gdftime.h physicalunits.h
 	install -d 			$(INC)
@@ -952,9 +952,9 @@ install_tools install_save2gdf: save2gdf doc/save2gdf.1 install_libbiosig
 	install save2aecg 		$(BIN)
 	install save2scp  		$(BIN)
 	-install bin/ttl2trig  		$(BIN)
-	mkdir -p  			$(DESTDIR)$(PREFIX)/share/man/man1
-	install doc/*.1  		$(DESTDIR)$(PREFIX)/share/man/man1
-	#install libbiosig.man 		$(DESTDIR)$(PREFIX)/share/
+	mkdir -p  			$(DESTDIR)$(prefix)/share/man/man1
+	install doc/*.1  		$(DESTDIR)$(prefix)/share/man/man1
+	#install libbiosig.man 		$(DESTDIR)$(prefix)/share/
 	#$(MAKE)  install_sigviewer
 	#$(MAKE)  install_octave
 
@@ -977,11 +977,11 @@ uninstall remove:
 	-$(DELETE) $(LIB)/libbiosig2.*
 	-$(DELETE) $(LIB)/libphysicalunits.*
 	-$(DELETE) $(LIB)/libgdftime.*
-	-$(DELETE) $(DESTDIR)$(PREFIX)/share/man/man1/save2gdf.1
-	-$(DELETE) $(DESTDIR)$(PREFIX)/share/man/man1/mexSLOAD.1
-	-$(DELETE) $(DESTDIR)$(PREFIX)/share/man/man1/sigviewer.1
-	#-$(DELETE) $(DESTDIR)$(PREFIX)/share/man/man1/rec2bin.1
-	#-$(DELETE) $(DESTDIR)$(PREFIX)/share/man/man1/bin2rec.1
+	-$(DELETE) $(DESTDIR)$(prefix)/share/man/man1/save2gdf.1
+	-$(DELETE) $(DESTDIR)$(prefix)/share/man/man1/mexSLOAD.1
+	-$(DELETE) $(DESTDIR)$(prefix)/share/man/man1/sigviewer.1
+	#-$(DELETE) $(DESTDIR)$(prefix)/share/man/man1/rec2bin.1
+	#-$(DELETE) $(DESTDIR)$(prefix)/share/man/man1/bin2rec.1
 
 
 #############################################################
