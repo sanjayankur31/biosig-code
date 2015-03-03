@@ -95,6 +95,7 @@ ifeq (,$(TARGET))
 	CC      := gcc
 	CXX     := g++
 	AR      := ar rcs
+	PKGCONF := pkg-config
 ifneq (Darwin,$(shell uname))
 	LFLAGS  += -Wl,-z,relro,-z,now
 endif
@@ -109,6 +110,7 @@ else
 	CXX     := $(TARGET)-g++
 	LD      := $(TARGET)-ld
 	AR      := $(TARGET)-ar rcs
+	PKGCONF := $(TARGET)-pkg-config
 	ifeq (mingw, $(findstring mingw, $(TARGET)))
 		## add gnulib's getlogin
 		SOURCES += win32/getlogin.c win32/getline.c win32/getdelim.c
@@ -134,7 +136,7 @@ ifeq (Darwin,$(shell uname))
 	SONAME_PREFIX  = -install_name=
 	SONAME_POSTFIX = .${MAJOR_VERSION}.${MINOR_VERSION}.$(DLEXT)
 else
-	LD	       = g++
+	LD	       = CXX
 	LDFLAGS       += -shared
 	DLEXT          = so
 	FULLDLEXT      = so.${BIOSIG_VERSION}
@@ -710,10 +712,10 @@ libbiosig2.dylib: $(OBJECTS)  biosig2.o t240/libcnsfef.a
 	$(LD) -dylib $(OBJECTS) biosig2.o t240/*.o $(LFLAGS) $(LIBS) -lstdc++ -o "$@"
 
 save2gdf: save2gdf.o
-	$(CXX) save2gdf.o $(shell pkg-config --libs libbiosig) -o save2gdf
+	$(CXX) save2gdf.o $(shell $(PKGCONF) --libs libbiosig) -o save2gdf
 
 pdp2gdf: pdp2gdf.o
-	$(CXX) pdp2gdf.o $(shell pkg-config --libs libbiosig) -o pdp2gdf
+	$(CXX) pdp2gdf.o $(shell $(PKGCONF) --libs libbiosig) -o pdp2gdf
 
 bscs: biosig_client biosig_server sandbox.o biosig.o
 biosig_client: biosig_client.c libbiosig.$(LIBEXT) biosig-network.o
@@ -729,7 +731,7 @@ biosig_server: biosig_server.c libbiosig.$(LIBEXT) biosig-network.o
 mma: mma/sload
 
 mma/sload: mma/sload.tm mma/sload.c
-	$(MAKE) -C mma CROSS=$(CROSS) CROSS64=$(CROSS64) LDLIBS="$(shell pkg-config --libs libbiosig) $(LDLIBS) " sload
+	$(MAKE) -C mma CROSS=$(CROSS) CROSS64=$(CROSS64) LDLIBS="$(shell $(PKGCONF) --libs libbiosig) $(LDLIBS) " sload
 
 win32mma: mma/sload.tm mma/sload.c
 	$(MAKE) -C mma CROSS=$(CROSS) CROSS64=$(CROSS64) LDLIBS="$(LDLIBS) -liconv" sload.exe
@@ -764,18 +766,18 @@ ifdef MEX_EXT
 mex: mex4o mex4m mexw32 mexw64
 mex4m: $(patsubst mex/%.cpp, mex/%.$(MEX_EXT), $(MEX_OBJECTS))
 mex/%.$(MEX_EXT): mex/%.cpp
-	$(MEX) $(MEX_OPTION) $(DEFINES) "$<" $(shell pkg-config --libs libbiosig) -o "$@"
+	$(MEX) $(MEX_OPTION) $(DEFINES) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 else
 mex: mex4o mexw32 mexw64
 endif
 
 mex/%.mex: mex/%.cpp
-	$(OCT) $(DEFINES) -v -g --mex "$<" $(shell pkg-config --libs libbiosig) -o "$@"
+	$(OCT) $(DEFINES) -v -g --mex "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
 mex/%.oct: mex/%.cpp Makefile biosig.h biosig-dev.h libbiosig.$(DLEXT)
-	$(OCT) $(DEFINES) "$<" $(shell pkg-config -libs libbiosig) -o "$@"
+	$(OCT) $(DEFINES) "$<" $(shell $(PKGCONF) -libs libbiosig) -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
 mex/%.mexw32: mex/%.cpp Makefile biosig.h biosig-dev.h
