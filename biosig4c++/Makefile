@@ -1,20 +1,24 @@
 ####### Makefile for "BioSig for C/C++" #####################
 ###
-###  Copyright (C) 2006-2013 Alois Schloegl <alois.schloegl@ist.ac.at>
+###  Copyright (C) 2006-2015 Alois Schloegl <alois.schloegl@ist.ac.at>
 ###  This file is part of the "BioSig for C/C++" repository
 ###  (biosig4c++) at http://biosig.sf.net/
 ###
 ##############################################################
 
 ##### Target: GNU/Linux
-
+#
+## make && make install    build and install libbiosig, but no other tools.
+#             libbiosig is a prerequisite for building all the other tools below.
+#
 ## make save2gdf   - makes converter
+## make install_save2gdf   - installs converter
+#
 ## make mex4o      - makes mexSLOAD, mexSOPEN for Octave (requires Octave-headers)
 ## make mex4m      - makes mexSLOAD, mexSOPEN for Matlab (requires Matlab, mex -setup must be configured)
 ## make mexw32     - makes mexSLOAD.mexw32, mexSOPEN.mexw32 (requires that mingw32, gnumex libraries from Matlab/Win32)
 ## make mexw64     - makes mexSLOAD.mexw64, mexSOPEN.mexw64 (requires that mce-w32, gnumex libraries from Matlab/Win64)
 ## make mex        - mex4o, mex4m, mexw32, mexw64 combined
-## make libbiosig  - makes libbiosig
 ## make biosig4python - makes python interface (requires Python)
 ## make biosig4java - makes Java interface (experimental)
 ## make biosig4php - makes PHP interface (experimental)
@@ -392,7 +396,8 @@ MinGW64OBJECTS  = $(patsubst win32/%.obj, win64/%.obj, $(MinGWOBJECTS))
 
 LIB_OBJECTS = libbiosig.a libbiosig2.a libgdf.a libgdftime.a libphysicalunits.a libbiosig.$(DLEXT) libbiosig2.$(DLEXT) libgdftime.$(DLEXT) libphysicalunits.$(DLEXT)
 
-first: $(IO_H_FILE2) save2gdf lib
+first: $(IO_H_FILE2) lib
+tools: save2gdf
 all:   first mex4o biosig4python sigviewer win32 win64 win32/sigviewer.exe win64/sigviewer.exe #biosig_client biosig_server mma java tcl perl php ruby #sigviewer 
 
 .PHONY : io.h libbiosig lib
@@ -937,7 +942,9 @@ install_libbiosig: libbiosig2.$(DLEXT) libbiosig.$(DLEXT) libphysicalunits.$(DLE
 	ln -sf $(LIB)/libbiosig2.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING} 	$(LIB)/libbiosig2.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}
 	ln -sf $(LIB)/libbiosig2.$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}	$(LIB)/libbiosig2.$(DLEXT)
 
-install: save2gdf libbiosig.a doc/save2gdf.1 install_libbiosig
+install: install_libbiosig
+
+install_tools install_save2gdf: save2gdf doc/save2gdf.1 install_libbiosig
 	install -d 			$(BIN) $(LIB) $(INC)
 	install save2gdf  		$(BIN)
 	install heka2itx  		$(BIN)
