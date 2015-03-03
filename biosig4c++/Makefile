@@ -118,7 +118,8 @@ else
 		## exclude conflicting definition of sopen from mingw's io.h
 		CFLAGS  += -I.
 		IO_H_FILE2 = io.h
-		LIBS    += -liconv -liberty -lssp -lws2_32
+		LIBS    += -lssp
+		LDLIBS  += -liconv -liberty -lws2_32
 	endif
 endif
 
@@ -136,7 +137,7 @@ ifeq (Darwin,$(shell uname))
 	SONAME_PREFIX  = -install_name=
 	SONAME_POSTFIX = .${MAJOR_VERSION}.${MINOR_VERSION}.$(DLEXT)
 else
-	LD	       = CXX
+	LD	       = $(CXX)
 	LDFLAGS       += -shared
 	DLEXT          = so
 	FULLDLEXT      = so.${BIOSIG_VERSION}
@@ -268,13 +269,13 @@ MinGWCC      = $(CROSS)-gcc
 MinGWCXX     = $(CROSS)-g++
 MinGWDEF     = $(DEFINES) 
 MinGWCFLAGS  = -pipe -fPIC  -D_REENTRANT -D=BUILD_DLL $(MinGWDEF) -Iwin32 -I$(PathToMinGW)/include/
-MinGWLIBS    = win32/libbiosig.a -L$(PathToMinGW)/lib/ -lws2_32 $(LDLIBS) # static
+MinGWLIBS    = win32/libbiosig.a -L$(PathToMinGW)/lib/ $(LDLIBS) # static
 MinGWLINK    = $(MinGWCXX)
 
 MinGW64CC      = $(CROSS64)-gcc
 MinGW64CXX     = $(CROSS64)-g++
 MinGW64CFLAGS  = -pipe -fPIC -O2 -D_REENTRANT -D=BUILD_DLL $(MinGWDEF) -Iwin64 -I$(PathToMinGW64)/include/
-MinGW64LIBS    = win64/libbiosig.a -L$(PathToMinGW64)/lib/ -lws2_32 $(LDLIBS) # static
+MinGW64LIBS    = win64/libbiosig.a -L$(PathToMinGW64)/lib/ $(LDLIBS) # static
 MinGW64LINK    = $(MinGW64CXX)
 ##########################################################
 
