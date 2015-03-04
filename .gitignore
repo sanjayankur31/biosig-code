@@ -21,7 +21,15 @@ mex/mexSOPEN.cpp
 # ignore intermediate files for biosig4python
 biosig4c++/python/biosig.py
 biosig4c++/python/swig_wrap.cxx
+# CMake output
+biosig4c++/CMakeCache.txt
+biosig4c++/CMakeFiles
 # 
 *.exe
 *.deb
 *.tar.gz
+# MacPorts stuff
+biosig4c++/macports/PortIndex
+biosig4c++/macports/PortIndex.quick
+biosig4c++/macports/Portfile-libbiosig.diff
+biosig4c++/macports/biosig4c++-*.src.tar.gz*
