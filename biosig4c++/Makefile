@@ -130,11 +130,11 @@ ifeq (Darwin,$(shell uname))
 	##
 	LD	       = ld
 	CFLAGS        += -I/usr/local/opt/libiconv/include
-	LDLIBS        += -L/usr/local/opt/libiconv/lib/ -liconv
+	LDLIBS        += -L/usr/local/opt/libiconv/lib/ -liconv -lstdc++
 	LDFLAGS        += -dylib -arch x86_64 -macosx_version_min 10.9
 	DLEXT          = dylib
 	FULLDLEXT      = ${BIOSIG_VERSION}.dylib
-	SONAME_PREFIX  = -install_name=
+	SONAME_PREFIX  = -install_name # the last space character is crucial
 	SONAME_POSTFIX = .${MAJOR_VERSION}.${MINOR_VERSION}.$(DLEXT)
 else
 	LD	       = $(CXX)
@@ -635,18 +635,18 @@ t240/libcnsfef.a:
 	$(MAKE) -C t240 libcnsfef.a CC=$(CC) AR='$(AR)'	# generate t240/*.o files
 
 libbiosig.${FULLDLEXT}: $(OBJECTS) biosig.o t240/libcnsfef.a
-	$(LD) $(LDFLAGS) ${SONAME_PREFIX}libbiosig${SONAME_POSTFIX} -o "$@" $(OBJECTS) t240/*.o
+	$(LD) $(LDFLAGS) $(LIBS) ${SONAME_PREFIX}libbiosig${SONAME_POSTFIX} $(OBJECTS) t240/*.o -o "$@"
 
 libbiosig2.${FULLDLEXT}: $(OBJECTS)  biosig2.o t240/libcnsfef.a
-	$(LD) $(LDFLAGS) ${SONAME_PREFIX}libbiosig2${SONAME_POSTFIX} -o "$@" $(OBJECTS) biosig2.o t240/*.o
+	$(LD) $(LDFLAGS) $(LIBS) ${SONAME_PREFIX}libbiosig2${SONAME_POSTFIX} $(OBJECTS) biosig2.o t240/*.o -o "$@"
 
 libgdf.${FULLDLEXT}: gdf.o getlogin.o gdftime.o physicalunits.o
-	$(LD) $(LDFLAGS) ${SONAME_PREFIX}libgdf${SONAME_POSTFIX} -o "$@" $?
+	$(LD) $(LDFLAGS) $(LIBS) ${SONAME_PREFIX}libgdf${SONAME_POSTFIX} $? -o "$@"
 
 libgdftime.${FULLDLEXT}: gdftime.o
-	$(LD) $(LDFLAGS) ${SONAME_PREFIX}libgdftime${SONAME_POSTFIX} -o "$@" $?
+	$(LD) $(LDFLAGS) $(LIBS) ${SONAME_PREFIX}libgdftime${SONAME_POSTFIX} $? -o "$@"
 libphysicalunits.${FULLDLEXT}: physicalunits.o
-	$(LD) $(LDFLAGS) ${SONAME_PREFIX}libgdftime${SONAME_POSTFIX} -o "$@" $?
+	$(LD) $(LDFLAGS) $(LIBS) ${SONAME_PREFIX}libgdftime${SONAME_POSTFIX} $? -o "$@"
 
 %.${DLEXT}: %.${FULLDLEXT}
 	ln -sf "$(*F).${FULLDLEXT}"	"$(*F)${SONAME_POSTFIX}"
@@ -658,16 +658,11 @@ libphysicalunits.a: physicalunits.o
 libphysicalunits.def: physicalunits.o
 	$(CXX) -o libphysicalunits.dll -s -shared -fPIC "$<" $(LIBS) -Wl,--subsystem,windows,--output-def,libphysicalunits.def,--out-implib,libphysicalunits.dll.a
 
-libphysicalunits.dylib: physicalunits.o
-	$(LD) -dylib $(LFLAGS) $(LIBS) "$<" -o "$@"
-
 libgdftime.a: gdftime.o
 	-$(DELETE) "$@"
 	$(AR) "$@" "$<"
 libgdftime.def: gdftime.o
 	$(CC) -o libgdftime.dll -s -shared -fPIC "$@" -Wl,--subsystem,windows,--output-def,libgdftime.def,--out-implib,libgdftime.dll.a
-libgdftime.dylib: gdftime.o
-	$(LD) -dylib $(LFLAGS) $(LIBS) -o "$@"
 
 libgdf.a: gdf.o getlogin.o gdftime.o physicalunits.o
 	-$(DELETE) "$@"
@@ -675,17 +670,11 @@ libgdf.a: gdf.o getlogin.o gdftime.o physicalunits.o
 libgdf.def: gdf.o getlogin.o gdftime.o physicalunits.o
 	$(CXX) -s -shared -fPIC -o libgdf.dll gdf.o getlogin.o gdftime.o physicalunits.o $(LIBS) -Wl,--subsystem,windows,--output-def,libgdf.def,--out-implib,libgdf.dll.a
 
-libgdf.dylib: gdf.o gdftime.o physicalunits.o
-	$(LD) -dylib $(LFLAGS) $(LIBS) "$<" -o "$@"
-
 libbiosig.a: $(OBJECTS) t240/libcnsfef.a libbiosig.pc
 	-$(DELETE) libbiosig.a
 	$(AR) libbiosig.a $(OBJECTS) t240/*.o
 libbiosig.def: $(OBJECTS) t240/libcnsfef.a libbiosig.pc
 	$(CXX) -o libbiosig.dll -s -shared -fPIC  $(OBJECTS) t240/libcnsfef.a $(LIBS) -Wl,--subsystem,windows,--output-def,libbiosig.def,--out-implib,libbiosig.dll.a
-
-libbiosig.dylib: $(OBJECTS)
-	$(LD) -dylib $(LFLAGS) $(LIBS) -o "$@"
 
 
 libbiosig.pc :
@@ -708,9 +697,6 @@ libbiosig2.a: $(OBJECTS) biosig2.o t240/libcnsfef.a
 	$(AR) libbiosig2.a $(OBJECTS) biosig2.o t240/*.o
 libbiosig2.def: $(OBJECTS) biosig2.o t240/libcnsfef.a
 	$(CXX) -o libbiosig2.dll -s -shared -fPIC  $(OBJECTS) biosig2.o t240/libcnsfef.a $(LIBS) -Wl,--subsystem,windows,--output-def,libbiosig2.def,--out-implib,libbiosig2.dll.a
-
-libbiosig2.dylib: $(OBJECTS)  biosig2.o t240/libcnsfef.a
-	$(LD) -dylib $(OBJECTS) biosig2.o t240/*.o $(LFLAGS) $(LIBS) -lstdc++ -o "$@"
 
 save2gdf: save2gdf.o
 	$(CXX) save2gdf.o $(shell $(PKGCONF) --libs libbiosig) -o save2gdf
@@ -934,7 +920,7 @@ install_libbiosig.a: libbiosig.a libbiosig2.a libphysicalunits.a libgdftime.a
 	install $?			$(LIB)
 	install libbiosig.pc		$(LIB)/pkgconfig/
 
-install_libbiosig.$(DLEXT): libbiosig2.$(FULLDLEXT) libbiosig.$(FULLDLEXT) libphysicalunits.$(DLEXT) libgdftime.$(DLEXT)
+install_libbiosig.$(DLEXT): libbiosig2.$(FULLDLEXT) libbiosig.$(FULLDLEXT) libphysicalunits.$(DLEXT) libgdftime.$(DLEXT) libbiosig.pc
 	install -d 			$(LIB)/pkgconfig/
 	install libbiosig.pc		$(LIB)/pkgconfig/
 	install $?			$(LIB)
