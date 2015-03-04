@@ -906,10 +906,9 @@ install_sigviewer: sigviewer
 install_ttl2trig: bin/ttl2trig
 	install bin/ttl2trig $(BIN)
 
-install_octave: mexSLOAD.mex 
-	mkdir -p  			$(DESTDIR)$(prefix)/share/octave/site-m/
-	install mex/mexSLOAD.mex* 	$(DESTDIR)$(prefix)/share/octave/site-m/
-	install mex/mexSOPEN.mex* 	$(DESTDIR)$(prefix)/share/octave/site-m/
+install_octave: mex/mexSLOAD.mex mex/mexSOPEN.mex mex/mexSSAVE.mex
+	install -d	$(DESTDIR)$(prefix)/share/octave/site-m/
+	install $? 	$(DESTDIR)$(prefix)/share/octave/site-m/
 
 install_headers: biosig-dev.h biosig.h biosig2.h gdftime.h physicalunits.h
 	install -d 			$(INC)
