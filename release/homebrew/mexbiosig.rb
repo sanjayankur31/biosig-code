@@ -2,7 +2,7 @@
 #                /usr/local/Library/Contributions/example-formula.rb
 # PLEASE REMOVE ALL GENERATED COMMENTS BEFORE SUBMITTING YOUR PULL REQUEST!
 
-class Biosig < Formula
+class Mexbiosig < Formula
   homepage "http://biosig.sf.net"
   url "http://sourceforge.net/projects/biosig/files/BioSig%20for%20C_C%2B%2B/src/biosig4c%2B%2B-1.6.3.src.tar.gz"
   version "1.6.3"
@@ -12,7 +12,7 @@ class Biosig < Formula
   # depends_on :x11 # if your formula requires any X11/XQuartz components
   depends_on "wget" => :build
   depends_on "libbiosig" => :build
-  #depends_on "octave" => :recommended
+  depends_on "octave" => :recommended
 
   def install
     system "wget http://sourceforge.net/p/biosig/code/ci/master/tree/biosig4c++/Makefile?format=raw -O Makefile "
@@ -25,7 +25,7 @@ class Biosig < Formula
     #                      "--disable-silent-rules",
     #                      "--prefix=#{prefix}"
 
-    system "PKG_CONFIG_PATH=/usr/local/lib/pkgconfig make install_save2gdf" 
+    system "PKG_CONFIG_PATH=/usr/local/lib/pkgconfig make install_octave" 
   end
 
   test do
