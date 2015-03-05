@@ -34,6 +34,7 @@ set (headers
   XMLParser/tinyxml.h
   XMLParser/tinystr.h
   biosig.h
+  biosig2.h
   gdftime.h
   physicalunits.h
 )
