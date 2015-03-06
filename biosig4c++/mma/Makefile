@@ -46,7 +46,7 @@ CADDSDIR  = ${MLINKDIR}/SystemFiles/Links/MathLink/DeveloperKit/${SYS}/CompilerA
 INCDIR    = -I${CADDSDIR} -I${MLINKDIR}/SystemFiles/IncludeFiles/C/
 LIBDIR   += -L${CADDSDIR}
 
-EXTRALIBS += -lm -ldl -lrt -lstdc++ $(LDLIBS) # Set these with appropriate libs for your system.
+EXTRALIBS += -lm -ldl -lrt $(LDLIBS) # Set these with appropriate libs for your system.
 
 ifneq (${MLIVER},)
 CFLAGS += -DMLINTERFACE=${MLIVER}
@@ -68,7 +68,7 @@ sloadtm.c: sload.tm
 	sed -i 's# __DATE__# ",__DATE__," ",__TIME__,"#' "$@"
 
 sload: sload.o sloadtm.o
-	${CC} sloadtm.o sload.o -lbiosig2 ${LIBDIR} -l${MLLIB} ${EXTRALIBS} -o "$@"
+	${CC} sloadtm.o sload.o ${EXTRALIBS} -lbiosig2 $(shell pkg-config --libs libbiosig) -lstdc++ ${LIBDIR} -l${MLLIB} $(OBJECTS) -o "$@"
 	# copy to users directory if available
 	#-cp "$@" ~/K/Software/MathematicaTools/
 	#-cp "$@" ~/K/Software/MathematicaTools/sload-$(shell date +%Y%m%d)
