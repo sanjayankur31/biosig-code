@@ -528,8 +528,6 @@ void biosigERROR(HDRTYPE *hdr, enum B4C_ERROR errnum, const char *errmsg);
 */
 
 
-//double strtod (const char *nptr, char **endptr); // no locale dependency 
-
 /*
 	some important functions used internally, 
 	the interface for these functios is a bit clumsy and are

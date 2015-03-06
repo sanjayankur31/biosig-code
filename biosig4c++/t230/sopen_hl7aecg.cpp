@@ -18,7 +18,8 @@
  */
 
 
-#include <stdio.h>             // system includes
+#include <stdio.h>	// system includes
+#include <stdlib.h>	// for strtod(3)
 #include <string.h>
 
 #include "../biosig-dev.h"

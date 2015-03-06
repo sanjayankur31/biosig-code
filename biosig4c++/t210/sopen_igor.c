@@ -25,9 +25,9 @@
 #include <assert.h>
 #include <ctype.h>
 #include <stddef.h>
-#include <stdlib.h>
 */
 #include <ctype.h>
+#include <stdlib.h>
 #include <string.h>
 #include "../biosig-dev.h"
 #include "../igor/IgorBin.h"
