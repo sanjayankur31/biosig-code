@@ -377,12 +377,15 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"HEKA L3 @%i= %fHz\t%i/%i %i/%i %i/%i %s\n",
 						double Bandwidth = (*(double*)(hdr->AS.Header+pos+144));
 						//double PipetteResistance  = (*(double*)(hdr->AS.Header+pos+152));
 						double RsValue   = (*(double*)(hdr->AS.Header+pos+192));
-						
+
+						uint8_t ValidYRange = hdr->AS.Header[pos+220];
 						uint16_t AdcChan = (*(uint16_t*)(hdr->AS.Header+pos+222));
 						/* obsolete: range is defined by DigMin/DigMax * DataScaler + YOffset
 						double PhysMin   = (*(double*)(hdr->AS.Header+pos+224));
 						double PhysMax   = (*(double*)(hdr->AS.Header+pos+232));
 						*/
+
+if (VERBOSE_LEVEL>7) fprintf(stdout, "%s (line %i): %i %i %i %i %i %g %g 0x%x xUnits=%i %g %g %g %g %i %i\n", __FILE__,__LINE__, k1, k2, k3, k4, ns, DataScaler, Toffset, pdc, XUnits, YRange, YOffset, Bandwidth, RsValue, ValidYRange, AdcChan);
 
 						switch (hdr->AS.Header[pos+70]) {
 						case 0: gdftyp = 3; 		//int16
@@ -574,10 +577,10 @@ if (VERBOSE_LEVEL>6) fprintf(stdout,"HEKA L5 @%i= #%i,%i, %s %g/%g %g/%g \n",(in
 
 
 						if (YOffset) {
-                                                        biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "Heka/Patchmaster: Yoffset is not zero");
+							biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "Heka/Patchmaster: YOffset is not zero");
 						}
 						if (hdr->AS.Header[pos+220] != 1) {
-                                                        biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "Heka/Patchmaster: ValidYRange not set");
+							fprintf(stderr,"WARNING Heka/Patchmaster: ValidYRange not set to 1 but %i in sweep [%i,%i,%i,%i]\n", hdr->AS.Header[pos+220],k1+1,k2+1,k3+1,k4+1);
 						}
 
 if (VERBOSE_LEVEL>7) fprintf(stdout,"HEKA L6 @%i= #%i,%i, %s %f-%fHz\t%i/%i %i/%i %i/%i %i/%i \n",(int)(pos+StartOfData),ns,AdcChan,Label,hdr->SampleRate,Fs,k1,K1,k2,K2,k3,K3,k4,K4);
