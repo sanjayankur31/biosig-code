@@ -446,7 +446,7 @@ sandbox.o: test0/sandbox.c  biosig.h biosig-dev.h
 
 
 ## exclude conflicting definition of sopen from mingw's io.h
-io.h: 
+io.h:
 	$(SED) '/ sopen/ s#^#//#' $(prefix)../$(TARGET)/include/io.h > io.h
 
 win32/io.h: $(IO_H_FILE)
@@ -635,18 +635,18 @@ t240/libcnsfef.a:
 	$(MAKE) -C t240 libcnsfef.a CC=$(CC) AR='$(AR)'	# generate t240/*.o files
 
 libbiosig.${FULLDLEXT}: $(OBJECTS) biosig.o t240/libcnsfef.a
-	$(LD) $(LDFLAGS) $(LIBS) ${SONAME_PREFIX}libbiosig${SONAME_POSTFIX} $(OBJECTS) t240/*.o -o "$@"
+	$(LD) ${SONAME_PREFIX}libbiosig${SONAME_POSTFIX} $(OBJECTS) t240/*.o $(LDFLAGS) $(LIBS) -o "$@"
 
 libbiosig2.${FULLDLEXT}: $(OBJECTS)  biosig2.o t240/libcnsfef.a
-	$(LD) $(LDFLAGS) $(LIBS) ${SONAME_PREFIX}libbiosig2${SONAME_POSTFIX} $(OBJECTS) biosig2.o t240/*.o -o "$@"
+	$(LD) ${SONAME_PREFIX}libbiosig2${SONAME_POSTFIX} $(OBJECTS) biosig2.o t240/*.o $(LDFLAGS) $(LIBS) -o "$@"
 
 libgdf.${FULLDLEXT}: gdf.o getlogin.o gdftime.o physicalunits.o
-	$(LD) $(LDFLAGS) $(LIBS) ${SONAME_PREFIX}libgdf${SONAME_POSTFIX} $? -o "$@"
+	$(LD) ${SONAME_PREFIX}libgdf${SONAME_POSTFIX} $? $(LDFLAGS) $(LIBS) -o "$@"
 
 libgdftime.${FULLDLEXT}: gdftime.o
-	$(LD) $(LDFLAGS) $(LIBS) ${SONAME_PREFIX}libgdftime${SONAME_POSTFIX} $? -o "$@"
+	$(LD) ${SONAME_PREFIX}libgdftime${SONAME_POSTFIX} $? $(LDFLAGS) $(LIBS) -o "$@"
 libphysicalunits.${FULLDLEXT}: physicalunits.o
-	$(LD) $(LDFLAGS) $(LIBS) ${SONAME_PREFIX}libgdftime${SONAME_POSTFIX} $? -o "$@"
+	$(LD) ${SONAME_PREFIX}libgdftime${SONAME_POSTFIX} $? $(LDFLAGS) $(LIBS) -o "$@"
 
 %.${DLEXT}: %.${FULLDLEXT}
 	ln -sf "$(*F).${FULLDLEXT}"	"$(*F)${SONAME_POSTFIX}"
@@ -675,7 +675,6 @@ libbiosig.a: $(OBJECTS) t240/libcnsfef.a libbiosig.pc
 	$(AR) libbiosig.a $(OBJECTS) t240/*.o
 libbiosig.def: $(OBJECTS) t240/libcnsfef.a libbiosig.pc
 	$(CXX) -o libbiosig.dll -s -shared -fPIC  $(OBJECTS) t240/libcnsfef.a $(LIBS) -Wl,--subsystem,windows,--output-def,libbiosig.def,--out-implib,libbiosig.dll.a
-
 
 libbiosig.pc :
 	echo "# Defines libbiosig.pc"       > libbiosig.pc
