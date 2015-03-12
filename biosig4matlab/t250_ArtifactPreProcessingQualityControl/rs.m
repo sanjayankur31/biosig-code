@@ -8,10 +8,8 @@ function [y1]=rs(y1,T,f2)
 %
 % Reference(s):
 
-%	$Revision: 1.2 $
-%	$Id$
-%	Copyright (C) 1997-2004 by Alois Schloegl 
-%	a.schloegl@ieee.org	
+%	Copyright (C) 1997-2004,2015 by Alois Schloegl
+%	alois.schloegl@ist.ac.at
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This library is free software; you can redistribute it and/or
@@ -42,8 +40,10 @@ if nargin==3,
                         y2(k+1,:)=sum(y1(k*D+(1:D),:),1)/D;
                 end;
 		y1=y2;
-        else %f1<f2
-		y1=y1(ceil((1:size(y1,1)*f2/f1)/f2*f1),:);                
+        else % f1<f2
+		%y1=y1(ceil((1:size(y1,1)*f2/f1)/f2*f1),:);
+		D  = f2/f1;
+		y1 = reshape(repmat(y1(:),1,D)', size(y1,1)*D, size(y1,2));
         end;
         
 elseif nargin==2,
