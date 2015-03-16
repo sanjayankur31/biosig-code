@@ -1,17 +1,17 @@
-function [HDR, s] = detect_ripple(fn, chan, varargin)
-% DETECT_RIPPLE detects ripples in neural recordings.
+function [HDR, s] = detect_sharp_wave_ripple(fn, chan, varargin)
+% DETECT_SHARP_WAVE_RIPPLE detects ripples in neural recordings.
 %
-% HDR = detect_ripple(filename, chan)
-% ... = detect_ripple(HDR, data)
-% ... = detect_ripple(... ,'-o', outputFilename)
-% ... = detect_ripple(... ,'-e', eventFilename)
-% ... = detect_ripple(... ,'-b', bandpassFilename)
-% ... = detect_ripple(... ,'-s', segmentFilename)
-% ... = detect_ripple(... ,'Threshold', Threshold)
-% ... = detect_ripple(... ,'winlen', winlen)
-% ... = detect_ripple(... ,'trigchan', trigger_channel)
-% ... = detect_ripple(... ,'methode', methode)
-% [HDR, data] = detect_ripple(...)
+% HDR = detect_sharp_wave_ripple(filename, chan)
+% ... = detect_sharp_wave_ripple(HDR, data)
+% ... = detect_sharp_wave_ripple(... ,'-o', outputFilename)
+% ... = detect_sharp_wave_ripple(... ,'-e', eventFilename)
+% ... = detect_sharp_wave_ripple(... ,'-b', bandpassFilename)
+% ... = detect_sharp_wave_ripple(... ,'-s', segmentFilename)
+% ... = detect_sharp_wave_ripple(... ,'Threshold', Threshold)
+% ... = detect_sharp_wave_ripple(... ,'winlen', winlen)
+% ... = detect_sharp_wave_ripple(... ,'trigchan', trigger_channel)
+% ... = detect_sharp_wave_ripple(... ,'methode', methode)
+% [HDR, data] = detect_sharp_wave_ripple(...)
 %
 % Input:
 % 	filename: name of source file 
@@ -79,7 +79,6 @@ function [HDR, s] = detect_ripple(fn, chan, varargin)
 %     The Journal of Neuroscience, December 7, 2011 • 31(49):18073–18093 • 18074
 
 
-
 %    Copyright (C) 2014,2015 by Alois Schloegl <alois.schloegl@ist.ac.at>
 %    This is part of the BIOSIG-toolbox http://biosig.sf.net/
 %
@@ -99,7 +98,7 @@ function [HDR, s] = detect_ripple(fn, chan, varargin)
 
 
 if nargin < 1,
-	help detect_ripple;
+	help detect_sharp_wave_ripple;
 end;
 
 if nargin < 2,
