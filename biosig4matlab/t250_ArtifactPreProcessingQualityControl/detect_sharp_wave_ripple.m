@@ -10,7 +10,7 @@ function [HDR, s] = detect_sharp_wave_ripple(fn, chan, varargin)
 % ... = detect_sharp_wave_ripple(... ,'Threshold', Threshold)
 % ... = detect_sharp_wave_ripple(... ,'winlen', winlen)
 % ... = detect_sharp_wave_ripple(... ,'trigchan', trigger_channel)
-% ... = detect_sharp_wave_ripple(... ,'methode', methode)
+% ... = detect_sharp_wave_ripple(... ,'method', method)
 % [HDR, data] = detect_sharp_wave_ripple(...)
 %
 % Input:
@@ -20,11 +20,13 @@ function [HDR, s] = detect_sharp_wave_ripple(fn, chan, varargin)
 %	data	signal data that should be analyzed
 %	Threshold	[default: 6] number of standard deviations
 % 	winlen	windowlength, should represent the approximate duration of a single event
-%		it determines at which distance in time, time events are considered one or 
-%		two separate events. 
-%       trigger_channel: channel used for triggering/segmenting the data	
+%		it determines in the default method (0) at which distance in time,
+%		time events are considered one or two separate events.
+%	trigger_channel: channel used for triggering/segmenting the data
+%	coincidenceWindow: [default: 40 ms]
+%		if defined, another event type (TYP=4) are defined, that contain all
+%		event positions where a detection happened within the coincidence windows [4].
 % 
-%	winlen	[default: .2e-3 s] windowlength in seconds for computing slope
 %	outputFilename
 %		name of file for storing the resulting data with the
 %		detected spikes and bursts in GDF format.
@@ -66,17 +68,20 @@ function [HDR, s] = detect_sharp_wave_ripple(fn, chan, varargin)
 %     Coherent Phasic Excitation during Hippocampal Ripples
 %     Neuron 72, 137–152, October 6, 2011 p149.
 %     DOI 10.1016/j.neuron.2011.08.016
-%
 % [2] John J. Tukker, Balint Lasztoczi, Linda Katona, J. David B. Roberts, Eleftheria K. Pissadaki, Yannis Dalezios,
 %     Laszlo Marton, Limei Zhang, Thomas Klausberger, and Peter Somogyi1
 %     Distinct Dendritic Arborization and In Vivo Firing Patterns of Parvalbumin-Expressing Basket Cells in the Hippocampal Area CA3
 %     The Journal of Neuroscience, April 17, 2013 • 33(16):6809 – 6825 • p6810
 %     J. Neurosci., April 17, 2013 • 33(16):6809 – 6825 • 6811
-%
 % [3] Balint Lasztoczi, John J. Tukker, Peter Somogyi, and Thomas Klausberger
 %     Terminal Field and Firing Selectivity of Cholecystokinin-
 %     Expressing Interneurons in the Hippocampal CA3 Area
 %     The Journal of Neuroscience, December 7, 2011 • 31(49):18073–18093 • 18074
+% [4] Maria Pangalos, José R. Donoso, Jochen Winterer, Aleksandar R. Zivkovic, Richard Kempter, Nikolaus Maier, and Dietmar Schmitz
+%     Recruitment of oriens-lacunosum-moleculare interneurons during hippocampal ripples.
+%     4398–4403 | PNAS | March 12, 2013 | vol. 110 | no. 11
+%     www.pnas.org/cgi/doi/10.1073/pnas.1215496110
+%
 
 
 %    Copyright (C) 2014,2015 by Alois Schloegl <alois.schloegl@ist.ac.at>
@@ -114,6 +119,7 @@ bandpassFile = [];
 segFile = [];
 trigChan= 0; 
 method=[];
+coincidenceWindow = [];
 
 %%%%% analyze input arguments %%%%%
 k = 1;
@@ -138,10 +144,13 @@ while k <= length(varargin)
 		elseif (strcmpi(varargin{k},'winlen'))
 			k = k + 1;
 			dT = varargin{k};
+		elseif (strcmpi(varargin{k},'coincidenceWindow'))
+			k = k + 1;
+			coincidenceWindow = varargin{k};
 		elseif (strcmpi(varargin{k},'trigchan'))
 			k = k + 1;
 			trigChan = varargin{k};
-		elseif (strcmpi(varargin{k},'method'))
+		elseif (strncmpi(varargin{k},'method',6))
 			k = k + 1;
 			method = varargin{k};
 		elseif (strcmpi(varargin{k},'bandpass'))
@@ -243,17 +252,20 @@ Fs = 20000; 	% assumed samplerate
 
 		
 	D = sparse(size(Y));
-	T = [];
+	T = repmat(NaN,0,3);
 	POS = [];
 	CHN = [];
-	if isempty(trigChan) || (trigChan==0)	
-		warning('triggerChannel has not been defined');
-		trigChan = 1:size(Y,2);
-	end; 
-	for k = trigChan(:)',
 
+	if isempty(trigChan) || (trigChan==0)	
+		%warning('triggerChannel has not been defined');
+		trigChan = 1:size(Y,2);
+	else
+		if ~isempty(coincidenceWindow)
+			error('coincidenceWindow and triggerChannel arguments are mutual exclusive - use only one or the other!')
+		end
+	end;
+	for k = trigChan(:)',
 		% Detection
-		
 		if (method==1)  % Maier et al. p.149, [1]
 			w = smoothingwindow*HDR.SampleRate;
 			y = filter(ones(w,1),w,abs(Y(:,k)));
@@ -281,7 +293,7 @@ Fs = 20000; 	% assumed samplerate
 			ix1th = find(d3 > 0);	% onset 
 			ix2th = find(d3 < 0);	% offset
 			for kk = 1:length(ix1th)
-				[mx, tix] = max( y( ix1th(kk) : ix2th(kk) ) );
+				[mx, tix] = max( y( ix1th(kk) : ix2th(kk)-1 ) );
 				tix = tix - 1 + ix1th(kk);
 				POS = [POS; tix - w/2];
 				CHN = [CHN; k];
@@ -314,15 +326,28 @@ Fs = 20000; 	% assumed samplerate
 
 	end;
 
-	POS = POS(dT * HDR.SampleRate/2 < POS & POS < size(s,1) - dT * HDR.SampleRate/2);
 
-	HDR.EVENT.POS = [T(:,1); T(:,2); POS; max(1, POS - dT * HDR.SampleRate/2); min(size(s,1), POS + dT*HDR.SampleRate/2)];
-	HDR.EVENT.CHN = [T(:,3); T(:,3); CHN; CHN; CHN];
-	HDR.EVENT.TYP = [repmat(hex2dec('0001'),size(T,1),1); repmat(hex2dec('8001'),size(T,1),1); repmat(3,size(T,1),1); repmat(hex2dec('0002'),size(POS,1),1); repmat(hex2dec('8002'),size(POS,1),1)];
+
+	%% select peaks only if there are peaks in both channels within the coincidence window
+	pplist=[];
+	if ~isempty(coincidenceWindow)
+		for pp=1:length(POS)
+			pos = POS((3-CHN(pp))==CHN); 	% select all peaks from the other channel
+			if any( (POS(pp)-coincidenceWindow*HDR.SampleRate/2 < pos) & (pos < POS(pp) + coincidenceWindow*HDR.SampleRate/2) )
+				pplist = [pplist;pp];
+			end
+		end
+	end
+
+	HDR.EVENT.POS = [T(:,1); T(:,2); POS; POS(pplist); max(1, POS - dT * HDR.SampleRate/2); min(size(s,1), POS + dT*HDR.SampleRate/2)];
+	HDR.EVENT.CHN = [T(:,3); T(:,3); CHN; CHN(pplist); CHN; CHN];
+	HDR.EVENT.TYP = [repmat(hex2dec('0001'),size(T,1),1); repmat(hex2dec('8001'),size(T,1),1); repmat(3,size(T,1),1); repmat(4,size(pplist,1),1); repmat(hex2dec('0002'),size(POS,1),1); repmat(hex2dec('8002'),size(POS,1),1)];
 	HDR.EVENT.DUR = zeros(size(HDR.EVENT.POS));
-    if isfield(HDR.EVENT,'TimeStamp')
-	    HDR.EVENT     = rmfield(HDR.EVENT,'TimeStamp');
-    end
+	%HDR.EVENT.CodeDesc = {'AboveThresholdWindow','selectedSegment','PeakEnvelopeOfSWR','SWRinBothChannelsWithinWindow'};
+	if isfield(HDR.EVENT,'TimeStamp')
+		HDR.EVENT     = rmfield(HDR.EVENT,'TimeStamp');
+	end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %	Output ripple detection in GDF file
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
