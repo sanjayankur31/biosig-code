@@ -43,6 +43,7 @@ extern "C" {
 uint16_t PhysDimCode(const char* PhysDim);
 /* Encodes  Physical Dimension as 16bit integer according to
    ISO/IEEE 11073-10101:2004 Vital Signs Units of Measurement
+   Leading and trailing whitespace are skipped.
  --------------------------------------------------------------- */
 
 const char* PhysDim3(uint16_t PhysDimCode);

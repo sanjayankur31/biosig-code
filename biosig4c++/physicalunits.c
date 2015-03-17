@@ -21,6 +21,7 @@
 
 */
 
+#include <ctype.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -139,6 +140,7 @@ uint16_t PhysDimCode(const char* PhysDim0)
 	char *s1;
 
 	if (PhysDim0==NULL) return(0);
+	while (isspace(*PhysDim0)) PhysDim0++;	// remove leading whitespace
 	if (strlen(PhysDim0)==0) return(0);
 
 	// greedy search - check all codes 0..65535
