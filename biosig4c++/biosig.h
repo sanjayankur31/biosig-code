@@ -47,10 +47,11 @@
 // biosigCHECK_VERSION returns true if BIOSIG_VERSION is at least a.b.c
 #define biosigCHECK_VERSION(a,b,c) (BIOSIG_VERSION >= ( 10000*(a) + 100*(b) + (c) ) )
 
-#if defined(_VCPP_DEF) || defined(_MSC_VER)
-    #define __BYTE_ORDER  __LITTLE_ENDIAN
-    typedef long   		ssize_t;
-    typedef unsigned long	size_t;
+#if (_MSC_VER >= 1600) // MSVC++ 2010 and newer
+    #include <stdint.h>
+#elif defined(_VCPP_DEF) || defined(_MSC_VER)// MSVC++ 2008 and older
+    typedef LONG_PTR		ssize_t;
+    typedef ULONG_PTR		size_t;
     typedef unsigned __int64	uint64_t;
     typedef __int64		int64_t;
     typedef unsigned __int32	uint32_t;
