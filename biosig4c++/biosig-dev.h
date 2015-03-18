@@ -108,11 +108,14 @@ char *getlogin (void);
 #  include <endian.h>
 #  include <byteswap.h>
 
-#elif defined(__MINGW32__) 
-   /* use local version because MINGW does not provide byteswap.h */
+#elif defined(__WIN32__)
+#  include <stdlib.h>
 #  define __BIG_ENDIAN		4321
 #  define __LITTLE_ENDIAN  	1234
 #  define __BYTE_ORDER 		__LITTLE_ENDIAN
+#  define bswap_16(x) _byteswap_ushort(x)
+#  define bswap_32(x) _byteswap_ulong(x)
+#  define bswap_64(x) _byteswap_uint64(x)
 
 #elif defined(__NetBSD__)
 #  include <sys/bswap.h>
@@ -162,7 +165,7 @@ char *getlogin (void);
 #  error Unknown platform
 #endif 
 
-#if defined(__MINGW32__) || defined(__sparc__)
+#if defined(__sparc__)
 
 # ifndef bswap_16
 #  define bswap_16(x)   \
