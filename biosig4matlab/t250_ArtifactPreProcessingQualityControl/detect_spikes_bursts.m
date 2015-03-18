@@ -189,7 +189,8 @@ Fs = 20000; 	% assumed samplerate
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %	Set Parameters for Spike Detection
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	B  = [.5; zeros(HDR.SampleRate*dT - 1, 1); -.5];
+	B  = [.5; zeros(round(HDR.SampleRate*dT)-1, 1); -.5];
+
 	HDR.BurstTable = [];
 
 	for ch = chan(:)';	% look for each channel	
@@ -198,9 +199,9 @@ Fs = 20000; 	% assumed samplerate
 		%%%%%%%	Spike Detection %%%%%%%%%%%%%%%%%%%
 		[unit, scale] = physicalunits(HDR.PhysDimCode(ch));
 		tmp = scale * filter(B, dT, s(:,ch));
-		OnsetSpike = find( diff (tmp > slopeThreshold) > 0); 	%% spike onset time [samples]
+		OnsetSpike = find( diff (tmp > slopeThreshold) > 0);	%% spike onset time [samples]
 		% --- remove double detections < 1 ms
-		if ~isempty(dT_Exclude)
+		if ~isempty(dT_Exclude) && ~isempty(OnsetSpike),
 			OnsetSpike = OnsetSpike([1; 1+find(diff(OnsetSpike) > Fs * dT_Exclude)]);
 		end;
 
