@@ -24,6 +24,7 @@ distname            biosig4c++-${version}.src
 worksrcdir          biosig4c++-${version}
 checksums           rmd160  RMD160 \
                     sha256  SHA256
+cmake.out_of_source yes
 
 depends_build-append \
                     port:gawk
