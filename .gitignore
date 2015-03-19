@@ -33,3 +33,4 @@ biosig4c++/macports/PortIndex
 biosig4c++/macports/PortIndex.quick
 biosig4c++/macports/Portfile-libbiosig.diff
 biosig4c++/macports/biosig4c++-*.src.tar.gz*
+biosig4c++/build/*
