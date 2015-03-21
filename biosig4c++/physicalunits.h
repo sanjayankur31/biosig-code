@@ -1,6 +1,5 @@
 /*
-% $Id$
-% Copyright (C) 2005-2012 Alois Schloegl <alois.schloegl@gmail.com>
+% Copyright (C) 2005-2012,2015 Alois Schloegl <alois.schloegl@ist.ac.at>
 % This file is part of the "BioSig for C/C++" repository
 % (biosig4c++) at http://biosig.sf.net/
 
@@ -29,8 +28,8 @@
 #ifndef __PHYSICALUNITS_H__
 #define __PHYSICALUNITS_H__
 
-#ifdef _VCPP_DEF
-typedef unsigned short		uint16_t;
+#if defined(_MSC_VER) && (_MSC_VER < 1600)
+    typedef unsigned __int64	uint16_t;
 #else
     #include <stdint.h>
 #endif

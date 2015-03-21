@@ -29,8 +29,8 @@
 #ifndef __MDC_ECG_CODES_H__
 #define __MDC_ECG_CODES_H__
 
-#ifdef _VCPP_DEF
-typedef unsigned short		uint16_t;
+#if defined(_MSC_VER) && (_MSC_VER < 1600)
+    typedef unsigned __int16	uint16_t;
 #else
     #include <stdint.h>
 #endif
