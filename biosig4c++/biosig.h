@@ -1,6 +1,6 @@
 /*
 
-% Copyright (C) 2005-2013 Alois Schloegl <alois.schloegl@gmail.com>
+% Copyright (C) 2005-2013,2015 Alois Schloegl <alois.schloegl@ist.ac.at>
 % This file is part of the "BioSig for C/C++" repository
 % (biosig4c++) at http://biosig.sf.net/
 
@@ -41,17 +41,20 @@
 #define BIOSIG_VERSION_MAJOR 1
 #define BIOSIG_VERSION_MINOR 6
 #define BIOSIG_PATCHLEVEL 5
-// for backward compatibility 
-#define BIOSIG_VERSION_STEPPING BIOSIG_PATCHLEVEL	
+// for backward compatibility
+#define BIOSIG_VERSION_STEPPING BIOSIG_PATCHLEVEL
 #define BIOSIG_VERSION (BIOSIG_VERSION_MAJOR * 10000 + BIOSIG_VERSION_MINOR * 100 + BIOSIG_PATCHLEVEL)
 // biosigCHECK_VERSION returns true if BIOSIG_VERSION is at least a.b.c
 #define biosigCHECK_VERSION(a,b,c) (BIOSIG_VERSION >= ( 10000*(a) + 100*(b) + (c) ) )
 
-#if (_MSC_VER >= 1600) // MSVC++ 2010 and newer
-    #include <stdint.h>
-#elif defined(_VCPP_DEF) || defined(_MSC_VER)// MSVC++ 2008 and older
-    typedef LONG_PTR		ssize_t;
-    typedef ULONG_PTR		size_t;
+#if defined(_MSC_VER) && (_MSC_VER < 1600)
+#if defined(_WIN64)
+    typedef __int64		ssize_t;
+    typedef unsigned __int64	size_t;
+#else
+    typedef __int32		ssize_t;
+    typedef unsigned __int32	size_t;
+#endif
     typedef unsigned __int64	uint64_t;
     typedef __int64		int64_t;
     typedef unsigned __int32	uint32_t;
@@ -70,7 +73,7 @@
 
 #ifdef __cplusplus
 #define EXTERN_C extern "C"
-#else    
+#else
 #define EXTERN_C
 #endif
 
@@ -151,7 +154,7 @@ enum FileFormat {
 	EBS, EDF, EEG1100, EEProbe, EEProbe2, EEProbeAvr, EGI,
 	EGIS, ELF, EMBLA, EMSA, ePrime, ET_MEG, ETG4000, EVENT, EXIF,
 	FAMOS, FEF, FIFF, FITS, FLAC, GDF, GDF1,
-	GIF, GTF, GZIP, HDF, HL7aECG, HEKA, 
+	GIF, GTF, GZIP, HDF, HL7aECG, HEKA,
 	IBW, ISHNE, ITX, JPEG, JSON, Lexicor,
 	Matlab, MFER, MIDI, MIT, MM, MSI, MSVCLIB, MS_LNK, MX,
 	native, NeuroLoggerHEX, NetCDF, NEURON, NEV, NEX1, NIFTI, NUMPY,
@@ -172,11 +175,11 @@ enum FileFormat {
 
 /*
    error handling should use error variables local to each HDR
-   otherwise, sopen() etc. is not re-entrant. 
+   otherwise, sopen() etc. is not re-entrant.
 
-   Therefore, use of variables B4C_ERRNUM and B4C_ERRMSG is deprecated; 	
-   Instead, use biosigERROR for setting error status, and 
-   serror2(hdr), hdr->AS.B4C_ERRNUM, hdr->AS.B4C_ERRMSG for error handling.   
+   Therefore, use of variables B4C_ERRNUM and B4C_ERRMSG is deprecated;
+   Instead, use biosigERROR for setting error status, and
+   serror2(hdr), hdr->AS.B4C_ERRNUM, hdr->AS.B4C_ERRMSG for error handling.
 
  */
 ATT_DEPREC extern int B4C_ERRNUM;
@@ -184,14 +187,14 @@ ATT_DEPREC extern const char *B4C_ERRMSG;
 
 
 /*
-This part has moved into biosig-dev.h in v1.4.1, because VERBOSE_LEVEL is just 
-used for debugging and should not be exposed to common applications 
+This part has moved into biosig-dev.h in v1.4.1, because VERBOSE_LEVEL is just
+used for debugging and should not be exposed to common applications
 #ifdef NDEBUG
 #define VERBOSE_LEVEL 0		// turn off debugging information
 #else
 extern int VERBOSE_LEVEL; 	// used for debugging
 #endif
-*/ 
+*/
 
 /****************************************************************************/
 /**                                                                        **/
@@ -439,8 +442,8 @@ typedef struct HDR_STRUCT {
 			These sections are also stored in GDF Header 3 (tag 9-13)
 			It is mostly used for SCP<->GDF conversion.
 
-			The pointers points into hdr->AS.Header, 
-			so do not dynamically re-allocate the pointers.  
+			The pointers points into hdr->AS.Header,
+			so do not dynamically re-allocate the pointers.
 		*/
 		const uint8_t* Section7;
 		const uint8_t* Section8;
@@ -477,9 +480,9 @@ struct etd_t {
         uint16_t groupid;	// defines the group id as used in EventCodeGroups below
         const char* desc;	// name/description of event code // const decrease signifitiantly number of warning
 } ATT_MSSTRUCT;
-// Groups of event codes 
+// Groups of event codes
 struct event_groups_t {
-        uint16_t groupid;	
+        uint16_t groupid;
         const char* GroupDescription; // const decrease signifitiantly number of warning
 } ATT_MSSTRUCT;
 struct FileFormatStringTable_t {
@@ -514,7 +517,7 @@ extern const struct FileFormatStringTable_t FileFormatStringTable [];
 EXTERN_C {
 #endif
 
-uint32_t get_biosig_version (); 
+uint32_t get_biosig_version ();
 /* 	returns the version number in hex-decimal representation
 	get_biosig_version() & 0x00ff0000 :  major version number
 	get_biosig_version() & 0x0000ff00 :  minor version number
@@ -548,12 +551,12 @@ HDRTYPE* sopen(const char* FileName, const char* MODE, HDRTYPE* hdr);
 		If the number of records is not known, set hdr->NRec=-1 and
 		sclose will fill in the correct number.
 	Mode: "a" is append mode,
-		if file exists, header and eventtable is read, 
-		position pointer is set to end of data in order to add 
-		more data. If file is successfully opened, the header structure 
-		of the existing file is used, and any different specification in 
-		hdr is discarded.  
-		If file is not compressed, it can be used for read and write, 
+		if file exists, header and eventtable is read,
+		position pointer is set to end of data in order to add
+		more data. If file is successfully opened, the header structure
+		of the existing file is used, and any different specification in
+		hdr is discarded.
+		If file is not compressed, it can be used for read and write,
   		for compressed files, only appending at the end of file is possible.
 		Currently, append mode is supported only for the GDF format.
 
@@ -561,11 +564,11 @@ HDRTYPE* sopen(const char* FileName, const char* MODE, HDRTYPE* hdr);
 	must be defined. In read-mode, hdr can be NULL; however,
 	hdr->FLAG... can be used to turn off spurious warnings. In write-mode,
 	the whole header information must be defined.
-	In append mode, it is recommended to provide whole header information, 
-	which must be equivalent to the header info of an existing file. 
+	In append mode, it is recommended to provide whole header information,
+	which must be equivalent to the header info of an existing file.
 	After calling sopen, the file header is read or written, and
 	the position pointer points to the beginning of the data section
-	in append mode, the position pointer points to the end of the data section. 
+	in append mode, the position pointer points to the end of the data section.
  --------------------------------------------------------------- */
 
 int 	sclose(HDRTYPE* hdr);
@@ -593,11 +596,11 @@ size_t	sread(biosig_data_type* DATA, size_t START, size_t LEN, HDRTYPE* hdr);
 	hdr->data.size[0] and hdr->data.size[1] respectively.
 
 	Channels k with (hdr->CHANNEL[k].SPR==0) are interpreted as sparsely
-	sampled channels [for details see specification ofGDF v2 or larger]. 
+	sampled channels [for details see specification ofGDF v2 or larger].
 	The sample values are also returned in DATA the corresponding
   	sampling time, the values in between the sparse sampling times are
-	set to DigMin. (Applying the flags UCAL and OVERFLOWDETECTION will 
-	convert this into PhysMin and NaN, resp. see below). 
+	set to DigMin. (Applying the flags UCAL and OVERFLOWDETECTION will
+	convert this into PhysMin and NaN, resp. see below).
 
 	The following flags will influence the result.
  	hdr->FLAG.UCAL = 0 	scales the data to its physical values
@@ -653,10 +656,10 @@ ATT_DEPREC int serror();
  *	if yes, an error message is displayed, and the error status is reset.
  * 	the return value is 0 if no error has occured, otherwise the error code
  *	is returned.
- *  IMPORTANT NOTE:	
- *	serror() uses the global error variables B4C_ERRNUM and B4C_ERRMSG, 
- *	which is not re-entrant, because two opened files share the same 
- *	error variables.  
+ *  IMPORTANT NOTE:
+ *	serror() uses the global error variables B4C_ERRNUM and B4C_ERRMSG,
+ *	which is not re-entrant, because two opened files share the same
+ *	error variables.
  --------------------------------------------------------------- */
 #endif //ONLYGDF
 
@@ -721,7 +724,7 @@ enum FileFormat GetFileTypeFromString(const char *);
 
 
 /* =============================================================
-	utility functions for handling of event table 
+	utility functions for handling of event table
    ============================================================= */
 
 void sort_eventtable(HDRTYPE *hdr);
@@ -738,8 +741,8 @@ void convert4to2_eventtable(HDRTYPE *hdr);
   -------------------------------------------------------------- */
 
 const char* GetEventDescription(HDRTYPE *hdr, size_t n);
-/* returns clear text description of n-th event, 
-   considers also user-defined events. 
+/* returns clear text description of n-th event,
+   considers also user-defined events.
   -------------------------------------------------------------- */
 
 void FreeTextEvent(HDRTYPE* hdr, size_t N, const char* annotation);
@@ -748,7 +751,7 @@ void FreeTextEvent(HDRTYPE* hdr, size_t N, const char* annotation);
 	if annotations is not listed in CodeDesc, it is added to CodeDesc
 	The table is limited to 256 entries, because the table EventCodes
 	allows only codes 0-255 as user specific entry. If the description
-	table contains more than 255 entries, an error is set. 
+	table contains more than 255 entries, an error is set.
   ------------------------------------------------------------------------*/
 
 /* =============================================================
@@ -761,7 +764,7 @@ uint16_t PhysDimCode(const char* PhysDim);
  --------------------------------------------------------------- */
 
 char* PhysDim(uint16_t PhysDimCode, char *PhysDimText);
-/* DEPRECATED: USE INSTEAD PhysDim3(uint16_t PhysDimCode) 
+/* DEPRECATED: USE INSTEAD PhysDim3(uint16_t PhysDimCode)
    It's included just for backwards compatibility
    converts HDR.CHANNEL[k].PhysDimCode into a readable Physical Dimension
    the memory for PhysDim must be preallocated, its maximum length is
@@ -779,7 +782,7 @@ double PhysDimScale(uint16_t PhysDimCode);
 
 
 /* =============================================================
-	printing of header information 	
+	printing of header information
    ============================================================= */
 
 int	hdr2ascii(HDRTYPE* hdr, FILE *fid, int VERBOSITY);
@@ -788,22 +791,22 @@ int	hdr2ascii(HDRTYPE* hdr, FILE *fid, int VERBOSITY);
  *	VERBOSITY=0 or 1 report just some basic information,
  *	VERBOSITY=2 reports als the channel information
  *	VERBOSITY=3 provides in addition the event table.
- *	VERBOSITY=8 for debugging 
+ *	VERBOSITY=8 for debugging
  *	VERBOSITY=9 for debugging
  *	VERBOSITY=-1 header and event table is shown in JSON format
  --------------------------------------------------------------- */
 
-ATT_DEPREC int hdr2json (HDRTYPE *hdr, FILE *fid); 
+ATT_DEPREC int hdr2json (HDRTYPE *hdr, FILE *fid);
 int fprintf_hdr2json(FILE *stream, HDRTYPE* hdr);
-/* prints header in json format into stream; 
-   hdr2json is the old form and deprecated, 
+/* prints header in json format into stream;
+   hdr2json is the old form and deprecated,
    use fprintf_hdr2json instead
  --------------------------------------------------------------- */
 
 int asprintf_hdr2json(char **str, HDRTYPE* hdr);
-/* prints header in json format into *str; 
-   memory for str is automatically allocated and must be freed 
-   after usage. 
+/* prints header in json format into *str;
+   memory for str is automatically allocated and must be freed
+   after usage.
  --------------------------------------------------------------- */
 
 #ifdef __cplusplus

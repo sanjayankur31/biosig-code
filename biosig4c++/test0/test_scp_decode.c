@@ -2,10 +2,10 @@
 
     $Id: test_scp_decode.c,v 1.2 2007-08-31 13:18:15 schloegl Exp $
     Copyright (C) 2007 Eugenio Cervesato
-    Modified by Alois Schloegl 
-		    
-    This function is part of the "BioSig for C/C++" repository 
-    (biosig4c++) at http://biosig.sf.net/ 
+    Modified by Alois Schloegl
+
+    This function is part of the "BioSig for C/C++" repository
+    (biosig4c++) at http://biosig.sf.net/
 
 
     This program is free software; you can redistribute it and/or modify
@@ -23,8 +23,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
  */
-#ifdef _VCPP_DEF
-#define WIN32
+#if defined(_MSC_VER) && (_MSC_VER < 1600)
 #define __LITTLE_ENDIAN=1
 #define __BIG_ENDIAN=0
 USEUNIT("t210/scp-decode.cpp");
@@ -57,15 +56,15 @@ int main(int argc, char* argv[])
                return 2;
         }
         hdr->FileName=argv[1];
-        hdr->FILE.OPEN=0; 
-        hdr->FILE.COMPRESSION=0; 
+        hdr->FILE.OPEN=0;
+        hdr->FILE.COMPRESSION=0;
         scp_decode(hdr, section, decode, record, textual, add_filter);
 
         for (int i=0;i<decode.flag_Res.number_samples;i+=2500)
-        for (int k=0;k<8;k+=3) 
+        for (int k=0;k<8;k+=3)
 	{
         	int x=decode.Reconstructed[i+k*5000];         // data returned is in microVolt -> DATA CONSINSTENT
-        	fprintf(stdout,"%i %i %i\n",i,k,x); 
+        	fprintf(stdout,"%i %i %i\n",i,k,x);
 	}
        	return(0);
 }
