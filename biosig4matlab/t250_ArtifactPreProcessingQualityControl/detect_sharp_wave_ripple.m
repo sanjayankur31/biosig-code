@@ -275,10 +275,21 @@ Fs = 20000; 	% assumed samplerate
 			y = filter(ones(w,1),w,abs(Y(:,k)));
 			d1 = y > Threshold * std(Y(:,k));
 
-		elseif any(method > 1),	% Tukker et al. 2013 [2], Lasztoczi et al. 2011 [3]
+		elseif any(method==[1:3]),	% Tukker et al. 2013 [2], Lasztoczi et al. 2011 [3]
 			w = smoothingwindow*HDR.SampleRate;
 			y = sqrt(filter(ones(w,1), w, Y(:,k).^2));
-			ix = find(y > (Threshold * rms(Y(:,k))));
+			%ix = find(y > (Threshold * rms(Y(:,k))));
+
+		elseif any(method==4),	% Jian Gan, 2015
+			w = smoothingwindow*HDR.SampleRate;
+			y = sqrt(filtfilt(ones(w,1), w, Y(:,k).^2));
+			%ix = find(y > (Threshold * rms(Y(:,k))));
+
+		elseif any(method==5),	% Jian Gan, 2015
+			w = smoothingwindow*HDR.SampleRate;
+			W = hamming(w);
+			y = sqrt(filtfilt(W,sum(W), Y(:,k).^2));
+			%ix = find(y > (Threshold * rms(Y(:,k))));
 
 		end
 		if any(method==[1:3])
@@ -304,7 +315,7 @@ Fs = 20000; 	% assumed samplerate
 				T = [T; max(ix1(ix1<tix)), min(ix2(ix2>tix)), k]; 	% start, and end of
 			end
 
-		elseif (method==4)
+		elseif any(method==[4]),	% Jian Gan, 2015
 			d1 = y > Threshold * rms(Y(:,k));
 			d2 = y > 2 * rms(Y(:,k));
 
@@ -330,7 +341,7 @@ Fs = 20000; 	% assumed samplerate
 					% enter ripple into event table
 					[mx, tix] = max( y( onset : offset-1 ) );
 					tix = tix - 1 + onset;
-					POS = [POS; tix - w/2];
+					POS = [POS; tix];
 					CHN = [CHN; k];
 					T = [T; max(ix3(ix3<tix)), min(ix2(ix2>tix)), k]; 	% start, and end of
 				end
