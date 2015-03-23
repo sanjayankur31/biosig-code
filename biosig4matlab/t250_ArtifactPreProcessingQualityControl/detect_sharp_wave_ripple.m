@@ -14,7 +14,7 @@ function [HDR, s] = detect_sharp_wave_ripple(fn, chan, varargin)
 % [HDR, data] = detect_sharp_wave_ripple(...)
 %
 % Input:
-% 	filename: name of source file 
+% 	filename: name of source file
 %	chan	list of channels that should be analyzed (default is 0: all channels)
 %	HDR	header structure obtained by SOPEN, SLOAD, or meXSLOAD
 %	data	signal data that should be analyzed
@@ -26,22 +26,22 @@ function [HDR, s] = detect_sharp_wave_ripple(fn, chan, varargin)
 %	coincidenceWindow: [default: 40 ms]
 %		if defined, another event type (TYP=4) are defined, that contain all
 %		event positions where a detection happened within the coincidence windows [4].
-% 
+%
 %	outputFilename
 %		name of file for storing the resulting data with the
 %		detected spikes and bursts in GDF format.
 %	eventFilename
-%		filename to store event inforamation in GDF format. this is similar to 
+%		filename to store event inforamation in GDF format. this is similar to
 %		the outputFile, except that the signal data is not included and is, therefore,
 %		much smaller than the outputFile
 %	bandpassFilename
 %		filename for bandpass filtered data
 %	segmentFilename
 %		filename for segmented data, each segment is twice as large as winlen plus one sample
-%		going from -winlen*samplerate : +winlen*samplerate 
+%		going from -winlen*samplerate : +winlen*samplerate
 %		This file can be loaded into stimfit.
 %	method: default 0
-%		detection method can be numeric or by name "maier2011', 'tukker2013', 'lasz2011'
+%		detection method can be numeric or by name "maier2011', 'tukker2013', 'lasz2011', 'jiangan2015'
 %		or 0,1,2, or 3. See references below for details.
 %
 %
@@ -61,7 +61,7 @@ function [HDR, s] = detect_sharp_wave_ripple(fn, chan, varargin)
 % see also:  DETECT_SPIKES_BURSTS, SPIKE2BURSTS, OPTIMUM_ISI_SPIKE_BURST_SEPARATION
 %
 % References:
-% [0] bandpass 100-250 Hz, - 6 S.D. detection, - search with -200 - +200 ms for maximum positive peak for  alignment 
+% [0] bandpass 100-250 Hz, - 6 S.D. detection, - search with -200 - +200 ms for maximum positive peak for  alignment
 %     extract window -200 - +200 ms window of both channels.
 % [1] Nikolaus Maier, Alvaro Tejero-Cantero, Anja L. Dorrn, Jochen Winterer, Prateep S. Beed,1 Genela Morris,
 %     Richard Kempter, James F.A. Poulet, Christian Leibold, and Dietmar Schmitz
@@ -81,7 +81,7 @@ function [HDR, s] = detect_sharp_wave_ripple(fn, chan, varargin)
 %     Recruitment of oriens-lacunosum-moleculare interneurons during hippocampal ripples.
 %     4398–4403 | PNAS | March 12, 2013 | vol. 110 | no. 11
 %     www.pnas.org/cgi/doi/10.1073/pnas.1215496110
-%
+% [5] Jian Gan, 2015, unpublished
 
 
 %    Copyright (C) 2014,2015 by Alois Schloegl <alois.schloegl@ist.ac.at>
@@ -117,7 +117,7 @@ outFile = [];
 evtFile = [];
 bandpassFile = [];
 segFile = [];
-trigChan= 0; 
+trigChan= 0;
 method=[];
 coincidenceWindow = [];
 
@@ -178,27 +178,31 @@ while k <= length(varargin)
 end;
 
 if ischar(method)
-	method = strmatch(lower(method),{'maier2011', 'tukker2013', 'lasz2011'});
+	method = strmatch(lower(method),{'maier2011', 'tukker2013', 'lasz2011', 'jiangan2015'});
 end
 
-switch (method) 
+switch (method)
 	case 1 % Maier et al. p.149, [1]
 		bandpassFilter = [120,300];
 		smoothingwindow = 0.010;
-		Threshold = 6; 		
+		Threshold = 6;
 	case 2 % Tukker et al. 2013 [2]
 		bandpassFilter = [90,140];
 		smoothingwindow = 0.010;
-		Threshold = 5; 		
+		Threshold = 5;
 	case 3 % Lasztoczi et al. 2011 [3]
 		bandpassFilter = [90,200];
 		smoothingwindow = 0.010;
-		Threshold = 5; 		
+		Threshold = 5;
+	case 4 % Jian Gan 2015 [5]
+		bandpassFilter = [90,200];
+		smoothingwindow = 0.010;
+		Threshold = 4;
 	otherwise
 		method = 0;
 		warning('method not specified, use default method');
 		bandpassFilter = [100,250];
-		Threshold = 6; 		
+		Threshold = 6;
 end
 
 Fs = 20000; 	% assumed samplerate
@@ -216,7 +220,7 @@ Fs = 20000; 	% assumed samplerate
 	elseif isstruct(fn)
 		HDR = fn;
 		s = chan;
-		HDR.NS = size(s,2);	
+		HDR.NS = size(s,2);
 		chan = 1:HDR.NS;
 	else
 		help(mfilename);
@@ -236,27 +240,27 @@ Fs = 20000; 	% assumed samplerate
 %	Set Parameters for ripple Detection
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-	% compute bandpower, default windowlength for smoothing is 1s. 
+	% compute bandpower, default windowlength for smoothing is 1s.
 	% bp = bandpower(center(s), fs, [    bandpassFilter(:),b2(:)]', [], 5);
 	S = fft(center(s,1));
 	f = [0:size(S,1)-1]*HDR.SampleRate/size(S,1);
 
-	% frequency band bandpassFilter 
+	% frequency band bandpassFilter
 	SS1 = zeros(size(S));
 	%ix  = ((bandpassFilter(1) <= f) & (f <= 149)) | ((151 <= f ) & (f <= bandpassFilter(2)));
 	ix  = (bandpassFilter(1) <= f ) & (f <= bandpassFilter(2));
 	SS1(ix,:) = S(ix,:);
 
 	Y = real(ifft(SS1));
-	BPSignal=Y; 
+	BPSignal=Y;
 
-		
+
 	D = sparse(size(Y));
 	T = repmat(NaN,0,3);
 	POS = [];
 	CHN = [];
 
-	if isempty(trigChan) || (trigChan==0)	
+	if isempty(trigChan) || (trigChan==0)
 		%warning('triggerChannel has not been defined');
 		trigChan = 1:size(Y,2);
 	else
@@ -271,33 +275,65 @@ Fs = 20000; 	% assumed samplerate
 			y = filter(ones(w,1),w,abs(Y(:,k)));
 			d1 = y > Threshold * std(Y(:,k));
 
-		elseif any(method==[2:3]),	% Tukker et al. 2013 [2], Lasztoczi et al. 2011 [3]
+		elseif any(method > 1),	% Tukker et al. 2013 [2], Lasztoczi et al. 2011 [3]
 			w = smoothingwindow*HDR.SampleRate;
 			y = sqrt(filter(ones(w,1), w, Y(:,k).^2));
 			ix = find(y > (Threshold * rms(Y(:,k))));
-		
+
 		end
 		if any(method==[1:3])
 			% start and end point detection
-			% "integrated power (i.e. RMS) trace crossed the mean + 1 SD line" 
-  	  		% because data is bandpassed, mean of raw data is zero, and mean of RMS is 1 SD. 
-			% thus threshold of 2 SD = 2 RMS is used. 
+			% "integrated power (i.e. RMS) trace crossed the mean + 1 SD line"
+			% because data is bandpassed, mean of raw data is zero, and mean of RMS is 1 SD.
+			% thus threshold of 2 SD = 2 RMS is used.
 			% It seems that methods [1-3] use the same way of computing the duration
 			d2 = y > 2 * rms(Y(:,k));
 			d3 = diff([0;d2;0]);
-			ix1 = find(d3 > 0);	% onset 
+			ix1 = find(d3 > 0);	% onset
 			ix2 = find(d3 < 0);	% offset
 
 			d1 = y > Threshold * std(Y(:,k));
 			d3  = diff([0;d1;0]);
-			ix1th = find(d3 > 0);	% onset 
+			ix1th = find(d3 > 0);	% onset
 			ix2th = find(d3 < 0);	% offset
 			for kk = 1:length(ix1th)
 				[mx, tix] = max( y( ix1th(kk) : ix2th(kk)-1 ) );
 				tix = tix - 1 + ix1th(kk);
 				POS = [POS; tix - w/2];
 				CHN = [CHN; k];
-				T = [T; max(ix1(ix1<tix)), min(ix2(ix2>tix)), k]; 	% start, and end of 
+				T = [T; max(ix1(ix1<tix)), min(ix2(ix2>tix)), k]; 	% start, and end of
+			end
+
+		elseif (method==4)
+			d1 = y > Threshold * rms(Y(:,k));
+			d2 = y > 2 * rms(Y(:,k));
+
+			d3 = diff([0;d2;0]);
+
+			%% detection with hysteresis
+			ix1 = find(diff([0;d1;0]) > 0);	% onset, exceed threshold
+			ix2 = find(d3 < 0);	% offset
+			ix3 = find(d3 > 0);	% begin of event - used for determining duration
+
+			tt=0; state=0;
+			while (tt <= size(Y,1))
+				if (state==0)
+					%find next onset
+					onset = min(ix1(ix1>tt));
+					tt=onset;
+					state=1;
+				else
+					%% find next offset
+					offset = min(ix2(ix2>tt));
+					tt=offset;
+					state=0;
+					% enter ripple into event table
+					[mx, tix] = max( y( onset : offset-1 ) );
+					tix = tix - 1 + onset;
+					POS = [POS; tix - w/2];
+					CHN = [CHN; k];
+					T = [T; max(ix3(ix3<tix)), min(ix2(ix2>tix)), k]; 	% start, and end of
+				end
 			end
 		end;
 
@@ -307,34 +343,30 @@ Fs = 20000; 	% assumed samplerate
 			POS(ix,:)=[];
 			CHN(ix,:)=[];
 			T(ix,:)=[];
-		end; 	
+		end;
 		end
 
 		if (method==0)	% default method
 			ix = find(abs(Y(:,k)) > Threshold * std(Y(:,k)));
-			m  = 1; 
-			while m <= length(ix);	
+			m  = 1;
+			while m <= length(ix);
 				ixx = ix( (ix(m) <= ix) & (ix < (ix(m) + dT*HDR.SampleRate)) );
-				T = [T; ixx(1), ixx(end), k];
+				T   = [T; ixx(1), ixx(end), k];
 				[mx,tix] = max(Y(ixx(1):ixx(end),k));
 				POS = [POS; tix - 1 + ixx(1)];
 				CHN = [CHN; k];
-				m = m+length(ixx);
+				m   = m + length(ixx);
 			end;
 		end
-
-
 	end;
 
-
-
 	%% select peaks only if there are peaks in both channels within the coincidence window
-	pplist=[];
+	pplist = [];
 	if ~isempty(coincidenceWindow)
 		for pp=1:length(POS)
 			pos = POS((3-CHN(pp))==CHN); 	% select all peaks from the other channel
-			if any( (POS(pp)-coincidenceWindow*HDR.SampleRate/2 < pos) & (pos < POS(pp) + coincidenceWindow*HDR.SampleRate/2) )
-				pplist = [pplist;pp];
+			if any( ( (POS(pp) - coincidenceWindow*HDR.SampleRate/2) < pos) & ( pos < (POS(pp) + coincidenceWindow*HDR.SampleRate/2) ) )
+				pplist = [pplist; pp];
 			end
 		end
 	end
@@ -374,12 +406,12 @@ Fs = 20000; 	% assumed samplerate
 		H.NS  = size(s,2);
 		H.Dur = 1/H.SampleRate;
 		H = sopen(H,'w');
-		if (H.FILE.FID < 0) 
+		if (H.FILE.FID < 0)
 			fprintf(2,'Warning can not open file <%s> - GDF file can not be written\n',H.FileName);
 		else
 			H = swrite(H,s);
 			H = sclose(H);
-		end; 
+		end;
 	end;
 
 	H = HDR;
@@ -401,7 +433,7 @@ Fs = 20000; 	% assumed samplerate
 		H.PhysDimCode(:) = 512;
 		H = rmfield(H,'PhysDim');
 		H.FLAG.UCAL = 0;
-		for ch=1:H.NS, 
+		for ch=1:H.NS,
 			H.Label{ch} = sprintf('std(%s)',H.Label{ch});
 		end;
 		H.NRec = size(BPSignal,1);
@@ -409,19 +441,19 @@ Fs = 20000; 	% assumed samplerate
 		H.NS  = size(BPSignal,2);
 		H.Dur = 1/H.SampleRate;
 		H = sopen(H,'w');
-		if (H.FILE.FID < 0) 
+		if (H.FILE.FID < 0)
 			fprintf(2,'Warning can not open file <%s> - GDF file can not be written\n',H.FileName);
 		else
 			H = swrite(H,zscore(BPSignal,1));
 			H = sclose(H);
-		end; 
+		end;
 	end;
 
-	H = []; 
+	H = [];
 	if ~isempty(segFile)
 		[data,sz] = trigg([s, BPSignal],POS, -dT*HDR.SampleRate, +dT*HDR.SampleRate, 0);
 
-		H.NS = sz(1); 
+		H.NS = sz(1);
 		H.SPR= sz(2);
 		H.NRec=sz(3);
 
@@ -455,7 +487,7 @@ Fs = 20000; 	% assumed samplerate
 		H.PhysDimCode(ch) = 512;
 		H.Label = HDR.Label;
 		H.SampleRate = HDR.SampleRate;
-		for ch=1:HDR.NS, 
+		for ch=1:HDR.NS,
 			H.Label{ch+HDR.NS} = sprintf('BP(%s)',H.Label{ch});
 		end;
 
@@ -466,12 +498,12 @@ Fs = 20000; 	% assumed samplerate
 %		H.LeadIdCode(1:H.NS)=0;
 
 		H = sopen(H,'w');
-		if (H.FILE.FID < 0) 
+		if (H.FILE.FID < 0)
 			fprintf(2,'Warning can not open file <%s> - GDF file can not be written\n',H.FileName);
 		else
 			H = swrite(H,data');
 			H = sclose(H);
-		end; 
+		end;
 	end;
 
 
@@ -488,11 +520,11 @@ Fs = 20000; 	% assumed samplerate
 		H.NS  = size(s,2);
 		H = sopen(H,'w');
 		H.EVENT.SampleRate = H.SampleRate;
-		if (H.FILE.FID < 0) 
+		if (H.FILE.FID < 0)
 			fprintf(2,'Warning can not open file <%s> - GDF file can not be written\n',H.FileName);
 		else
 			H = sclose(H);
-		end; 
+		end;
 	end;
 
 
