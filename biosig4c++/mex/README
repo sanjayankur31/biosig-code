@@ -10,14 +10,15 @@ COMPILATION:
 
 == Octave on Linux =======================
 On Linux platforms the compilation is straight forward. The prerequisites are 
-    sudo apt-get install zlib1g-dev libsuitesparse-dev octave-headers
+    sudo apt-get install zlib1g-dev libsuitesparse-dev liboctave-dev
+Octave version < 3.8.0 requrire octave-headers instead of liboctave-dev
 The mex files for Octave are generated with 
 	make mex4o 
 
 
 == Matlab on Linux =======================
 Prerequisites:
-    sudo apt-get install zlib1g-dev libsuitesparse-dev octave-headers
+    sudo apt-get install zlib1g-dev libsuitesparse-dev
 Edit Makefile and set the correct path to Matlab:
 The mex files for Matlab are generated with 
 	make mex4m
@@ -28,12 +29,10 @@ Compilation was successful using the mingw-cross-env on linux to generate Win32/
 GnuMex/Mingw must be installed together with Matlab on windows.
 The gnumex libraries must be copied to the linux machine having MinGW-Cross-env installed. 
 Adapt the Makefile and run 
-	make mexw32 
+	make mexw32 mexw64
 
 
-
-    $Id: README,v 1.26 2009/02/27 09:18:33 schloegl Exp $
-    Copyright (C) 2011 Alois Schloegl <a.schloegl@ieee.org>
+    Copyright (C) 2011,2015 Alois Schloegl <alois.schloegl@ist.ac.at>
     This function is part of the "BioSig for C/C++" repository 
     (BioSig4C++) at http://biosig.sf.net/ 
 
