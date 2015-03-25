@@ -19,13 +19,15 @@ function [HDR, s] = detect_sharp_wave_ripple(fn, chan, varargin)
 %	HDR	header structure obtained by SOPEN, SLOAD, or meXSLOAD
 %	data	signal data that should be analyzed
 %	Threshold	[default: 6] number of standard deviations
-% 	winlen	windowlength, should represent the approximate duration of a single event
+% 	winlen	windowlength [default 400 ms (+-200ms)]
+%               should represent the approximate duration of a single event
 %		it determines in the default method (0) at which distance in time,
 %		time events are considered one or two separate events.
 %	trigger_channel: channel used for triggering/segmenting the data
 %	coincidenceWindow: [default: 40 ms]
-%		if defined, another event type (TYP=4) are defined, that contain all
-%		event positions where a detection happened within the coincidence windows [4].
+%		if defined, (TYP=4) indicates a ripple where the current-envelope-peak occured
+%               within a time window centered on the LFP-envelope peak. if this criteria is not
+%               met or the coincidence window is undefined (empty), TYP=3 is used.
 %
 %	outputFilename
 %		name of file for storing the resulting data with the
@@ -268,47 +270,42 @@ Fs = 20000; 	% assumed samplerate
 			error('coincidenceWindow and triggerChannel arguments are mutual exclusive - use only one or the other!')
 		end
 	end;
-	for k = trigChan(:)',
-		% Detection
-		if (method==1)  % Maier et al. p.149, [1]
-			w = smoothingwindow*HDR.SampleRate;
-			y = filter(ones(w,1),w,abs(Y(:,k)));
-			d1 = y > Threshold * std(Y(:,k));
 
-		elseif any(method==[1:3]),	% Tukker et al. 2013 [2], Lasztoczi et al. 2011 [3]
+	%% compute the envelope
+	if (method==1)  % Maier et al. p.149, [1]
 			w = smoothingwindow*HDR.SampleRate;
-			y = sqrt(filter(ones(w,1), w, Y(:,k).^2));
-			%ix = find(y > (Threshold * rms(Y(:,k))));
-
-		elseif any(method==4),	% Jian Gan, 2015
+			E = filter(ones(w,1),w,abs());
+	elseif any(method==[1:3]),	% Tukker et al. 2013 [2], Lasztoczi et al. 2011 [3]
 			w = smoothingwindow*HDR.SampleRate;
-			y = sqrt(filtfilt(ones(w,1), w, Y(:,k).^2));
-			%ix = find(y > (Threshold * rms(Y(:,k))));
-
-		elseif any(method==5),	% Jian Gan, 2015
+			E = sqrt(filter(ones(w,1), w, Y.^2));
+	elseif any(method==4),	% Jian Gan, 2015
+			w = smoothingwindow*HDR.SampleRate;
+			E = sqrt(filtfilt(ones(w,1), w, Y.^2));
+	elseif any(method==5),	% Jian Gan, 2015
 			w = smoothingwindow*HDR.SampleRate;
 			W = hamming(w);
-			y = sqrt(filtfilt(W,sum(W), Y(:,k).^2));
-			%ix = find(y > (Threshold * rms(Y(:,k))));
+			E = sqrt(filtfilt(W,sum(W), Y.^2));
+	end
 
-		end
+	% Detection
+	for k = 1:HDR.NS(:)',
 		if any(method==[1:3])
 			% start and end point detection
 			% "integrated power (i.e. RMS) trace crossed the mean + 1 SD line"
 			% because data is bandpassed, mean of raw data is zero, and mean of RMS is 1 SD.
 			% thus threshold of 2 SD = 2 RMS is used.
 			% It seems that methods [1-3] use the same way of computing the duration
-			d2 = y > 2 * rms(Y(:,k));
+			d2 = E(:,k) > 2 * rms(Y(:,k));
 			d3 = diff([0;d2;0]);
 			ix1 = find(d3 > 0);	% onset
 			ix2 = find(d3 < 0);	% offset
 
-			d1 = y > Threshold * std(Y(:,k));
+			d1 = E(:,k) > Threshold * std(Y(:,k));
 			d3  = diff([0;d1;0]);
 			ix1th = find(d3 > 0);	% onset
 			ix2th = find(d3 < 0);	% offset
 			for kk = 1:length(ix1th)
-				[mx, tix] = max( y( ix1th(kk) : ix2th(kk)-1 ) );
+				[mx, tix] = max( E( ix1th(kk) : ix2th(kk)-1, k ) );
 				tix = tix - 1 + ix1th(kk);
 				POS = [POS; tix - w/2];
 				CHN = [CHN; k];
@@ -316,8 +313,8 @@ Fs = 20000; 	% assumed samplerate
 			end
 
 		elseif any(method==[4]),	% Jian Gan, 2015
-			d1 = y > Threshold * rms(Y(:,k));
-			d2 = y > 2 * rms(Y(:,k));
+			d1 = E(:,k) > Threshold * rms(Y(:,k));
+			d2 = E(:,k) > 2 * rms(Y(:,k));
 
 			d3 = diff([0;d2;0]);
 
@@ -338,12 +335,14 @@ Fs = 20000; 	% assumed samplerate
 					offset = min(ix2(ix2>tt));
 					tt=offset;
 					state=0;
+
 					% enter ripple into event table
-					[mx, tix] = max( y( onset : offset-1 ) );
+					[mx, tix] = max( E( onset : offset-1, k ) );
 					tix = tix - 1 + onset;
 					POS = [POS; tix];
 					CHN = [CHN; k];
-					T = [T; max(ix3(ix3<tix)), min(ix2(ix2>tix)), k]; 	% start, and end of
+					T   = [T; max(ix3(ix3<tix)), min(ix2(ix2>tix)), k]; 	% start, and end of
+
 				end
 			end
 		end;
@@ -371,20 +370,25 @@ Fs = 20000; 	% assumed samplerate
 		end
 	end;
 
-	%% select peaks only if there are peaks in both channels within the coincidence window
-	pplist = [];
+	%% select peaks only if there are peaks in both channels within the coincidence window according to [4] Supporting Information p.1
+	TYP=repmat(3,size(POS));
 	if ~isempty(coincidenceWindow)
-		for pp=1:length(POS)
-			pos = POS((3-CHN(pp))==CHN); 	% select all peaks from the other channel
-			if any( ( (POS(pp) - coincidenceWindow*HDR.SampleRate/2) < pos) & ( pos < (POS(pp) + coincidenceWindow*HDR.SampleRate/2) ) )
-				pplist = [pplist; pp];
+		assert(HDR.NS==2);
+		for k = 1:HDR.NS,
+			for pp=1:length(POS)
+				% extract envelope of other channel around +-50 ms , and find maximum envelope
+				tix = max(1,POS(pp) - 0.050*HDR.SampleRate/2):min(size(E,1),POS(pp) + 0.050*HDR.SampleRate/2);
+				[tmp,tix2] = max(E(tix,HDR.NS+1-k));
+				if abs(tix(tix2)-POS(pp)) < coincidenceWindow*HDR.SampleRate/2,
+					TYP(pp)=4;
+				end
 			end
 		end
 	end
 
-	HDR.EVENT.POS = [T(:,1); T(:,2); POS; POS(pplist); max(1, POS - dT * HDR.SampleRate/2); min(size(s,1), POS + dT*HDR.SampleRate/2)];
-	HDR.EVENT.CHN = [T(:,3); T(:,3); CHN; CHN(pplist); CHN; CHN];
-	HDR.EVENT.TYP = [repmat(hex2dec('0001'),size(T,1),1); repmat(hex2dec('8001'),size(T,1),1); repmat(3,size(T,1),1); repmat(4,size(pplist,1),1); repmat(hex2dec('0002'),size(POS,1),1); repmat(hex2dec('8002'),size(POS,1),1)];
+	HDR.EVENT.POS = [T(:,1); T(:,2); POS; max(1, POS - dT * HDR.SampleRate/2); min(size(s,1), POS + dT*HDR.SampleRate/2)];
+	HDR.EVENT.CHN = [T(:,3); T(:,3); CHN; CHN; CHN];
+	HDR.EVENT.TYP = [repmat(hex2dec('0001'),size(T,1),1); repmat(hex2dec('8001'),size(T,1),1); TYP; repmat(hex2dec('0002'),size(POS,1),1); repmat(hex2dec('8002'),size(POS,1),1)];
 	HDR.EVENT.DUR = zeros(size(HDR.EVENT.POS));
 	%HDR.EVENT.CodeDesc = {'AboveThresholdWindow','selectedSegment','PeakEnvelopeOfSWR','SWRinBothChannelsWithinWindow'};
 	if isfield(HDR.EVENT,'TimeStamp')
@@ -462,8 +466,12 @@ Fs = 20000; 	% assumed samplerate
 
 	H = [];
 	if ~isempty(segFile)
-		[data,sz] = trigg([s, BPSignal],POS, -dT*HDR.SampleRate, +dT*HDR.SampleRate, 0);
+		[data,sz] = trigg([s, BPSignal, E],POS(TYP==4 & CHN==2), -dT*HDR.SampleRate, +dT*HDR.SampleRate, 0);
 
+	if isempty(data)
+		fprintf(2,'no matching ripple was identified, can not write %s\n',segFile);
+		delete(segFile);
+	else
 		H.NS = sz(1);
 		H.SPR= sz(2);
 		H.NRec=sz(3);
@@ -475,39 +483,47 @@ Fs = 20000; 	% assumed samplerate
 		H.FILE = [];
 		H.FileName  = segFile;
 		H.FILE.Path = '';
+		PhysMax=max(data');
+		PhysMin=min(data');
+		H.PhysMax = PhysMax + 0.1*(PhysMax-PhysMin);
+		H.PhysMin = PhysMin - 0.1*(PhysMax-PhysMin);
+		H.DigMax  = H.PhysMax;
+		H.DigMin  = H.PhysMin;
 
-		ch = HDR.NS+1:H.NS;
-		H.PhysMax = max(data,[],2); %HDR.PhysMax([1:HDR.NS,1:HDR.NS]');
-		H.PhysMin = min(data,[],2); %HDR.PhysMin([1:HDR.NS,1:HDR.NS]');
-		H.DigMax  = max(data,[],2); %HDR.DigMax([1:HDR.NS,1:HDR.NS]');
-		H.DigMin  = min(data,[],2); %HDR.DigMin([1:HDR.NS,1:HDR.NS]');
-
-		H.PhysMax = HDR.PhysMax([1:HDR.NS,1:HDR.NS]');
-		H.PhysMin = HDR.PhysMin([1:HDR.NS,1:HDR.NS]');
-		H.DigMax  = HDR.DigMax([1:HDR.NS,1:HDR.NS]');
-		H.DigMin  = HDR.DigMin([1:HDR.NS,1:HDR.NS]');
 		H.FLAG.UCAL = 1;
 
+		H.SampleRate = HDR.SampleRate;
 		H.GDFTYP = repmat(16, H.NS, 1);
 		H.AS.SPR = repmat(H.SPR,H.NS,1);
+		H.Label=HDR.Label;
+		%H=rmfield(H,'Dur');
+		%H=rmfield(H,'AS');
+		%H=rmfield(H,'ELEC');
+		%H=rmfield(H,'Cal');
+		%H=rmfield(H,'Off');
+		%H3.AS.SPR = repmat(H3.SPR,H3.NS,1);
 
-		H.Filter.LowPass(ch) = bandpassFilter(1);
-		H.Filter.HighPass(ch) = bandpassFilter(2);
-		H.Filter.Notch(ch) = HDR.Filter.Notch(ch-HDR.NS);
-		H.PhysDimCode = HDR.PhysDimCode;
-		H.PhysDimCode(ch) = 512;
+		H.Filter.LowPass(3:4) = bandpassFilter(1);
+		H.Filter.HighPass(3:4) = bandpassFilter(2);
+		H.Filter.LowPass(5:6) = 1/smoothingwindow;
+		H.Filter.HighPass(5:6) = 0;
+		H.Filter.Notch(3:4) = HDR.Filter.Notch(1:2);
+		H.Filter.Notch(5:6) = 0;
+
+		H.PhysDimCode = HDR.PhysDimCode([1,2,1,2,1,2]);
 		H.Label = HDR.Label;
-		H.SampleRate = HDR.SampleRate;
 		for ch=1:HDR.NS,
 			H.Label{ch+HDR.NS} = sprintf('BP(%s)',H.Label{ch});
+			H.Label{ch+2*HDR.NS} = sprintf('RMS(BP(%s))',H.Label{ch});
 		end;
 
 		H.EVENT=[];
-		H.EVENT.POS = [1:H.NRec-1]'*H.SPR+1;
+		H.EVENT.POS = [1:H.NRec-1]'*H.SPR+1;[1:H.NRec]';
 		H.EVENT.TYP = repmat(hex2dec('7ffe'), H.NRec-1,1);
+		%H.EVENT.POS = [HDR.EVENT.POS;[1:H.NRec]'*H.SPR-floor(H.SPR/2)];
+		%H.EVENT.TYP = [HDR.EVENT.POS;TYP];
 
 %		H.LeadIdCode(1:H.NS)=0;
-
 		H = sopen(H,'w');
 		if (H.FILE.FID < 0)
 			fprintf(2,'Warning can not open file <%s> - GDF file can not be written\n',H.FileName);
@@ -515,6 +531,7 @@ Fs = 20000; 	% assumed samplerate
 			H = swrite(H,data');
 			H = sclose(H);
 		end;
+	end;
 	end;
 
 
