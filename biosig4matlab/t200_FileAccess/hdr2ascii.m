@@ -88,7 +88,7 @@ if ~isfield(HDR,'NS')
 end;	 
 fprintf(fid,'NumberOfChannels\t= %i\n',HDR.NS);
 if isfield(HDR,'SampleRate')
-	fprintf(fid,'SamplingRate    \t= %i\n',HDR.SampleRate); 
+	fprintf(fid,'SamplingRate    \t= %f (%i%+g) Hz\n',HDR.SampleRate, round(HDR.SampleRate), HDR.SampleRate-round(HDR.SampleRate));
 end;	 
 if isfield(HDR,'NRec') && isfield(HDR,'SPR')
 	fprintf(fid,'Number_of_Samples\t= %i\n',HDR.NRec*HDR.SPR); 
