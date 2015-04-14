@@ -441,7 +441,7 @@ if (VERBOSE_LEVEL>7) fprintf(stdout, "%s (line %i): %i %i %i %i %i %g %g 0x%x xU
 						double Cal = DataScaler * PhysDimScale(pdc);
 						double Off = YOffset * PhysDimScale(pdc);
 						pdc &= 0xffe0; 
-						double Fs = 1.0 / ( dT  * PhysDimScale(XUnits) ) ;
+						float Fs = 1.0 / ( dT  * PhysDimScale(XUnits) ) ;  // float is used to avoid spurios accuracy, round to single precision accuracy
 
 						if (flagSweepSelected) {
 
