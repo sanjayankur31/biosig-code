@@ -22,7 +22,7 @@
 %  you can excluded the path to NaN/*. The BIOSIG tools will still 
 %  work, but does not support the handling of NaN's.
 
-% Copyright (C) 2003-2010,2013 by Alois Schloegl <a.schloegl@ieee.org>
+% Copyright (C) 2003-2010,2013,2015 by Alois Schloegl <alois.schloegl@ist.ac.at>
 % This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 BIOSIG_HOME = pwd;	%
@@ -44,6 +44,7 @@ path(BIOSIG_DIR,path);			%
 path([BIOSIG_DIR,'/demo'],path);		% demos
 path([BIOSIG_DIR,'/doc'],path);		% docus, Eventtable etc. 
 path([BIOSIG_DIR,'/t200_FileAccess'],path);		% dataformat
+path([BIOSIG_DIR,'/t210_Events'],path);			% event table
 path([BIOSIG_DIR,'/t250_ArtifactPreProcessingQualityControl'],path);		% trigger and quality control
 path([BIOSIG_DIR,'/t300_FeatureExtraction'],path);		% signal processing and feature extraction
 path([BIOSIG_DIR,'/t400_Classification'],path);		% classification
