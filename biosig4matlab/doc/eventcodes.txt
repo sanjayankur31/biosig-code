@@ -148,15 +148,15 @@
 0x044a	arm (right) movement
 ### 0x050_	ECG events
 0x0501	ecg:Fiducial point of QRS complex
-0x0502	ecg:P-wave-onset
-#0x8502	ecg:P-wave-end
-0x0503	ecg:Q-wave-onset, QRS-onset
+0x0502	ecg:P-wave-onset, MDC_ECG_TIME_START_P
+#0x8502	ecg:P-wave-end, MDC_ECG_TIME_END_P
+0x0503	ecg:Q-wave-onset, QRS-onset, MDC_ECG_TIME_START_QRS
 #0x8503 ecg:Q-wave-peak, Q-wave-end
 0x0504	ecg:R-point
 0x0505	ecg:S-wave-onset, S-wave-peak
-#0x8505	ecg:S-wave-end, J-point, QRS-end
-0x0506	ecg:T-wave-onset
-#0x8506	ecg:T-wave-end
+#0x8505	ecg:S-wave-end, J-point, QRS-end, MDC_ECG_TIME_END_QRS
+0x0506	ecg:T-wave-onset, MDC_ECG_TIME_START_T
+#0x8506	ecg:T-wave-end, MDC_ECG_TIME_END_T
 0x0507	ecg:U-wave-onset
 #0x8507	ecg:U-wave-end
 #

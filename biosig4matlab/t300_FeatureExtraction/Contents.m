@@ -25,6 +25,7 @@
 %       Paynter
 %   ECG analysis
 %	qrsdetect
+%       ecg_wave_analysis (not complete yet)
 %	berger
 %       ecgbcorr
 %       qrscorr
@@ -43,7 +44,7 @@
 % 
 %
 % REFERENCES: 
-%  [1]  A. Schlögl, Time Series Analysis toolbox for Matlab and Octave. 1996-2004
+%  [1]  A. Schloegl, Time Series Analysis toolbox for Matlab and Octave. 1996-2004.
 %     available online: http://www.dpmi.tu-graz.ac.at/~schloegl/matlab/tsa/download.html
 %
 %
