@@ -274,7 +274,7 @@ Fs = 20000; 	% assumed samplerate
 	%% compute the envelope
 	if (method==1)  % Maier et al. p.149, [1]
 			w = smoothingwindow*HDR.SampleRate;
-			E = filter(ones(w,1),w,abs());
+			E = filter(ones(w,1),w,abs(Y));
 	elseif any(method==[1:3]),	% Tukker et al. 2013 [2], Lasztoczi et al. 2011 [3]
 			w = smoothingwindow*HDR.SampleRate;
 			E = sqrt(filter(ones(w,1), w, Y.^2));
