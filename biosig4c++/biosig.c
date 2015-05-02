@@ -911,7 +911,7 @@ struct event {
 #endif
 };
 
-int compare_eventpos(struct event *e1, struct event *e2) {
+int compare_eventpos(const void *e1, const void *e2) {
 	return(((struct event*)(e1))->POS - ((struct event*)(e2))->POS);
 }
 

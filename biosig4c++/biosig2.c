@@ -119,7 +119,7 @@ int biosig_set_segment_selection(HDRTYPE *hdr, int k, uint32_t argSweepSel) {;
 }
 uint32_t* biosig_get_segment_selection(HDRTYPE *hdr) {
 	if (hdr==NULL) return NULL;
-	return &(hdr->AS.SegSel);
+	return (uint32_t*)&(hdr->AS.SegSel);
 };
 
 long biosig_get_number_of_channels(HDRTYPE *hdr) {
@@ -251,7 +251,7 @@ size_t biosig_set_number_of_events(HDRTYPE *hdr, size_t N) {
 	return hdr->EVENT.N;
 }
 
-int biosig_get_nth_event(HDRTYPE *hdr, size_t n, uint16_t *typ, uint32_t *pos, uint16_t *chn, uint32_t *dur, gdf_time *timestamp, char **desc) {
+int biosig_get_nth_event(HDRTYPE *hdr, size_t n, uint16_t *typ, uint32_t *pos, uint16_t *chn, uint32_t *dur, gdf_time *timestamp, const char **desc) {
 	if (hdr==NULL) return -1;
 	if (hdr->EVENT.N <= n) return -1;
 	uint16_t TYP=hdr->EVENT.TYP[n];
@@ -385,16 +385,16 @@ const char* biosig_get_application_specific_information(HDRTYPE *hdr) {
 }
 
 int biosig_set_patient_name(HDRTYPE *hdr, const char* name) {
-	if (hdr==NULL) return NULL;
+	if (hdr==NULL) return -1;
 	strncpy(hdr->Patient.Name, name, MAX_LENGTH_NAME);
 	hdr->Patient.Name[MAX_LENGTH_NAME]=0;
-	return hdr->Patient.Name;
+	return 0;
 }
 int biosig_set_patient_id(HDRTYPE *hdr, const char* id) {
-	if (hdr==NULL) return NULL;
+	if (hdr==NULL) return -1;
 	strncpy(hdr->Patient.Id, id, MAX_LENGTH_PID);
 	hdr->Patient.Id[MAX_LENGTH_PID]=0;
-	return hdr->Patient.Id;
+	return 0;
 }
 int biosig_set_recording_id(HDRTYPE *hdr, const char* rid) {
 	if (hdr==NULL) return -1;
@@ -429,7 +429,7 @@ int biosig_set_manufacturer_serial_number(HDRTYPE *hdr, const char* rid) {
 }
 int biosig_set_application_specific_information(HDRTYPE *hdr, const char* appinfo) {
 	if (hdr==NULL) return -1;
-	hdr->AS.bci2000 = appinfo;
+	hdr->AS.bci2000 = strdup(appinfo);
 	return 0;
 }
 
@@ -990,10 +990,10 @@ const char *biosig_get_label(int handle, int biosig_signal) {
 
 int biosig_set_label(int handle, int biosig_signal, const char *label) {
 
-	if (handle<0 || handle >= hdrlistlen || hdrlist[handle].hdr==NULL) return(NULL);
+	if (handle<0 || handle >= hdrlistlen || hdrlist[handle].hdr==NULL) return(-1);
 	HDRTYPE *hdr = hdrlist[handle].hdr;
 	typeof(hdr->NS) ns = hdr->NS;
-	if (biosig_signal >= ns) return(NULL);
+	if (biosig_signal >= ns) return(-1);
 
 	strncpy(hdr->CHANNEL[biosig_signal].Label, label, MAX_LENGTH_LABEL);
 	return (0);
