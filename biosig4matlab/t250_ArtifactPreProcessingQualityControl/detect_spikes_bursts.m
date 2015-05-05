@@ -25,7 +25,7 @@ function [HDR, s] = detect_spikes_bursts(fn, chan, varargin)
 %	chan	list of channels that should be analyzed (default is 0: all channels)
 %	HDR	header structure obtained by SOPEN, SLOAD, or meXSLOAD
 %	data	signal data that should be analyzed
-%	slopeThreshold	[default: 5V/s] Spike is detected when
+%	slopeThreshold	[default: 10 V/s] Spike is detected when
 %		slope (over time winlen) exceeds this value
 %	winlen	[default: .2e-3 s] windowlength in seconds for computing slope
 %	dT_Burst	[default: 50e-3 s] am inter-spike-interval (ISI) exceeding this value,
@@ -97,7 +97,7 @@ end;
 dT = .2e-3;		%%% smoothing window length [s]
 dT_Burst = 50e-3;	%%% smaller ISI is a burst [s]
 dT_Exclude = [];	%%% for identifying double detections, spikes with smaller ISI are excluded
-slopeThreshold = 5; 	%% [V/s]
+slopeThreshold = 10; 	%% [V/s]
 outFile = [];
 evtFile = [];
 burstFile = [];
@@ -189,7 +189,7 @@ Fs = 20000; 	% assumed samplerate
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %	Set Parameters for Spike Detection
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	B  = [.5; zeros(round(HDR.SampleRate*dT)-1, 1); -.5];
+	B  = [1; zeros(round(HDR.SampleRate*dT)-1, 1); -1];
 
 	HDR.BurstTable = [];
 
