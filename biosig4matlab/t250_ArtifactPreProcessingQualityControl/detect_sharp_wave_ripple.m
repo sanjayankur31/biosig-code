@@ -196,8 +196,12 @@ switch (method)
 		bandpassFilter = [90,200];
 		smoothingwindow = 0.010;
 		Threshold = 5;
-	case 4 % Jian Gan 2015 [5]
+	case 4 % Jian Gan, March 2015 [5]
 		bandpassFilter = [90,200];
+		smoothingwindow = 0.010;
+		Threshold = 4;
+	case 14 % Jian Gan, May 2015 [5]
+		bandpassFilter = [100,250];
 		smoothingwindow = 0.010;
 		Threshold = 4;
 	otherwise
@@ -261,6 +265,7 @@ Fs = 20000; 	% assumed samplerate
 	T = repmat(NaN,0,3);
 	POS = [];
 	CHN = [];
+	TYP = [];
 
 	if isempty(trigChan) || (trigChan==0)
 		%warning('triggerChannel has not been defined');
@@ -281,7 +286,7 @@ Fs = 20000; 	% assumed samplerate
 	elseif any(method==4),	% Jian Gan, 2015
 			w = smoothingwindow*HDR.SampleRate;
 			E = sqrt(filtfilt(ones(w,1), w, Y.^2));
-	elseif any(method==5),	% Jian Gan, 2015
+	elseif any(method==[14,5]),	% Jian Gan, 2015
 			w = smoothingwindow*HDR.SampleRate;
 			W = hamming(w);
 			E = sqrt(filtfilt(W,sum(W), Y.^2));
@@ -312,9 +317,10 @@ Fs = 20000; 	% assumed samplerate
 				T = [T; max(ix1(ix1<tix)), min(ix2(ix2>tix)), k]; 	% start, and end of
 			end
 
-		elseif any(method==[4]),	% Jian Gan, 2015
-			d1 = E(:,k) > Threshold * rms(Y(:,k));
-			d2 = E(:,k) > 2 * rms(Y(:,k));
+		elseif any(method==[4,14]),	% Jian Gan, 2015
+			RMS = rms(Y(:,k));
+			d1 = E(:,k) > Threshold * RMS;
+			d2 = E(:,k) > 2 * RMS;
 
 			d3 = diff([0;d2;0]);
 
@@ -341,7 +347,9 @@ Fs = 20000; 	% assumed samplerate
 					tix = tix - 1 + onset;
 					POS = [POS; tix];
 					CHN = [CHN; k];
-					T   = [T; max(ix3(ix3<tix)), min(ix2(ix2>tix)), k]; 	% start, and end of
+					typ = 4 + 2*(mx > 6*RMS);
+					TYP = [TYP; typ];
+					T   = [T; max(ix3(ix3<=tix)), min(ix2(ix2>tix)), k]; 	% start, and end of
 
 				end
 			end
@@ -352,11 +360,12 @@ Fs = 20000; 	% assumed samplerate
 			ix = find((T(:,2)-T(:,1)) < 0.012*HDR.SampleRate);
 			POS(ix,:)=[];
 			CHN(ix,:)=[];
+			TYP(ix,:)=[];
 			T(ix,:)=[];
 		end;
 		end
 
-		if (method==0)	% default method
+		if (method==0)	% legacy method
 			ix = find(abs(Y(:,k)) > Threshold * std(Y(:,k)));
 			m  = 1;
 			while m <= length(ix);
@@ -365,12 +374,14 @@ Fs = 20000; 	% assumed samplerate
 				[mx,tix] = max(Y(ixx(1):ixx(end),k));
 				POS = [POS; tix - 1 + ixx(1)];
 				CHN = [CHN; k];
+				TYP = [TYP; 3];
 				m   = m + length(ixx);
 			end;
 		end
 	end;
 
 	%% select peaks only if there are peaks in both channels within the coincidence window according to [4] Supporting Information p.1
+	if (method < 14)
 	TYP=repmat(3,size(POS));
 	if ~isempty(coincidenceWindow)
 		assert(HDR.NS==2);
@@ -385,6 +396,7 @@ Fs = 20000; 	% assumed samplerate
 			end
 		end
 	end
+	end;
 
 	HDR.EVENT.POS = [T(:,1); T(:,2); POS; max(1, POS - dT * HDR.SampleRate/2); min(size(s,1), POS + dT*HDR.SampleRate/2)];
 	HDR.EVENT.CHN = [T(:,3); T(:,3); CHN; CHN; CHN];
