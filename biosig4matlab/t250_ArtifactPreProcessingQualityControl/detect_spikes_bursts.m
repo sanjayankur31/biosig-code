@@ -3,7 +3,7 @@ function [HDR, s] = detect_spikes_bursts(fn, chan, varargin)
 % neural recordings.
 % Spikes are detected when voltages increase is larger than slopeThreshold
 % (default 20 V/s) within a window of length winlen (default 0.0002 s). An interspike interval
-% large than dT_Burst (default 75 ms) define the start of the next burst. 
+% large than dT_Burst (default 75 ms) define the start of the next burst.
 %
 %
 % HDR = detect_spikes_bursts(filename, chan)
@@ -21,7 +21,7 @@ function [HDR, s] = detect_spikes_bursts(fn, chan, varargin)
 % [HDR, data] = detect_spikes_bursts(...)
 %
 % Input:
-% 	filename: name of source file 
+% 	filename: name of source file
 %	chan	list of channels that should be analyzed (default is 0: all channels)
 %	HDR	header structure obtained by SOPEN, SLOAD, or meXSLOAD
 %	data	signal data that should be analyzed
@@ -44,7 +44,7 @@ function [HDR, s] = detect_spikes_bursts(fn, chan, varargin)
 %		name of file for storing the resulting data with the
 %		detected spikes and bursts in GDF format.
 %	eventFilename
-%		filename to store event inforamation in GDF format. this is similar to 
+%		filename to store event inforamation in GDF format. this is similar to
 %		the outputFile, except that the signal data is not included and is, therefore,
 %		much smaller than the outputFile
 %	burstFilename
@@ -170,7 +170,7 @@ Fs = 20000; 	% assumed samplerate
 	elseif isstruct(fn)
 		HDR = fn;
 		s = chan;
-		HDR.NS = size(s,2);	
+		HDR.NS = size(s,2);
 		chan = 1:HDR.NS;
 	else
 		help(mfilename);
@@ -193,28 +193,65 @@ Fs = 20000; 	% assumed samplerate
 
 	HDR.BurstTable = [];
 
-	for ch = chan(:)';	% look for each channel	
+	for ch = chan(:)';	% look for each channel
 		% only voltage channels are considered
-	if (bitand(HDR.PhysDimCode(ch), hex2dec('ffe0')) == 4256), %% physicalunits('V'),	
+	if (bitand(HDR.PhysDimCode(ch), hex2dec('ffe0')) == 4256), %% physicalunits('V'),
 		%%%%%%%	Spike Detection %%%%%%%%%%%%%%%%%%%
 		[unit, scale] = physicalunits(HDR.PhysDimCode(ch));
-		tmp = scale * filter(B, dT, s(:,ch));
+		tmp = scale * filter(B, round(HDR.SampleRate*dT)/HDR.SampleRate, s(:,ch));
 		OnsetSpike = find( diff (tmp > slopeThreshold) > 0);	%% spike onset time [samples]
 		% --- remove double detections < 1 ms
 		if ~isempty(dT_Exclude) && ~isempty(OnsetSpike),
 			OnsetSpike = OnsetSpike([1; 1+find(diff(OnsetSpike) > Fs * dT_Exclude)]);
 		end;
 
+
 		EVENT.TYP = [EVENT.TYP; repmat(hex2dec('0201'), size(OnsetSpike))];
 		EVENT.POS = [EVENT.POS; OnsetSpike];
-		EVENT.DUR = [EVENT.DUR; repmat(1,  size(OnsetSpike))];
+		EVENT.DUR = [EVENT.DUR; repmat(0,  size(OnsetSpike))];
 		EVENT.CHN = [EVENT.CHN; repmat(ch, size(OnsetSpike,1), 1) ];
 		if isfield(EVENT,'TimeStamp')
 			%%% TODO: these should be properly computed %%%
 			EVENT.TimeStamp = [EVENT.TimeStamp; repmat(NaN, size(OnsetSpike,1), 1) ];
 		end;
+
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%	get peak time and max slope time
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+		if 1,
+			POS = repmat(0, size(OnsetSpike).*[2,1]);
+			TYP = repmat(NaN, size(POS));
+
+			for k=1:length(OnsetSpike),
+				% find peak time within interval of [-winlen ms, 0.001 ms]
+				tix = OnsetSpike(k) + [0 : 0.001*HDR.SampleRate];
+				%[peak,pix]=max(s(tix,ch)); pix=pix(1);
+				stmp= s(tix,ch);
+				pix = tix(find(stmp == max(stmp)));
+				POS(2*k-1) = round(mean(pix));
+				TYP(2*k-1) = hex2dec('204');
+
+				% find max slope time
+				tix = OnsetSpike(k) + [-ceil(HDR.SampleRate*dT) : 0.001*HDR.SampleRate ];
+				stmp= tmp(tix);
+				pix = tix(find(stmp == max(stmp)))-round(HDR.SampleRate*dT)/2;
+				POS(2*k) = round(mean(pix));
+				TYP(2*k) = hex2dec('203');
+			end;
+			EVENT.TYP = [EVENT.TYP; TYP];
+			EVENT.POS = [EVENT.POS; POS];
+			EVENT.DUR = [EVENT.DUR; repmat(0,  size(POS)) ];
+			EVENT.CHN = [EVENT.CHN; repmat(ch, size(POS)) ];
+			if isfield(EVENT,'TimeStamp')
+				%%% TODO: these should be properly computed %%%
+				EVENT.TimeStamp = [EVENT.TimeStamp; repmat(NaN, size(POS)) ];
+			end;
+
+		end
 	end;
 	end;
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -222,11 +259,11 @@ Fs = 20000; 	% assumed samplerate
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	HDR.EVENT = EVENT;
 	vararg = {'dT_Burst', dT_Burst, 'dT_Exclude', dT_Exclude};
-	if ~isempty(evtFile) 
+	if ~isempty(evtFile)
 		vararg{end+1}='-e';
 		vararg{end+1}=evtFile;
 	end;
-	if ~isempty(burstFile) 
+	if ~isempty(burstFile)
 		vararg{end+1}='-b';
 		vararg{end+1}=burstFile;
 	end;
@@ -256,11 +293,11 @@ Fs = 20000; 	% assumed samplerate
 		HDR.Dur = 1/HDR.SampleRate;
 		HDR = rmfield(HDR,'AS');
 		HDR = sopen(HDR,'w');
-		if (HDR.FILE.FID < 0) 
+		if (HDR.FILE.FID < 0)
 			fprintf(2,'Warning can not open file <%s> - GDF file can not be written\n',HDR.FileName);
 		else
 			HDR = swrite(HDR,s);
 			HDR = sclose(HDR);
-		end; 
+		end;
 	end;
 
