@@ -87,7 +87,8 @@ PathToSigViewer = ../sigviewer
 PathToSigViewerWIN32 = ../sigviewer4win32
 PathToSigViewerWIN64 = ../sigviewer4win64
 
-CFLAGS       += -fstack-protector -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -pipe -fPIC -Wall -fno-builtin-memcmp -O2 -Wextra
+CFLAGS       += -fstack-protector -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -pipe -fPIC -fno-builtin-memcmp -O2 -Wno-unused-result
+# -Wall -Wextra
 CXXFLAGS      = $(CFLAGS)
 
 ## TARGET dependencies
@@ -230,6 +231,13 @@ VERBOSE	     := -V0
 
 ##########################################################
 ## set Matlab and Octave variables
+ifeq (Darwin,$(shell uname))
+ifndef MATLABDIR
+  $(error MATLABDIR is not defined)
+endif
+  MEX         = $(MATLABDIR)mex
+  MEX_EXT    := $(shell $(MATLABDIR)mexext)
+else
 ifneq ($(shell which matlab),)
 ifndef MATLABDIR
   #MATLABDIR  := $(dir $(shell readlink -f $(shell which matlab) ) )
@@ -237,6 +245,7 @@ ifndef MATLABDIR
 endif
   MEX         = $(MATLABDIR)mex
   MEX_EXT    := $(shell $(MATLABDIR)mexext)
+endif
 endif
 
 # use environment variable to define OCTAVE_VERSION
@@ -751,9 +760,17 @@ mexw64: $(patsubst mex/%.cpp, mex/%.mexw64, $(MEX_OBJECTS))
 ifdef MEX_EXT
 mex: mex4o mex4m mexw32 mexw64
 mex4m: $(patsubst mex/%.cpp, mex/%.$(MEX_EXT), $(MEX_OBJECTS))
+
+ifneq (Darwin,$(shell uname))
 mex/%.$(MEX_EXT): mex/%.cpp
 	$(MEX) $(MEX_OPTION) $(DEFINES) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
+else
+mex/%.$(MEX_EXT): mex/%.cpp
+	## $(MEX) $(MEX_OPTION) $(DEFINES) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
+	$(MEX) $(DEFINES) "$<" libbiosig.dylib
+endif
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
+
 else
 mex: mex4o mexw32 mexw64
 endif
