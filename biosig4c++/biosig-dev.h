@@ -37,6 +37,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <sys/param.h>
+
+#define _XOPEN_SOURCE 700      /* See feature_test_macros(7), needed for strptime(...) */
 #include <time.h>
 
 extern int VERBOSE_LEVEL; 	// used for debugging, variable is always defined

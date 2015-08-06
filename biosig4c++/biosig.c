@@ -5285,7 +5285,7 @@ fprintf(stdout,"ACQ EVENT: %i POS: %i\n",k,POS);
 
 					// consolidate previous channel
 					if ((((size_t)cp->SPR*GDFTYP_BITS[cp->GDFTYP] >> 3) != (hdr->AS.bpb-cp->bi)) && (hdr->TYPE==BIN)) {
-						fprintf(stdout,"Warning SOPEN(BIN): problems with channel %i - filesize %i does not fit header info %i\n",(int)k+1, hdr->AS.bpb-hdr->CHANNEL[k].bi,GDFTYP_BITS[hdr->CHANNEL[k].GDFTYP]*(size_t)hdr->CHANNEL[k].SPR >> 3);
+						fprintf(stdout,"Warning SOPEN(BIN): problems with channel %i - filesize %i does not fit header info %li\n",(int)k+1, hdr->AS.bpb-hdr->CHANNEL[k].bi,GDFTYP_BITS[hdr->CHANNEL[k].GDFTYP]*(size_t)hdr->CHANNEL[k].SPR >> 3);
 					}
 
 					hdr->SampleRate = hdr->SPR/duration;
