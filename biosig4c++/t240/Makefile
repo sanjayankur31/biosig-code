@@ -330,7 +330,7 @@ OBJS=${ASN_MODULE_SOURCES:.c=.o} ${ASN_CONVERTER_SOURCES:.c=.o}
 WINOBJS=${ASN_MODULE_SOURCES:.c=.obj} ${ASN_CONVERTER_SOURCES:.c=.obj}
 W64OBJS=${ASN_MODULE_SOURCES:.c=.o64} ${ASN_CONVERTER_SOURCES:.c=.o64}
 
-CC = gcc
+CC ?= gcc
 MinGWCC   = $(CROSS)-gcc 
 MinGW64CC = $(CROSS64)-gcc 
 
@@ -356,12 +356,12 @@ libcnsfef.a: $(OBJS)
 .SUFFIXES: .c .o
 
 %.obj: %.c
-	$(CROSS)-$(CC) $(CFLAGS) -o $@ -c $<
+	$(CROSS)-$(CC) $(CFLAGS) -o "$@" -c "$<"
 %.o64: %.c
-	$(CROSS64)-$(CC) $(CFLAGS) -o $@ -c $<
+	$(CROSS64)-$(CC) $(CFLAGS) -o "$@" -c "$<"
 
 .c.o:
-	$(CC) $(CFLAGS) -o $@ -c $<
+	$(CC) $(CFLAGS) -o "$@" -c "$<"
 
 clean:
 #	rm -f $(ASN_MODULE_HEADERS)

@@ -87,14 +87,16 @@ PathToSigViewer = ../sigviewer
 PathToSigViewerWIN32 = ../sigviewer4win32
 PathToSigViewerWIN64 = ../sigviewer4win64
 
+CFLAGS       += -std=gnu89 #-Wc90-c99-compat -Wc99-c11-compat
 CFLAGS       += -fstack-protector -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -pipe -fPIC -fno-builtin-memcmp -O2 -Wno-unused-result
 # -Wall -Wextra
+CFLAGS       += -Wno-deprecated
 CXXFLAGS      = $(CFLAGS)
 
 ## TARGET dependencies
 ifeq (,$(TARGET))
-	CC      := gcc
-	CXX     := g++
+	CC      ?= gcc
+	CXX     ?= g++
 	AR      := ar rcs
 	PKGCONF := pkg-config
 ifneq (Darwin,$(shell uname))
