@@ -175,7 +175,11 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"<%6.2f> %i- %s | %s\n",hdr->VERSION, STATUS
 					// decode information (filters, PhysDim, etc.) and assign to corresponding channels. 
 					char *pd = NULL;
 					float tmp1, tmp2, HighPass, LowPass;
+#if !defined __STDC_VERSION__ || __STDC_VERSION__ < 199901L
 					sscanf(t1, "%f, %f, %f, %f, %as", &HighPass,&LowPass, &tmp1,&tmp2, &pd); 
+#else
+					sscanf(t1, "%f, %f, %f, %f, %ms", &HighPass,&LowPass, &tmp1,&tmp2, &pd);
+#endif
 					strrchr(pd,',')[0]=0;
 					if (!strcmp(pd,"%%")) pd[1]=0; 
 					uint16_t pdc = PhysDimCode(pd); 

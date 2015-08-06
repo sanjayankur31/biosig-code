@@ -4810,7 +4810,11 @@ fprintf(stdout,"ACQ EVENT: %i POS: %i\n",k,POS);
 			double f1,f2;
 			char *label = NULL;
 
+#if !defined __STDC_VERSION__ || __STDC_VERSION__ < 199901L
 			sscanf(t,"%d %as %d %lf %lf",&chno1,&label,&chno2,&f1,&f2);
+#else
+			sscanf(t,"%d %ms %d %lf %lf",&chno1,&label,&chno2,&f1,&f2);
+#endif
 
 			k = hdr->NS++;
 			hdr->CHANNEL = (CHANNEL_TYPE*) realloc(hdr->CHANNEL,hdr->NS*sizeof(CHANNEL_TYPE));
@@ -5457,7 +5461,11 @@ fprintf(stdout,"ACQ EVENT: %i POS: %i\n",k,POS);
 			else if (status==1) {
 				int  i[4];
 				char *item = NULL;
+#if !defined __STDC_VERSION__ || __STDC_VERSION__ < 199901L
 				sscanf(ptr,"%as %i %i %i %i",&item,i,i+1,i+2,i+3);
+#else
+				sscanf(ptr,"%ms %i %i %i %i",&item,i,i+1,i+2,i+3);
+#endif
 				if (!strcmp(item,"TargetCode")) {
 					tc_pos = i[2]*8 + i[3];
 					tc_len = i[0];
@@ -10935,7 +10943,11 @@ if (VERBOSE_LEVEL>2)
 				int ms,rri;
 				char *desc = NULL;
 
+#if !defined __STDC_VERSION__ || __STDC_VERSION__ < 199901L
 				sscanf(line,"%02u-%02u-%02u %02u:%02u:%02u %03u %as %u", &t.tm_mday, &t.tm_mon, &t.tm_year, &t.tm_hour, &t.tm_min, &t.tm_sec, &ms, &desc, &rri);
+#else
+				sscanf(line,"%02u-%02u-%02u %02u:%02u:%02u %03u %ms %u", &t.tm_mday, &t.tm_mon, &t.tm_year, &t.tm_hour, &t.tm_min, &t.tm_sec, &ms, &desc, &rri);
+#endif
 				if (t.tm_year < 1970) t.tm_year += 100;
 				t.tm_mon--;
 				t.tm_isdst = -1;
