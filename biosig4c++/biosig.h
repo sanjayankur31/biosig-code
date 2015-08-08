@@ -64,7 +64,7 @@
     typedef unsigned __int8	uint8_t;
     typedef __int8		int8_t;
 #else
-    #include <stdint.h>
+    #include <inttypes.h>
 #endif
 #include <stdio.h>
 #include <time.h>

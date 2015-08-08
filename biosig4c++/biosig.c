@@ -5285,7 +5285,7 @@ fprintf(stdout,"ACQ EVENT: %i POS: %i\n",k,POS);
 
 					// consolidate previous channel
 					if ((((size_t)cp->SPR*GDFTYP_BITS[cp->GDFTYP] >> 3) != (hdr->AS.bpb-cp->bi)) && (hdr->TYPE==BIN)) {
-						fprintf(stdout,"Warning SOPEN(BIN): problems with channel %i - filesize %i does not fit header info %li\n",(int)k+1, hdr->AS.bpb-hdr->CHANNEL[k].bi,GDFTYP_BITS[hdr->CHANNEL[k].GDFTYP]*(size_t)hdr->CHANNEL[k].SPR >> 3);
+						fprintf(stdout,"Warning SOPEN(BIN): problems with channel %i - filesize %i does not fit header info %"PRIiMAX"\n",(int)k+1, hdr->AS.bpb-hdr->CHANNEL[k].bi, (GDFTYP_BITS[hdr->CHANNEL[k].GDFTYP]*(size_t)hdr->CHANNEL[k].SPR) >> 3);
 					}
 
 					hdr->SampleRate = hdr->SPR/duration;
@@ -11139,7 +11139,7 @@ else if (!strncmp(MODE,"w",1))	 /* --- WRITE --- */
 		s  = bscs_open(sd, &ID);
   		s  = bscs_send_hdr(sd,hdr);
   		hdr->FILE.OPEN = 2;
-  		fprintf(stdout,"write file to bscs://%s/%016lx\n",hostname,ID);
+		fprintf(stdout,"write file to bscs://%s/%016"PRIx64"\n",hostname,ID);
   		return(hdr);
 	}
 #endif
@@ -11315,7 +11315,7 @@ else if (!strncmp(MODE,"w",1))	 /* --- WRITE --- */
 		for (k = 0; k < hdr->NS; k++) {
 			NS += (hdr->CHANNEL[k].OnOff > 0);
 		}
-		hdr->HeadLen += fprintf(hdr->FILE.FID, "ATF\t1.0\n%lu\t%u", max(0,hdr->NRec * hdr->SPR), NS + 1);
+		hdr->HeadLen += fprintf(hdr->FILE.FID, "ATF\t1.0\n%"PRIu64"u\t%u", max(0,hdr->NRec * hdr->SPR), NS + 1);
 
 		char *sep = "\n";
 		if (getTimeChannelNumber(hdr) == 0) {
@@ -14000,7 +14000,7 @@ int hdr2ascii(HDRTYPE* hdr, FILE *fid, int VERBOSE)
 		tmp[8] = 0;
 		fprintf(fid,               "\tEquipment       : %s\n",tmp);
 		if (VERBOSE_LEVEL>8)
-			fprintf(fid,       "\t                  %#.16lx\n",(uint64_t)hdr->ID.Equipment);
+			fprintf(fid,       "\t                  %#.16"PRIx64"\n",(uint64_t)hdr->ID.Equipment);
 		uint8_t k,IPv6=0;
 		for (k=4; k<16; k++) IPv6 |= hdr->IPaddr[k];
 		if (IPv6) fprintf(fid,     "\tIPv6 address    : %02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x",hdr->IPaddr[0],hdr->IPaddr[1],hdr->IPaddr[2],hdr->IPaddr[3],hdr->IPaddr[4],hdr->IPaddr[5],hdr->IPaddr[6],hdr->IPaddr[7],hdr->IPaddr[8],hdr->IPaddr[9],hdr->IPaddr[10],hdr->IPaddr[11],hdr->IPaddr[12],hdr->IPaddr[13],hdr->IPaddr[14],hdr->IPaddr[15]);

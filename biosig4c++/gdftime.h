@@ -35,7 +35,7 @@
 #if defined(_MSC_VER) && (_MSC_VER < 1600)
     typedef __int64		int64_t;
 #else
-    #include <stdint.h>
+    #include <inttypes.h>
 #endif
 #include <math.h>
 #include <time.h>

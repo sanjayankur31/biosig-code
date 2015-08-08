@@ -1,7 +1,7 @@
 /*
 
     $Id: biosig-network.c,v 1.12 2009-04-08 15:56:00 schloegl Exp $
-    Copyright (C) 2009 Alois Schloegl <a.schloegl@ieee.org>
+    Copyright (C) 2009,2015 Alois Schloegl <alois.schloegl@ist.ac.at>
     This file is part of the "BioSig for C/C++" repository 
     (biosig4c++) at http://biosig.sf.net/ 
 
@@ -330,7 +330,7 @@ int bscs_open(int sd, uint64_t* ID) {
 		LEN = BSCS_ID_BITLEN>>3;
 	}	
 
-	if (VERBOSE_LEVEL>8) fprintf(stdout,"open: %16lx %16lx\n",*ID,msg.LOAD);
+	if (VERBOSE_LEVEL>8) fprintf(stdout,"open: %16lx %016"PRIx64"\n",*ID,*(uint64_t*)&(msg.LOAD));
 
 	msg.LEN   = b_endian_u32(LEN);
 	int s = send(sd, TC &msg, LEN+8, 0);	

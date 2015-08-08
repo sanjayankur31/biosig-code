@@ -26,7 +26,7 @@
 
 // IgorBin.h -- structures and #defines for dealing with Igor binary data.
 
-#include <stdint.h>
+#include <inttypes.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -31,7 +31,7 @@
 #if defined(_MSC_VER) && (_MSC_VER < 1600)
     typedef unsigned __int64	uint16_t;
 #else
-    #include <stdint.h>
+    #include <inttypes.h>
 #endif
 
 
