@@ -26,6 +26,11 @@
 #include <sys/stat.h>
 #include <iconv.h>
 
+#ifndef __USE_XOPEN
+#define __USE_XOPEN
+#endif
+#include <time.h>
+
 #if defined (_LIBICONV_H)
  #define iconv		libiconv
  #define iconv_open	libiconv_open
