@@ -115,7 +115,7 @@ typedef struct {
 		biosig_data_type* 	block; 	 /* data block */
 	} data;
 
-	uint8_t 	IPaddr[6]; 	/* IP address of recording device (if applicable) */
+	uint8_t 	IPaddr[16]; 	/* IP address of recording device (if applicable) */
 	double 		SampleRate;	/* Sampling rate */
 	int64_t  	NRec;		/* number of records/blocks -1 indicates length is unknown. */	
 	gdf_time 	T0; 		/* starttime of recording */
