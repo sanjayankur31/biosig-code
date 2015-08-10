@@ -54,8 +54,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <netdb.h>        /* getaddrinfo(3) and associated definitions.     */
-#include <netinet/in.h>   /* sockaddr_in and sockaddr_in6 definitions.      */
 
 #ifdef WITH_CURL
 #  include <curl/curl.h>
@@ -69,9 +67,11 @@ int VERBOSE_LEVEL = 0;		// this variable is always available, but only used with
 
 #ifdef _WIN32
   #include <winsock2.h>
+  #include <ws2tcpip.h>
   #define FILESEP '\\'
 #else
   #include <netdb.h>
+  #include <netinet/in.h>   /* sockaddr_in and sockaddr_in6 definitions.      */
   #include <pwd.h>
   #include <unistd.h>
   #define FILESEP '/'

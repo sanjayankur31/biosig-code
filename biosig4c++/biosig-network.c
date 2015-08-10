@@ -172,20 +172,23 @@ int bscs_connect(const char* hostname) {
 		if (connect(sd, p->ai_addr, p->ai_addrlen) != -1)
 			break;
 
-#ifndef _WIN32		
 		close(sd);
-#else
-		closesocket(sd);
-		WSACleanup();
-#endif
     	}
 	if (p == NULL) {
 		fprintf(stderr, "client: failed to connect\n");
+#ifdef _WIN32
+		WSACleanup();
+#endif
 		return(BSCS_CANNOT_CONNECT);
 	}
 
 	char s[INET6_ADDRSTRLEN];
-    	inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), s, sizeof s);
+#if !defined(_WIN32)
+	// FIXME: does not compile with MXE for TARGET "i686-w64-mingw32.static"
+	inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), s, sizeof(s));
+#else
+	strcpy(s," [Icannot get server name - NET_NTOP() not available]");
+#endif
     	printf("client: connecting to %s\n", s);
 
 	freeaddrinfo(result);   // all done with this structure
