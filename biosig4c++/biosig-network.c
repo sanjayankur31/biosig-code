@@ -1,6 +1,5 @@
 /*
 
-    $Id: biosig-network.c,v 1.12 2009-04-08 15:56:00 schloegl Exp $
     Copyright (C) 2009,2015 Alois Schloegl <alois.schloegl@ist.ac.at>
     This file is part of the "BioSig for C/C++" repository 
     (biosig4c++) at http://biosig.sf.net/ 
@@ -141,26 +140,26 @@ int bscs_connect(const char* hostname) {
 	}
 #endif
 	
-#if 0	// IPv4 and IPv6
 	int status;
-	struct addrinfo hints, *servinfo, *p;
-    	char s[INET6_ADDRSTRLEN];
 
+#if 1	// IPv4 and IPv6
+	struct addrinfo hints;
+	struct addrinfo *result, *p;
 
-	memset(&hints, 0, sizeof hints); // make sure the struct is empty
-	hints.ai_family = AF_UNSPEC;     // don't care IPv4 or IPv6
+	memset(&hints, 0, sizeof(struct addrinfo));
+	hints.ai_family   = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
 	hints.ai_socktype = SOCK_STREAM; // TCP stream sockets
+	hints.ai_flags    = 0;
+	hints.ai_protocol = 0;          /* Any protocol */
 
-	// get ready to connect
-	status = getaddrinfo(hostname, "SERVER_PORT", &hints, &servinfo);
-   	if(status) {
+	status = getaddrinfo(hostname, NULL, &hints, &result);
+	if (status != 0) {
 	        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
 	   	return(BSCS_UNKNOWN_HOST);
    	}
-   	if(servinfo==NULL) return(BSCS_UNKNOWN_HOST);
 
 	// loop through all the results and connect to the first we can
-	for(p = servinfo; p != NULL; p = p->ai_next) {
+	for(p = result; p != NULL; p = p->ai_next) {
         	char hostname1[NI_MAXHOST] = "";
         	int error = getnameinfo(p->ai_addr, p->ai_addrlen, hostname1, NI_MAXHOST, NULL, 0, 0); 
         	if (*hostname1)
@@ -170,27 +169,26 @@ int bscs_connect(const char* hostname) {
 			perror("client: socket");
 			continue;
 		}
-		if (connect(sd, p->ai_addr, p->ai_addrlen) == -1) {
+		if (connect(sd, p->ai_addr, p->ai_addrlen) != -1)
+			break;
+
 #ifndef _WIN32		
-			close(sd);
+		close(sd);
 #else
-			closesocket(sd);
-			WSACleanup();
+		closesocket(sd);
+		WSACleanup();
 #endif
-			perror("client: connect");
-			continue;
-		}
-	        break;
     	}
 	if (p == NULL) {
 		fprintf(stderr, "client: failed to connect\n");
 		return(BSCS_CANNOT_CONNECT);
 	}
 
+	char s[INET6_ADDRSTRLEN];
     	inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), s, sizeof s);
     	printf("client: connecting to %s\n", s);
 
-	freeaddrinfo(servinfo); // all done with this structure
+	freeaddrinfo(result);   // all done with this structure
 
 #else 
 

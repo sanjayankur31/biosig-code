@@ -1,6 +1,6 @@
 /*
 
-    Copyright (C) 2005-2014 Alois Schloegl <alois.schloegl@gmail.com>
+    Copyright (C) 2005-2015 Alois Schloegl <alois.schloegl@ist.ac.at>
     Copyright (C) 2011 Stoyan Mihaylov
     This file is part of the "BioSig for C/C++" repository
     (biosig4c++) at http://biosig.sf.net/
@@ -54,6 +54,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <netdb.h>        /* getaddrinfo(3) and associated definitions.     */
+#include <netinet/in.h>   /* sockaddr_in and sockaddr_in6 definitions.      */
 
 #ifdef WITH_CURL
 #  include <curl/curl.h>
@@ -1278,6 +1280,44 @@ int getTimeChannelNumber(HDRTYPE* hdr) {
 }
 
 
+/*------------------------------------------------------------------------
+	biosig_set_hdr_ipaddr
+	set the field HDR.IPaddr based on the IP address of hostname
+
+	Return value:
+	 0: hdr->IPaddr is set
+	otherwise hdr->IPaddr is not set
+  ------------------------------------------------------------------------*/
+int biosig_set_hdr_ipaddr(HDRTYPE *hdr, const char *hostname) {
+
+	struct addrinfo hints;
+	struct addrinfo *result, *rp;
+
+	memset(&hints, 0, sizeof(struct addrinfo));
+	hints.ai_family   = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
+	hints.ai_socktype = 0;
+	hints.ai_flags    = 0;
+	hints.ai_protocol = 0;          /* Any protocol */
+
+	int s = getaddrinfo(hostname, NULL, &hints, &result);
+
+	if (s != 0) return -1;	// IPaddr can not be set
+
+	for (rp = result; rp != NULL; rp = rp->ai_next) {
+		if ( rp->ai_family == AF_INET6)
+			memcpy(hdr->IPaddr, &(((struct sockaddr_in6 *)rp->ai_addr)->sin6_addr), 16);
+
+		else if ( rp->ai_family == AF_INET) {
+			memcpy(hdr->IPaddr, &(((struct sockaddr_in *)rp->ai_addr)->sin_addr.s_addr), 4);
+			memset(hdr->IPaddr+4, 0, 12);
+		}
+		break; // set first found address
+	}
+
+	freeaddrinfo(result);
+}
+
+
 /****************************************************************************/
 /**                                                                        **/
 /**                     EXPORTED FUNCTIONS                                 **/
@@ -1287,6 +1327,7 @@ int getTimeChannelNumber(HDRTYPE* hdr) {
 uint32_t get_biosig_version () {
 	return ((BIOSIG_VERSION_MAJOR<<16) + (BIOSIG_VERSION_MINOR<<8) + BIOSIG_PATCHLEVEL);
 }
+
 
 /****************************************************************************/
 /**                     INIT HDR                                           **/
@@ -1411,9 +1452,7 @@ HDRTYPE* constructHDR(const unsigned NS, const unsigned N_EVENT)
 	char *localhostname;
 	localhostname = xgethostname();
 	if (localhostname) {
-		// TODO: replace gethostbyname by getaddrinfo (for IPv6)
-		struct hostent *host = gethostbyname(localhostname);
-		if (host) memcpy(hdr->IPaddr, host->h_addr, host->h_length);
+		biosig_set_hdr_ipaddr(hdr, localhostname);
 		free (localhostname);
 	}
 	}
@@ -5119,19 +5158,14 @@ fprintf(stdout,"ACQ EVENT: %i POS: %i\n",k,POS);
 						hdr->tzmin = m;
 				}
 				else if (!strcmp(line,"Recording.IPaddress")) {
-					/* ###FIXME: IPv6 are currently not supported.
-					 	gethostbyaddr will become obsolete,
-					 	use getaddrinfo instead
-					*/
 #ifndef WITHOUT_NETWORK
 #ifdef _WIN32
 					WSADATA wsadata;
 					WSAStartup(MAKEWORD(1,1), &wsadata);
 #endif
-					struct hostent *host = gethostbyaddr(val,strlen(val),AF_INET);
-					// TODO: replace gethostbyaddr: getaddrinfo, getnameinfo()
-					if (host!=NULL)
-						memcpy(hdr->IPaddr, host->h_addr, host->h_length);
+
+					biosig_set_hdr_ipaddr(hdr, val);
+
 #ifdef _WIN32
 					WSACleanup();
 #endif

@@ -780,6 +780,14 @@ double PhysDimScale(uint16_t PhysDimCode);
 	e.g. 0.001 for milli, 1000 for kilo etc.
  --------------------------------------------------------------- */
 
+int biosig_set_hdr_ipaddr(HDRTYPE *hdr, const char *hostname);
+/* set the field HDR.IPaddr based on the IP address of hostname
+
+   Return value:
+	0: hdr->IPaddr is set
+	otherwise hdr->IPaddr is not set
+  ---------------------------------------------------------------*/
+
 
 /* =============================================================
 	printing of header information
