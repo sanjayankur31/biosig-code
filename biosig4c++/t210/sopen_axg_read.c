@@ -26,11 +26,6 @@
 #include <sys/stat.h>
 #include <iconv.h>
 
-#ifndef __USE_XOPEN
-#define __USE_XOPEN
-#endif
-#include <time.h>
-
 #if defined (_LIBICONV_H)
  #define iconv		libiconv
  #define iconv_open	libiconv_open
@@ -611,8 +606,8 @@ if (VERBOSE_LEVEL > 7) fprintf(stdout,"%s (line %i) NS=%i nCol=%i\n", __FILE__, 
 		/******  parse Date and Time ********/
 		struct tm T; 
 #ifdef __GLIBC__
-		strptime(strstr(Notes,"Created on ")+11, "%a %b %d %Y", &T); ;
-		strptime(strstr(Notes,"acquisition at ")+15, "%T", &T); ;
+		strptime(strstr(Notes,"Created on ")+11, "%a %b %d %Y", &T);
+		strptime(strstr(Notes,"acquisition at ")+15, "%T", &T);
 		hdr->T0 = tm_time2gdf_time(&T);
 #else
 		char DATE[30];

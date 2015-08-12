@@ -91,6 +91,7 @@ CFLAGS       += -std=gnu89 #-Wc90-c99-compat -Wc99-c11-compat
 CFLAGS       += -fstack-protector -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -pipe -fPIC -fno-builtin-memcmp -O2 -Wno-unused-result
 # -Wall -Wextra
 CFLAGS       += -Wno-deprecated
+CFLAGS       += -D_GNU_SOURCE
 CXXFLAGS      = $(CFLAGS)
 
 ## TARGET dependencies
@@ -709,7 +710,9 @@ libbiosig2.def: $(OBJECTS) biosig2.o t240/libcnsfef.a
 	$(CXX) -o libbiosig2.dll -s -shared -fPIC  $(OBJECTS) biosig2.o t240/libcnsfef.a $(LIBS) -Wl,--subsystem,windows,--output-def,libbiosig2.def,--out-implib,libbiosig2.dll.a
 
 save2gdf: save2gdf.o
-	$(CXX) save2gdf.o $(shell $(PKGCONF) --libs libbiosig) -o save2gdf
+	$(CXX) $(CXXFLAGS) save2gdf.o $(shell $(PKGCONF) --libs libbiosig) -o save2gdf
+%: %.c
+	$(CXX) $(CXXFLAGS) "$<" -o "$@"
 
 pdp2gdf: pdp2gdf.o
 	$(CXX) pdp2gdf.o $(shell $(PKGCONF) --libs libbiosig) -o pdp2gdf
