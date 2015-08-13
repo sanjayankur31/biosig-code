@@ -2,23 +2,28 @@
 #                /usr/local/Library/Contributions/example-formula.rb
 # PLEASE REMOVE ALL GENERATED COMMENTS BEFORE SUBMITTING YOUR PULL REQUEST!
 
-class Libbiosig < Formula
-  homepage "http://biosig.sf.net"
-  url "http://sourceforge.net/projects/biosig/files/BioSig%20for%20C_C%2B%2B/src/biosig4c%2B%2B-1.7.0.src.tar.gz"
-  version "1.7.0"
-  sha1 "af05487f6dd82f802e4c3ffec1218f24cda0dcea"
+class Stimfit < Formula
+  homepage "http://stimfit.org"
+  url "https://github.com/neurodroid/stimfit/archive/v0.14.9windows.tar.gz"
+  version "0.14.9windows"
+  sha1 "c517ca54b0a58dfe41dd4930beacbb31ec465534"
 
   # depends_on "cmake" => :build
   # depends_on :x11 # if your formula requires any X11/XQuartz components
   depends_on "wget" => :build
-  depends_on "gawk" => :build
-  depends_on "libiconv" => :build
+  depends_on "libbiosig" => :build
+  depends_on "automake" => :build
+  depends_on "autoconf" => :build
+  depends_on "boost" => :build
+  depends_on "hdf5" => :build
+  depends_on "swig" => :build
+  depends_on "wxwidgets" => :build
+  #depends_on "autoconf" => :build
   #depends_on "octave" => :recommended
 
   def install
-    #system "wget http://sourceforge.net/p/biosig/code/ci/master/tree/biosig4c++/Makefile?format=raw -O Makefile "
-
     #ENV.deparallelize  # if your formula fails when building in parallel
+    system "./autogen.sh && autoconf && automake"
 
     # Remove unrecognized options if warned by configure
     #system "./configure", "--disable-debug",
@@ -26,7 +31,13 @@ class Libbiosig < Formula
     #                      "--disable-silent-rules",
     #                      "--prefix=#{prefix}"
 
-    system "make install" 
+    system "./configure --enable-python --with-biosig --with-pslope"
+    
+    system "make"
+
+    system "make install"	
+    #system "PKG_CONFIG_PATH=/usr/local/lib/pkgconfig make install_save2gdf" 
+    
   end
 
   test do
