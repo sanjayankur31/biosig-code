@@ -1,7 +1,6 @@
 /*
 
-    $Id: biosig_client.c,v 1.5 2009-02-27 09:21:11 schloegl Exp $
-    Copyright (C) 2009 Alois Schloegl <a.schloegl@ieee.org>
+    Copyright (C) 2009,2015 Alois Schloegl <alois.schloegl@ist.ac.at>
     This file is part of the "BioSig for C/C++" repository 
     (biosig4c++) at http://biosig.sf.net/ 
 
@@ -21,9 +20,7 @@
 */
 
 
-
 #include "biosig-network.h"
-
 
 #include <ctype.h>
 #include <errno.h>
@@ -52,8 +49,6 @@ int main (int argc, char *argv[]) {
    	}
 
 	fprintf(stdout,"client 122 %i %s <%s>\n",errno,strerror(errno),getenv("HOME"));
-
-
 	
 	char path2keys[1024];
 	char *str;
@@ -103,27 +98,27 @@ int main (int argc, char *argv[]) {
 		else if (!strncasecmp(cmd,"ow+c",4)) {
 			ID = 0; 
 			s=bscs_open(sd, &ID);
-			fprintf(stdout,"ow ID=%16Lx s=%i %08x\n",ID,s,s);
+			fprintf(stdout,"ow ID=%016"PRIx64" s=%i %08x\n",ID,s,s);
 			s=bscs_close(sd);
-			fprintf(stdout,"c ID=%16Lx s=%i %08x\n",ID,s,s);
+			fprintf(stdout,"c ID=%016"PRIx64" s=%i %08x\n",ID,s,s);
 		}
 		else if (!strncasecmp(cmd,"or+c",4)) {
 			ID = l_endian_u64(0x233ab6dfc96f664fLL); 
 			s=bscs_open(sd, &ID);
-			fprintf(stdout,"or ID=%16Lx s=%i %08x\n",ID,s,s);
+			fprintf(stdout,"or ID=%016"PRIx64" s=%i %08x\n",ID,s,s);
 //		   	hdr->TYPE = unknown; 
 //			getfiletype(hdr);
 			bscs_requ_hdr(sd,hdr);
 			bscs_requ_dat(sd,0,hdr->NRec,hdr);
 //			bscs_requ_evt(sd,hdr);
 			s=bscs_close(sd);
-			fprintf(stdout,"c ID=%16Lx s=%i %08x\n",ID,s,s);
+			fprintf(stdout,"c ID=%016"PRIx64" s=%i %08x\n",ID,s,s);
 		}
 		else if (!strncasecmp(cmd,"openr",5)) {
 			ID = l_endian_u64(0x233ab6dfc96f664fLL); 
 
 			ID = l_endian_u64(0x233ab6dfc96f664fLL); 
-			fprintf(stdout,"or ID=%16Lx s=%i %08x\n",ID,s,s);
+			fprintf(stdout,"or ID=%016"PRIx64" s=%i %08x\n",ID,s,s);
 			s=bscs_open(sd, &ID);
 		}
 		else if (!strncasecmp(cmd,"openw",5)) {
@@ -138,7 +133,7 @@ int main (int argc, char *argv[]) {
 
 			ID = 0; 
 			s=bscs_open(sd, &ID);
-			fprintf(stdout,"openw: ID=%16Lx s=%i %08x\n",ID,s,s);
+			fprintf(stdout,"openw: ID=%016"PRIx64" s=%i %08x\n",ID,s,s);
 		}
 		else if (!strncasecmp(cmd,"sendhdr",7)) {
 			s= bscs_send_hdr(sd, hdr);
@@ -176,11 +171,11 @@ int main (int argc, char *argv[]) {
 		else if (!strncasecmp(cmd,"ow",2)) {
 			ID = 0; 
 			s=bscs_open(sd, &ID);
-			fprintf(stdout,"ow ID=%16Lx s=%i %08x\n",ID,s,s);
+			fprintf(stdout,"ow ID=%016"PRIx64" s=%i %08x\n",ID,s,s);
 		}
 		else if (!strncasecmp(cmd,"close",5)) {
 			s=bscs_close(sd);
-			fprintf(stdout,"oc ID=%16Lx s=%i %08x\n",ID,s,s);
+			fprintf(stdout,"oc ID=%016"PRIx64" s=%i %08x\n",ID,s,s);
 		}
 		else if (!strncasecmp(cmd,"requ ",5)) {
 			char *fn = cmd+5;
@@ -220,7 +215,7 @@ fprintf(stdout,"16 %i\n",hdr->EVENT.N);
 		     	
 		     	hdr = sopen(fn,"r",NULL);
 //			if (hdr->TYPE!=GDF) {
-			if (serror()) {
+			if (serror2(hdr)) {
 				stat(fn, &info);
 		     		FILE *fid = fopen(fn,"r"); 
 		     		if (fid==NULL)
@@ -242,10 +237,10 @@ fprintf(stdout,"16 %i\n",hdr->EVENT.N);
 						strcpy(path2keys+path2keysLength,tmp);
 			
 						fid = fopen(path2keys,"w");	// TODO: prevent overwritting
-						fprintf(fid,"key4biosig: host=%s ID=%16Lx ",argv[1],ID);
+						fprintf(fid,"key4biosig: host=%s ID=%016"PRIx64" ",argv[1],ID);
 						fclose(fid);
 
-						fprintf(stdout,"open_w ID=%Lx\n",ID);
+						fprintf(stdout,"open_w ID=%016"PRIx64"\n",ID);
 						hdr->HeadLen = count; 
 						bscs_send_dat(sd, buf, count);
 						bscs_close(sd);
@@ -257,7 +252,7 @@ fprintf(stdout,"16 %i\n",hdr->EVENT.N);
 		     	
 		     		sread_raw(0,hdr->NRec,hdr,1); 	// collapse rawdata (remove obsolete channels) 
 				size_t bpb = bpb8_collapsed_rawdata(hdr)>>3;
-				if (serror()) {
+				if (serror2(hdr)) {
 					sclose(hdr);
 					exit(-1);
 				}	
@@ -274,15 +269,15 @@ fprintf(stdout,"16 %i\n",hdr->EVENT.N);
 				if (fid==NULL) 
 					fprintf(stdout,"error: %i %s\n",errno, strerror(errno));		     		
 
-				fprintf(fid,"bscs://%s/%16Lx",argv[1],ID);
+				fprintf(fid,"bscs://%s/%016"PRIx64"",argv[1],ID);
 				fclose(fid);
 
-				fprintf(stdout,"open_w  ID=%16Lx len=%i\n",ID,hdr->AS.length);
+				fprintf(stdout,"open_w  ID=%016"PRIx64" len=%"PRIiPTR"\n",ID,hdr->AS.length);
 				s= bscs_send_hdr(sd, hdr);
 				fprintf(stdout,"sent hdr %i %i\n",s,hdr->AS.bpb);
 
 				s = bscs_send_dat(sd, hdr->AS.rawdata, hdr->AS.length*bpb);
-				fprintf(stdout,"sent dat %i %i\n",s,bpb);
+				fprintf(stdout,"sent dat %i %"PRIiPTR"\n",s,bpb);
 					
 				if (hdr->TYPE != GDF) hdrEVT2rawEVT(hdr); 
 				if (hdr->EVENT.N>0) s= bscs_send_evt(sd, hdr);

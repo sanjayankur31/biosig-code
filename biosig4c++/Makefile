@@ -711,8 +711,6 @@ libbiosig2.def: $(OBJECTS) biosig2.o t240/libcnsfef.a
 
 save2gdf: save2gdf.o
 	$(CXX) $(CXXFLAGS) save2gdf.o $(shell $(PKGCONF) --libs libbiosig) -o save2gdf
-%: %.c
-	$(CXX) $(CXXFLAGS) "$<" -o "$@"
 
 pdp2gdf: pdp2gdf.o
 	$(CXX) pdp2gdf.o $(shell $(PKGCONF) --libs libbiosig) -o pdp2gdf

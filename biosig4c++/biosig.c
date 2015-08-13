@@ -1222,7 +1222,7 @@ const char* GetEventDescription(HDRTYPE *hdr, size_t N) {
 
 /*------------------------------------------------------------------------
 	DUR2VAL converts sparse sample values in the event table 
-	from the DUR format (uint32) to the sample value.
+	from the DUR format (uint32, machine endian) to the sample value.
 	Endianity of the platform is considered.
   ------------------------------------------------------------------------*/
 double dur2val(uint32_t DUR, uint16_t gdftyp) {
@@ -1231,9 +1231,11 @@ double dur2val(uint32_t DUR, uint16_t gdftyp) {
 		return (double)(int32_t)DUR;
 	if (gdftyp==6)
 		return (double)(uint32_t)DUR;
-	if (gdftyp==16)
-		return (double)*(float*)(&DUR);
-
+	if (gdftyp==16) {
+		float fDur;
+		memcpy(&fDur,&DUR,4);
+		return (double)fDur;
+	}
 	union {
 		uint32_t t32;
 		uint16_t t16[2];
@@ -1315,6 +1317,7 @@ int biosig_set_hdr_ipaddr(HDRTYPE *hdr, const char *hostname) {
 	}
 
 	freeaddrinfo(result);
+	return 0;
 }
 
 
@@ -13432,7 +13435,7 @@ int sclose(HDRTYPE* hdr)
 	if (VERBOSE_LEVEL>6)
 		fprintf(stdout,"SCLOSE( %s ) MODE=%i\n",hdr->FileName, hdr->FILE.OPEN);
 
-	if (VERBOSE_LEVEL>7) fprintf(stdout,"sclose(121)\n");
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): sclose\n",__FILE__,__LINE__);
 
         if (hdr==NULL) return(0);
 
@@ -13443,7 +13446,7 @@ int sclose(HDRTYPE* hdr)
 			hdr->CHANNEL[k].GDFTYP=3;
 	}
 
-	if (VERBOSE_LEVEL>7) fprintf(stdout,"sclose(122) OPEN=%i %s\n",hdr->FILE.OPEN,GetFileTypeString(hdr->TYPE));
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): sclose OPEN=%i %s\n",__FILE__,__LINE__,hdr->FILE.OPEN,GetFileTypeString(hdr->TYPE));
 
 #ifdef WITH_FEF
 	if (hdr->TYPE == FEF) sclose_fef_read(hdr);
@@ -13452,12 +13455,23 @@ int sclose(HDRTYPE* hdr)
 #ifndef WITHOUT_NETWORK
 	if (hdr->FILE.Des>0) {
 		// network connection
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): sclose\n",__FILE__,__LINE__);
+
 		if (hdr->FILE.OPEN > 1) bscs_send_evt(hdr->FILE.Des,hdr);
+
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): sclose\n",__FILE__,__LINE__);
+
   		int s = bscs_close(hdr->FILE.Des);
+
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): sclose\n",__FILE__,__LINE__);
+
   		if (s & ERR_MASK) {
-			if (VERBOSE_LEVEL>7) fprintf(stdout,"bscs_close failed (err %i %08x)\n",s,s);
+			if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): bscs_close failed (err %i %08x)\n",__FILE__,__LINE__,s,s);
 			biosigERROR(hdr, B4C_SCLOSE_FAILED, "bscs_close failed");
   		}
+
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): sclose\n",__FILE__,__LINE__);
+
   		hdr->FILE.Des = 0;
   		hdr->FILE.OPEN = 0;
 		bscs_disconnect(hdr->FILE.Des);
