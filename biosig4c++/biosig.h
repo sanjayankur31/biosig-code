@@ -39,8 +39,8 @@
 #define __BIOSIG_EXT_H__
 
 #define BIOSIG_VERSION_MAJOR 1
-#define BIOSIG_VERSION_MINOR 6
-#define BIOSIG_PATCHLEVEL 5
+#define BIOSIG_VERSION_MINOR 7
+#define BIOSIG_PATCHLEVEL 0
 // for backward compatibility
 #define BIOSIG_VERSION_STEPPING BIOSIG_PATCHLEVEL
 #define BIOSIG_VERSION (BIOSIG_VERSION_MAJOR * 10000 + BIOSIG_VERSION_MINOR * 100 + BIOSIG_PATCHLEVEL)
@@ -169,7 +169,7 @@ enum FileFormat {
 	Z, ZIP, ZIP2
 };
 
-#if (BIOSIG_VERSION >= 10700)
+#if (BIOSIG_VERSION >= 10800)
 #error ABI change: order enum FileFormat alphabethically
 #endif
 
