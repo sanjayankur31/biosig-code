@@ -1401,12 +1401,14 @@ HDRTYPE* constructHDR(const unsigned NS, const unsigned N_EVENT)
 	hdr->data.block = NULL;
 	hdr->T0    = t_time2gdf_time(time(NULL)-timezone); // localtime
 	hdr->tzmin = -timezone/60;      // convert from seconds west of UTC to minutes east;
-	if (BIOSIG_VERSION <= 10500)
-		hdr->ID.Equipment = *(uint64_t*) & "b4c_1.4 ";
-	else
-		hdr->ID.Equipment = *(uint64_t*) & "b4c_1.5 ";
 
-	hdr->ID.Equipment = *(uint64_t*) & "b4c_1.4 ";
+	{
+	uint8_t Equipment[8] = "b4c_1.5 ";
+	Equipment[4] = BIOSIG_VERSION_MAJOR+'0';
+	Equipment[6] = BIOSIG_VERSION_MINOR+'0';
+	memcpy(&(hdr->ID.Equipment), &Equipment, 8);
+	}
+
 	hdr->ID.Manufacturer._field[0]    = 0;
 	hdr->ID.Manufacturer.Name         = NULL;
 	hdr->ID.Manufacturer.Model        = NULL;
