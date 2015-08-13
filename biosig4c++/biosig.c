@@ -2539,8 +2539,8 @@ void struct2gdfbin(HDRTYPE *hdr)
 			}
 		}
 #endif
-#if (BIOSIG_VERSION >= 10700)
-		// TODO: SCPECGv3
+#ifdef GDF_WITH_SCP_SECTION12
+		// TODO: SCPECGv3 - this is very experimental, do not use it for production !!!
 		tag = 14;
 		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw tag %i\n",tag);
 		if (hdr->SCP.Section12.NumberOfEntries >0) {
@@ -2877,38 +2877,38 @@ void struct2gdfbin(HDRTYPE *hdr)
 		tag = 10;
 		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw tag %i\n",tag);
 		if (TagNLen[tag]>0) {
-			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=9 & Length of Tag 9
+			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=10 & Length of Tag 10
 			memcpy((char*)(Header2+4),hdr->SCP.Section8, TagNLen[tag]);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
 			Header2 += 4+TagNLen[tag];
 		}
 		tag = 11;
 		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw tag %i\n",tag);
 		if (TagNLen[tag]>0) {
-			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=9 & Length of Tag 9
+			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=11 & Length of Tag 11
 			memcpy((char*)(Header2+4),hdr->SCP.Section9, TagNLen[tag]);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
 			Header2 += 4+TagNLen[tag];
 		}
 		tag = 12;
 		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw tag %i\n",tag);
 		if (TagNLen[tag]>0) {
-			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=9 & Length of Tag 9
+			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=12 & Length of Tag 12
 			memcpy((char*)(Header2+4),hdr->SCP.Section10, TagNLen[tag]);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
 			Header2 += 4+TagNLen[tag];
 		}
 		tag = 13;
 		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw tag %i\n",tag);
 		if (TagNLen[tag]>0) {
-			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=9 & Length of Tag 9
+			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=13 & Length of Tag 13
 			memcpy((char*)(Header2+4),hdr->SCP.Section11, TagNLen[tag]);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
 			Header2 += 4+TagNLen[tag];
 		}
 #endif
-#if (BIOSIG_VERSION >= 10700)
-		// TODO: SCPECGv3
+#ifdef GDF_WITH_SCP_SECTION12
+		// TODO: SCPECGv3 - this is very experimental, do not use it for production !!!
 		tag = 14;
 		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw tag %i\n",tag);
 		if (TagNLen[tag]>0) {
-			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=9 & Length of Tag 9
+			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=14 & Length of Tag 14
 			leu32a(hdr->SCP.Section12.NumberOfEntries, Header2+4);
 			uint32_t m; 
 			uint8_t *off = Header2+8;
@@ -2918,7 +2918,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 				leu32a(hdr->SCP.Section12.annotatedECG[m].value,         off+6);
 				off += sizeof(hdr->SCP.Section12.annotatedECG[0]); 
 			}
-			memcpy((char*)(Header2+4),hdr->SCP.Section12.NumberOfEntries, TagNLen[tag]);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
+			memcpy((char*)(Header2+4),&(hdr->SCP.Section12.NumberOfEntries), TagNLen[tag]);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
 			Header2 += 4+TagNLen[tag];
 		}
 #endif
@@ -3304,8 +3304,8 @@ if (VERBOSE_LEVEL>6) fprintf(stdout,"user-specific events defined\n");
 					hdr->SCP.Section11Length = len;
 				}
 #endif
-#if (BIOSIG_VERSION >= 10700)
-				// TODO: SCPECG v3
+#ifdef GDF_WITH_SCP_SECTION12
+				// TODO: SCPECGv3 - this is very experimental, do not use it for production !!!
 				else if (tag==14) {
 					hdr->SCP.Section12.NumberOfEntries = leu32p(Header2+pos+4);
 					uint32_t m; 
