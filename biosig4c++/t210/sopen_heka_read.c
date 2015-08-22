@@ -676,7 +676,7 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"HEKA L6 @%i= #%i,%i, %s %f-%fHz\t%i/%i %i/%
 
  ******************************************************************************/
 
-if (VERBOSE_LEVEL > 7) fprintf(stdout,"HEKA: 400: %li  %li %li\n",(long)hdr->NRec, (long)hdr->AS.bpb,hdr->NRec * (size_t)hdr->AS.bpb);
+if (VERBOSE_LEVEL > 7) fprintf(stdout,"HEKA: 400: %"PRIi64"  %"PRIi32" %"PRIi64"\n",hdr->NRec, hdr->AS.bpb, hdr->NRec * (size_t)hdr->AS.bpb);
 
 		size_t sz = hdr->NRec * (size_t)hdr->AS.bpb;
 		if (sz/hdr->NRec < hdr->AS.bpb) {

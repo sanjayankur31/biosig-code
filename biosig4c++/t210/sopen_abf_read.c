@@ -101,11 +101,11 @@ EXTERN_C void sopen_abf_read(HDRTYPE* hdr) {
 
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"sopen_abf_read 101\n");
 
-	if (VERBOSE_LEVEL>7) fprintf(stderr,"%s (line %i) %li %i %i %li\n",__FILE__,__LINE__,
+	if (VERBOSE_LEVEL>7) fprintf(stderr,"%s (line %i) %"PRIiPTR" %i %i %"PRIiPTR"\n",__FILE__,__LINE__,
                 sizeof(struct ABFFileHeader),ABF_OLDHEADERSIZE, ABF_HEADERSIZE,
                 offsetof(struct ABFFileHeader, lHeaderSize));
 
-	if (VERBOSE_LEVEL>7) fprintf(stderr,"%s (line %i) %i %li %i\n",__FILE__,__LINE__,
+	if (VERBOSE_LEVEL>7) fprintf(stderr,"%s (line %i) %i %"PRIiPTR" %i\n",__FILE__,__LINE__,
 		ABF_BLOCKSIZE, offsetof(struct ABFFileHeader, lDataSectionPtr),
 		ABF_BLOCKSIZE*lei32p(hdr->AS.Header + offsetof(struct ABFFileHeader, lDataSectionPtr)) );
 
@@ -532,35 +532,35 @@ EXTERN_C void sopen_abf2_read(HDRTYPE* hdr) {
 
 			fprintf(stdout,"DataSection.uBlockIndex: \t%i\n",leu32p(hdr->AS.Header + offsetof(struct ABF_FileInfo, DataSection.uBlockIndex)));
 			fprintf(stdout,"DataSection.uBytes:      \t%i\n",leu32p(hdr->AS.Header + offsetof(struct ABF_FileInfo, DataSection.uBytes)));
-			fprintf(stdout,"DataSection.llNumEntries:\t%li\n",lei64p(hdr->AS.Header + offsetof(struct ABF_FileInfo, DataSection.llNumEntries)));
+			fprintf(stdout,"DataSection.llNumEntries:\t%"PRIi64"\n",lei64p(hdr->AS.Header + offsetof(struct ABF_FileInfo, DataSection.llNumEntries)));
 
 			fprintf(stdout,"TagSection.uBlockIndex:  \t%i\n",leu32p(hdr->AS.Header + offsetof(struct ABF_FileInfo, TagSection.uBlockIndex)));
 			fprintf(stdout,"TagSection.uBytes:       \t%i\n",leu32p(hdr->AS.Header + offsetof(struct ABF_FileInfo, TagSection.uBytes)));
-			fprintf(stdout,"TagSection.llNumEntries: \t%li\n",lei64p(hdr->AS.Header + offsetof(struct ABF_FileInfo, TagSection.llNumEntries)));
+			fprintf(stdout,"TagSection.llNumEntries: \t%"PRIi64"\n",lei64p(hdr->AS.Header + offsetof(struct ABF_FileInfo, TagSection.llNumEntries)));
 
 			fprintf(stdout,"ScopeSection.uBlockIndex: \t%i\n",leu32p(hdr->AS.Header + offsetof(struct ABF_FileInfo, ScopeSection.uBlockIndex)));
 			fprintf(stdout,"ScopeSection.uBytes:      \t%i\n",leu32p(hdr->AS.Header + offsetof(struct ABF_FileInfo, ScopeSection.uBytes)));
-			fprintf(stdout,"ScopeSection.llNumEntries:\t%li\n",lei64p(hdr->AS.Header + offsetof(struct ABF_FileInfo, ScopeSection.llNumEntries)));
+			fprintf(stdout,"ScopeSection.llNumEntries:\t%"PRIi64"\n",lei64p(hdr->AS.Header + offsetof(struct ABF_FileInfo, ScopeSection.llNumEntries)));
 
 			fprintf(stdout,"DeltaSection.uBlockIndex: \t%i\n",leu32p(hdr->AS.Header + offsetof(struct ABF_FileInfo, DeltaSection.uBlockIndex)));
 			fprintf(stdout,"DeltaSection.uBytes:      \t%i\n",leu32p(hdr->AS.Header + offsetof(struct ABF_FileInfo, DeltaSection.uBytes)));
-			fprintf(stdout,"DeltaSection.llNumEntries:\t%li\n",lei64p(hdr->AS.Header + offsetof(struct ABF_FileInfo, DeltaSection.llNumEntries)));
+			fprintf(stdout,"DeltaSection.llNumEntries:\t%"PRIi64"\n",lei64p(hdr->AS.Header + offsetof(struct ABF_FileInfo, DeltaSection.llNumEntries)));
 
 			fprintf(stdout,"VoiceTagSection.uBlockIndex: \t%i\n",leu32p(hdr->AS.Header + offsetof(struct ABF_FileInfo, VoiceTagSection.uBlockIndex)));
 			fprintf(stdout,"VoiceTagSection.uBytes:      \t%i\n",leu32p(hdr->AS.Header + offsetof(struct ABF_FileInfo, VoiceTagSection.uBytes)));
-			fprintf(stdout,"VoiceTagSection.llNumEntries:\t%li\n",lei64p(hdr->AS.Header + offsetof(struct ABF_FileInfo, VoiceTagSection.llNumEntries)));
+			fprintf(stdout,"VoiceTagSection.llNumEntries:\t%"PRIi64"\n",lei64p(hdr->AS.Header + offsetof(struct ABF_FileInfo, VoiceTagSection.llNumEntries)));
 
 			fprintf(stdout,"SynchArraySection.uBlockIndex: \t%i\n",leu32p(hdr->AS.Header + offsetof(struct ABF_FileInfo, SynchArraySection.uBlockIndex)));
 			fprintf(stdout,"SynchArraySection.uBytes:      \t%i\n",leu32p(hdr->AS.Header + offsetof(struct ABF_FileInfo, SynchArraySection.uBytes)));
-			fprintf(stdout,"SynchArraySection.llNumEntries:\t%li\n",lei64p(hdr->AS.Header + offsetof(struct ABF_FileInfo, SynchArraySection.llNumEntries)));
+			fprintf(stdout,"SynchArraySection.llNumEntries:\t%"PRIi64"\n",lei64p(hdr->AS.Header + offsetof(struct ABF_FileInfo, SynchArraySection.llNumEntries)));
 
 			fprintf(stdout,"AnnotationSection.uBlockIndex: \t%i\n",leu32p(hdr->AS.Header + offsetof(struct ABF_FileInfo, AnnotationSection.uBlockIndex)));
 			fprintf(stdout,"AnnotationSection.uBytes:      \t%i\n",leu32p(hdr->AS.Header + offsetof(struct ABF_FileInfo, AnnotationSection.uBytes)));
-			fprintf(stdout,"AnnotationSection.llNumEntries:\t%li\n",lei64p(hdr->AS.Header + offsetof(struct ABF_FileInfo, AnnotationSection.llNumEntries)));
+			fprintf(stdout,"AnnotationSection.llNumEntries:\t%"PRIi64"\n",lei64p(hdr->AS.Header + offsetof(struct ABF_FileInfo, AnnotationSection.llNumEntries)));
 
 			fprintf(stdout,"StatsSection.uBlockIndex: \t%i\n",leu32p(hdr->AS.Header + offsetof(struct ABF_FileInfo, StatsSection.uBlockIndex)));
 			fprintf(stdout,"StatsSection.uBytes:      \t%i\n",leu32p(hdr->AS.Header + offsetof(struct ABF_FileInfo, StatsSection.uBytes)));
-			fprintf(stdout,"StatsSection.llNumEntries:\t%li\n",lei64p(hdr->AS.Header + offsetof(struct ABF_FileInfo, StatsSection.llNumEntries)));
+			fprintf(stdout,"StatsSection.llNumEntries:\t%"PRIi64"\n",lei64p(hdr->AS.Header + offsetof(struct ABF_FileInfo, StatsSection.llNumEntries)));
 
 		}
 

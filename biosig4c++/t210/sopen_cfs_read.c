@@ -238,7 +238,7 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"\n******* Data Section variable information
 		for (m = NumberOfDataSections; 0 < m; ) {
 			DATAPOS[--m] = datapos;
 			datapos      = leu32p(hdr->AS.Header + datapos);
-if (VERBOSE_LEVEL>7) fprintf(stdout, "%s:%i sopen_cfs_read started: section %d pos %lu 0x%lx\n",__FILE__,__LINE__,m,datapos,datapos);
+if (VERBOSE_LEVEL>7) fprintf(stdout, "%s:%i sopen_cfs_read started: section %"PRIi16" pos %"PRIuPTR" 0x%"PRIxPTR"\n",__FILE__,__LINE__,m,datapos,datapos);
 		}
 
 		if (hdr->AS.SegSel[0] > NumberOfDataSections) {
@@ -1036,7 +1036,7 @@ EXTERN_C void sopen_smr_read(HDRTYPE* hdr) {
 
 			assert (chanNumber == m+1);
 
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"SMR 333:\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n",m,k,hc->GDFTYP,(int)predBlock,(int)succBlock,startTime,endTime,chanNumber,item,lChanDvD,startTime+item*lChanDvD-endTime);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i):\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n",__FILE__,__LINE__,m,k,hc->GDFTYP,(int)predBlock,(int)succBlock,startTime,endTime,chanNumber,item,lChanDvD,startTime+item*lChanDvD-endTime);
 
 			for (i = 0; i < item; i++) {
 				// convert data to little endian

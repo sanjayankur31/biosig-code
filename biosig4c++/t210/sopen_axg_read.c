@@ -391,7 +391,7 @@ if (VERBOSE_LEVEL > 7) fprintf(stdout,"%s (line %i) NS=%i nCol=%i\n", __FILE__, 
 				size_t reticonv = iconv(ICONV, &inbuf, &inlen, &outbuf, &outlen);
 				iconv_close(ICONV);
 
-				if (VERBOSE_LEVEL > 7) fprintf(stdout,"%s (line %i): %i %i %i %li\n", __FILE__, __LINE__, (int)hc->SPR, (int)inlen, (int)(pos-hdr->AS.Header), reticonv );
+				if (VERBOSE_LEVEL > 7) fprintf(stdout,"%s (line %i): %i %i %i %"PRIiPTR"\n", __FILE__, __LINE__, (int)hc->SPR, (int)inlen, (int)(pos-hdr->AS.Header), reticonv );
 
 				if (reticonv == (size_t)(-1) ) {
 					perror("AXG - conversion of title failed!!!");
