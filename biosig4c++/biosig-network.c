@@ -362,7 +362,7 @@ int bscs_open(int sd, uint64_t* ID) {
 	 	// invalid packet or error opening file 
 	}
 	
-	if (VERBOSE_LEVEL>7) 	fprintf(stdout,"ERR: state= %08"PRIx32" %08"PRIx32" len=%"PRIi32"\n",b_endian_u32(msg.STATE),BSCS_VERSION_01 | BSCS_OPEN_R | BSCS_REPLY | STATE_OPEN_READ | BSCS_NO_ERROR,LEN);
+	if (VERBOSE_LEVEL>7) 	fprintf(stdout,"ERR: state= %08"PRIx32" %08"PRIx32" len=%"PRIiPTR"\n",b_endian_u32(msg.STATE),BSCS_VERSION_01 | BSCS_OPEN_R | BSCS_REPLY | STATE_OPEN_READ | BSCS_NO_ERROR,LEN);
 	
 	return(msg.STATE);
 }
@@ -378,7 +378,7 @@ int bscs_close(int sd) {
 	msg.STATE = BSCS_VERSION_01 | BSCS_CLOSE | BSCS_NO_ERROR | SERVER_STATE;
 if (VERBOSE_LEVEL>8) fprintf(stdout,"close1: %08"PRIx32" \n",msg.STATE);
 	msg.LEN   = b_endian_u32(0);
-if (VERBOSE_LEVEL>8) fprintf(stdout,"close2: %08"PRIx32" %"PRIiPTR" %"PRIiPTR"\n",msg.STATE,sizeof(msg),msg.LEN);
+if (VERBOSE_LEVEL>8) fprintf(stdout,"close2: %08"PRIx32" %"PRIiPTR" %"PRIi32"\n",msg.STATE,sizeof(msg),msg.LEN);
 
 	s = send(sd, TC &msg, 8, 0);	
 
@@ -645,7 +645,7 @@ if (VERBOSE_LEVEL>8) fprintf(stdout,"REQ EVT: %i %"PRIiPTR" \n",s,LEN);
 	   	rawEVT2hdrEVT(hdr); // TODO: replace this function because it is inefficient  
    	}
 
-if (VERBOSE_LEVEL>8) fprintf(stdout,"REQ EVT: %i %"PRIi32" \n",s,LEN);
+if (VERBOSE_LEVEL>8) fprintf(stdout,"REQ EVT: %i %"PRIiPTR" \n",s,LEN);
 #if 0 
 			uint8_t *buf = hdr->AS.rawEventData; 
 			if (hdr->VERSION < 1.94) {
