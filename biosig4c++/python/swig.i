@@ -271,7 +271,6 @@ int	seof(HDRTYPE* hdr);
 void	srewind(HDRTYPE* hdr);
 int 	sseek(HDRTYPE* hdr, long int offset, int whence);
 long int stell(HDRTYPE* hdr);
-int 	serror();	
 int 	serror2(HDRTYPE* hdr);
 int	hdr2ascii(HDRTYPE* hdr, FILE *fid, int verbosity);
 
@@ -337,14 +336,6 @@ PyObject* sread(size_t start, size_t length, HDRTYPE* hdr);
 		/* if(count != length) {} */
 		return PyArray_Return(_array);
         }
-%}
-
-void serror();
-%{
-	void _serror() {
-		fprintf(stderr,"Use of SERROR is deprecated - use serror2(HDR) instead"); 	
-		serror();
-	}	
 %}
 
 void hdr2ascii(HDRTYPE* hdr, int verbosity);

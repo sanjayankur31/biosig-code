@@ -60,7 +60,6 @@ enum FileFormat biosig_get_filetype(HDRTYPE *hdr);
 int biosig_set_filetype(HDRTYPE *hdr, enum FileFormat format);
 #define biosig_check_filetype(a,b) (biosig_get_filetype(a)==b)
 
-ATT_DEPREC int biosig_set_flags(HDRTYPE *hdr, char compression, char ucal, char overflowdetection);
 int biosig_get_flag(HDRTYPE *hdr, unsigned flags);
 int biosig_set_flag(HDRTYPE *hdr, unsigned flags);
 int biosig_reset_flag(HDRTYPE *hdr, unsigned flags);
