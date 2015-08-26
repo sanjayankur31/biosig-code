@@ -568,8 +568,8 @@ win64/sigviewer.exe: win64/libbiosig.a win64/libbiosig.dll
 
 biosig4python : python/_biosig.so python/biosig.py python/_biosig2.so python/biosig2.py
 
-python/biosig.py python/swig_wrap.cxx: python/swig.i
-	$(SWIG) -python  -I/usr/include/python$(PYTHONVER)/ -I$(NUMPY_INC) -o python/swig_wrap.cxx python/swig.i
+python/biosig.py python/swig_wrap.cxx: python/biosig.i
+	$(SWIG) -python  -I/usr/include/python$(PYTHONVER)/ -I$(NUMPY_INC) -o python/swig_wrap.cxx python/biosig.i
 python/_biosig.so : python/swig_wrap.cxx  libbiosig.$(LIBEXT)
 	$(CXX) -c $(DEFINES) $(CXXFLAGS) -I$(PYTHON_INCPATH) -I$(NUMPY_INC) python/swig_wrap.cxx -o python/swig_wrap.o
 	$(CXX) -shared python/swig_wrap.o $(LFLAGS) $(LIBS) -lbiosig -lphysicalunits -l$(PYTHON_LIB) -o python/_biosig.so
@@ -580,7 +580,7 @@ python/_biosig2.so : python/biosig2_wrap.cxx  libbiosig2.$(LIBEXT)
 	$(CXX) -shared python/biosig2_wrap.o $(LFLAGS) $(LIBS) -lbiosig2 -l$(PYTHON_LIB) -o python/_biosig2.so
 
 
-python: libbiosig.$(LIBEXT) libbiosig2.$(LIBEXT) python/swig.i python/biosig2.i
+python: libbiosig.$(LIBEXT) libbiosig2.$(LIBEXT) python/biosig.i python/biosig2.i
 	$(MAKE) -C python 
 
 
