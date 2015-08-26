@@ -1,7 +1,6 @@
 /*
 %
-% $Id$
-% Copyright (C) 2008,2009 Alois Schloegl <a.schloegl@ieee.org>
+% Copyright (C) 2008,2009,2015 Alois Schloegl <alois.schloegl@ist.ac.at>
 % This file is part of the "BioSig for C/C++" repository 
 % (biosig4c++) at http://biosig.sf.net/ 
 

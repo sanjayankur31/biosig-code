@@ -1,6 +1,6 @@
 /*
 
-    Copyright (C) 2012,2013 Alois Schloegl <alois.schloegl@gmail.com>
+    Copyright (C) 2012,2013,2015 Alois Schloegl <alois.schloegl@ist.ac.at>
     This file is part of the "BioSig for C/C++" repository
     (biosig4c++) at http://biosig.sf.net/
 
