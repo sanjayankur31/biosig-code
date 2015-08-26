@@ -1,3 +1,12 @@
+biosig4c++ (1.7.0-1) unstable; urgency=low
+
+  * gcc-5 compatibility 
+  * improved support for HEKA, ITX, AXG format
+  * improved support for GDF/BDF/EDF, SCP-ECG
+  * number of bug fixes and minor improvement
+
+ -- Alois Schloegl <alois.schloegl@ist.ac.at>  Tue, 17 Aug 2015 09:32:25  +0200
+
 biosig4c++ (1.6.1-1) unstable; urgency=low
 
   * debian/contral:
