@@ -232,24 +232,22 @@ VERBOSE	     := -V0
 
 ##########################################################
 ## set Matlab and Octave variables
-ifeq (Darwin,$(shell uname))
-ifndef MATLABDIR
+ifeq (undefined,$(origin MATLABDIR))
+  ifeq (Darwin,$(shell uname))
+    MATLABDIR := $(shell find /Applications/MATLAB* -name bin -type d -depth 1 | head -1)
+  else
+    MATLABDIR ?= $(shell find /usr/local/MATLAB* -maxdepth 2 -name bin -type d | head -1)
+  endif
+endif
+
+ifeq (,$(shell echo $MATLABDIR))
   #$(error MATLABDIR is not defined)
-  $(echo "Warning: MATLABDIR is not defined")
+  $(shell echo "Warning: MATLABDIR is not defined")
 else
-  MEX         = $(MATLABDIR)mex
-  MEX_EXT    := $(shell $(MATLABDIR)mexext)
+  MEX         = $(MATLABDIR)/mex
+  MEX_EXT    := $(shell $(MATLABDIR)/mexext)
 endif
-else
-ifneq ($(shell which matlab),)
-ifndef MATLABDIR
-  #MATLABDIR  := $(dir $(shell readlink -f $(shell which matlab) ) )
-  MATLABDIR  := /usr/local/MATLAB/R2011b/bin/
-endif
-  MEX         = $(MATLABDIR)mex
-  MEX_EXT    := $(shell $(MATLABDIR)mexext)
-endif
-endif
+
 
 # use environment variable to define OCTAVE_VERSION
 #   e.g. export OCTAVE_VERSION=-3.6.2
