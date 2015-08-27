@@ -770,7 +770,7 @@ mex/%.$(MEX_EXT): mex/%.cpp
 else
 mex/%.$(MEX_EXT): mex/%.cpp
 	## $(MEX) $(MEX_OPTION) $(DEFINES) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
-	$(MEX) $(DEFINES) "$<" libbiosig.dylib
+	$(MEX) $(DEFINES) -outdir mex "$<" libbiosig.dylib
 endif
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
