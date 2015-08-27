@@ -240,9 +240,8 @@ ifeq (undefined,$(origin MATLABDIR))
   endif
 endif
 
-ifeq (,$(shell echo $MATLABDIR))
-  #$(error MATLABDIR is not defined)
-  $(shell echo "Warning: MATLABDIR is not defined")
+ifeq (,$(MATLABDIR))
+  $(warning MATLABDIR is not defined)
 else
   MEX         = $(MATLABDIR)/mex
   MEX_EXT    := $(shell $(MATLABDIR)/mexext)
