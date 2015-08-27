@@ -1,6 +1,6 @@
 #! /bin/bash
 
-BSVERSION="1.6.4"
+BSVERSION="1.7.1"
 MPDIR=`pwd`
 
 wget http://downloads.sourceforge.net/project/biosig/BioSig%20for%20C_C%2B%2B/src/biosig4c%2B%2B-${BSVERSION}.src.tar.gz
