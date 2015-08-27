@@ -234,10 +234,12 @@ VERBOSE	     := -V0
 ## set Matlab and Octave variables
 ifeq (Darwin,$(shell uname))
 ifndef MATLABDIR
-  $(error MATLABDIR is not defined)
-endif
+  #$(error MATLABDIR is not defined)
+  $(echo "Warning: MATLABDIR is not defined")
+else
   MEX         = $(MATLABDIR)mex
   MEX_EXT    := $(shell $(MATLABDIR)mexext)
+endif
 else
 ifneq ($(shell which matlab),)
 ifndef MATLABDIR
