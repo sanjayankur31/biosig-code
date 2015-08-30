@@ -923,8 +923,14 @@ install_ttl2trig: bin/ttl2trig
 	install bin/ttl2trig $(BIN)
 
 install_octave: mex/mexSLOAD.mex mex/mexSOPEN.mex mex/mexSSAVE.mex
-	install -d	$(DESTDIR)$(prefix)/share/octave/site-m/
-	install $? 	$(DESTDIR)$(prefix)/share/octave/site-m/
+	install -d $(DESTDIR)$(prefix)/lib/octave/packages/mexbiosig-$(BIOSIG_VERSION)
+	install $? $(DESTDIR)$(prefix)/lib/octave/packages/mexbiosig-$(BIOSIG_VERSION)
+	echo "mexBiosig is installed in $(DESTDIR)$(prefix)/lib/octave/packages/mexbiosig-$(BIOSIG_VERSION)"
+	#octave$(OCTAVE_VERSION) --norc --eval "addpath $(DESTDIR)$(prefix)/lib/octave/packages/mexbiosig-$(BIOSIG_VERSION); savepath"
+
+uninstall_octave:
+	-$(DELETE) $(DESTDIR)$(prefix)/lib/octave/packages/mexbiosig-$(BIOSIG_VERSION)/*
+	-rmdir $(DESTDIR)$(prefix)/lib/octave/packages/mexbiosig-$(BIOSIG_VERSION)
 
 install_headers: biosig-dev.h biosig.h biosig2.h gdftime.h physicalunits.h
 	install -d 			$(INC)
@@ -959,7 +965,7 @@ install_tools install_save2gdf: save2gdf doc/save2gdf.1 install_libbiosig
 	#$(MAKE)  install_sigviewer
 	#$(MAKE)  install_octave
 
-uninstall remove:
+uninstall remove: uninstall_octave
 	-$(DELETE) $(BIN)/save2gdf
 	-$(DELETE) $(BIN)/heka2itx
 	-$(DELETE) $(BIN)/save2scp
