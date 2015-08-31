@@ -698,7 +698,7 @@ libbiosig.pc :
 	echo "URL: http://biosig.sf.net"    >>libbiosig.pc
 	echo "Libs: -L$(prefix)/lib -lbiosig $(LDLIBS)"  >>libbiosig.pc
 	#echo "Libs.private: -liconv"  >>libbiosig.pc
-	echo "Cflags: -I$(prefix)/include" >>libbiosig.pc
+	echo "Cflags: $(DEFINES) -I$(prefix)/include" >>libbiosig.pc
 
 libbiosig2.a: $(OBJECTS) biosig2.o t240/libcnsfef.a
 	-$(DELETE) libbiosig2.a
