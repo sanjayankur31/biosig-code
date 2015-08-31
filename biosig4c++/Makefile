@@ -794,6 +794,24 @@ mex/%.mexw64: mex/%.cpp Makefile biosig.h biosig-dev.h
 		-I$(W64MAT_INC) -O2 -o "$@" -L$(GNUMEX64) -s "$<" -llibmx -llibmex -lbiosig -liconv -lssp $(LDLIBS) -lws2_32
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
+release_octave_pkg:
+	$(eval $@_TMP := $(shell mktemp -d biosig.XXXXXX)/mexbiosig-$(BIOSIG_VERSION))
+	echo "$($@_TMP) generated";
+	$(shell mkdir -p $($@_TMP)/doc/)
+	$(shell mkdir -p $($@_TMP)/inst/)
+	$(shell mkdir -p $($@_TMP)/src/)
+	cp mex/README $($@_TMP)/doc/
+	cp mex/DESCRIPTION $($@_TMP)/
+	cp LICENSE $($@_TMP)/COPYING
+	cp mex/mex*.cpp mex/Makefile $($@_TMP)/src/
+	### TODO
+	touch $($@_TMP)/src/mex{SOPEN,SLOAD,SSAVE}.m
+	echo "mexSLOAD mexSOPEN mexSSAVE" > $($@_TMP)/INDEX
+	(cd $($@_TMP)/.. && tar cvfz mexbiosig-$(BIOSIG_VERSION).src.tar.gz mexbiosig-$(BIOSIG_VERSION))
+	(cp $($@_TMP)/../mexbiosig-$(BIOSIG_VERSION).src.tar.gz ~/L/public_html/biosig/prereleases/ )
+	rm -rf $(shell dirname $($@_TMP) )
+
+
 #############################################################
 #	SigViewer
 #############################################################

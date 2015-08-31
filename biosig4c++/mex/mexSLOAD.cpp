@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../biosig.h"
+#include <biosig.h>
 extern int VERBOSE_LEVEL; 	// used for debugging, variable is always defined
 
 #ifdef NDEBUG
