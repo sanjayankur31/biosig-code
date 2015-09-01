@@ -9,19 +9,32 @@ Basically, mex-files for loading biosig data are provided.
 COMPILATION: 
 
 == Octave on Linux =======================
-On Linux platforms the compilation is straight forward. The prerequisites are 
-    sudo apt-get install zlib1g-dev libsuitesparse-dev liboctave-dev
-Octave version < 3.8.0 requrire octave-headers instead of liboctave-dev
-The mex files for Octave are generated with 
-	make mex4o 
+On Linux platforms the compilation is straight forward. A prerequisite is
+libbiosig (with its dependencies).
+     make libbiosig && sudo make install
+
+Generate and install mexbiosig-package
+     make mexbiosig
+     sudo make install_mexbiosig
+
+== Octave on MacOSX =======================
+You need to have homebrew  (for details see http://brew.sh)
+   ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+and install biosig
+   brew tap schloegl/biosig
+   brew install mexbiosig
+
+== Octave/MXE on Windows/Cygwin =======================
+   not tested yet
 
 
-== Matlab on Linux =======================
+== Matlab on Linux, MacOSX  =======================
 Prerequisites:
     sudo apt-get install zlib1g-dev libsuitesparse-dev
 Edit Makefile and set the correct path to Matlab:
 The mex files for Matlab are generated with 
-	make mex4m
+	MATLABDIR=/usr/local/MATLAB/R2014b make mex4m
 
 
 == Matlab v7.11 for Win32 ================

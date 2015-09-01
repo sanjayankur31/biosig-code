@@ -4,18 +4,18 @@
 
 class Mexbiosig < Formula
   homepage "http://biosig.sf.net"
-  url "http://sourceforge.net/projects/biosig/files/BioSig%20for%20C_C%2B%2B/src/biosig4c%2B%2B-1.7.0.src.tar.gz"
-  version "1.7.0"
-  sha1 "af05487f6dd82f802e4c3ffec1218f24cda0dcea"
+  url "http://sourceforge.net/projects/biosig/files/BioSig%20for%20C_C%2B%2B/src/biosig4c%2B%2B-1.7.2.src.tar.gz"
+  version "1.7.2"
+  sha1 "f5fd7ffffc3525420830084e117da1aadd213be0"
 
   # depends_on "cmake" => :build
   # depends_on :x11 # if your formula requires any X11/XQuartz components
   depends_on "wget" => :build
   depends_on "libbiosig" => :build
-  depends_on "octave" => :recommended
+  depends_on "homebrew/science/octave" => :build
 
   def install
-    #system "wget http://sourceforge.net/p/biosig/code/ci/master/tree/biosig4c++/Makefile?format=raw -O Makefile "
+    system "wget http://sourceforge.net/p/biosig/code/ci/master/tree/biosig4c++/Makefile?format=raw -O Makefile "
 
     #ENV.deparallelize  # if your formula fails when building in parallel
 
@@ -25,7 +25,12 @@ class Mexbiosig < Formula
     #                      "--disable-silent-rules",
     #                      "--prefix=#{prefix}"
 
-    system "PKG_CONFIG_PATH=/usr/local/lib/pkgconfig make install_octave" 
+    ## build mex for MATLAB: needs to define MATLABDIR, or some heuristic is used
+    #system "MATLABDIR= make mex4m; done"
+    #system "make mex4m -B"
+
+    ## build mex for Octave
+    system "sudo make install_mexbiosig"
   end
 
   test do
@@ -38,6 +43,6 @@ class Mexbiosig < Formula
     #
     # The installed folder is not in the path, so use the entire path to any
     # executables being tested: `system "#{bin}/program", "do", "something"`.
-    #system "save2gdf", "--help"
+    system "octave --norc --eval 'pkg load mexbiosig; which mexSLOAD; exit;'"
   end
 end

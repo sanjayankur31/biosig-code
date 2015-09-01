@@ -794,23 +794,22 @@ mex/%.mexw64: mex/%.cpp Makefile biosig.h biosig-dev.h
 		-I$(W64MAT_INC) -O2 -o "$@" -L$(GNUMEX64) -s "$<" -llibmx -llibmex -lbiosig -liconv -lssp $(LDLIBS) -lws2_32
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
-release_octave_pkg:
-	$(eval $@_TMP := $(shell mktemp -d biosig.XXXXXX)/mexbiosig-$(BIOSIG_VERSION))
+mexbiosig mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz: mex/*.cpp
+	$(eval $@_TMP := $(shell mktemp -d /tmp/biosig.XXXXXX)/mexbiosig-$(BIOSIG_VERSION))
 	echo "$($@_TMP) generated";
 	$(shell mkdir -p $($@_TMP)/doc/)
 	$(shell mkdir -p $($@_TMP)/inst/)
 	$(shell mkdir -p $($@_TMP)/src/)
 	cp mex/README $($@_TMP)/doc/
-	cp mex/DESCRIPTION $($@_TMP)/
+	sed -e 's#^Version.*$$#Version: $(BIOSIG_VERSION)#g' -e 's#^Date.*$$#Date: '$(shell date +%Y-%m-%d)'#g' mex/DESCRIPTION > $($@_TMP)/DESCRIPTION
 	cp LICENSE $($@_TMP)/COPYING
 	cp mex/mex*.cpp mex/Makefile $($@_TMP)/src/
 	### TODO
-	touch $($@_TMP)/src/mex{SOPEN,SLOAD,SSAVE}.m
+	#touch $($@_TMP)/src/mex{SOPEN,SLOAD,SSAVE}.m
 	echo "mexSLOAD mexSOPEN mexSSAVE" > $($@_TMP)/INDEX
-	(cd $($@_TMP)/.. && tar cvfz mexbiosig-$(BIOSIG_VERSION).src.tar.gz mexbiosig-$(BIOSIG_VERSION))
-	(cp $($@_TMP)/../mexbiosig-$(BIOSIG_VERSION).src.tar.gz ~/L/public_html/biosig/prereleases/ )
-	rm -rf $(shell dirname $($@_TMP) )
-
+	tar cvfz "$@" $($@_TMP)/../mexbiosig-$(BIOSIG_VERSION)
+	-(cp "$@" ~/L/public_html/biosig/prereleases/ )
+	-rm -rf $(shell dirname $($@_TMP) )
 
 #############################################################
 #	SigViewer
@@ -867,7 +866,7 @@ bin/flowmon: flowmon.o gdf.o physicalunits.o
 #	INSTALL and DE-INSTALL
 #############################################################
 
-.PHONY: clean distclean install remove install_sigviewer install_octave asc bin testscp testhl7 testbin test test6 zip 
+.PHONY: clean distclean install remove install_sigviewer asc bin testscp testhl7 testbin test test6 zip
 
 distclean:
 	-$(DELETE) -r autom4te.cache
@@ -940,15 +939,11 @@ install_sigviewer: sigviewer
 install_ttl2trig: bin/ttl2trig
 	install bin/ttl2trig $(BIN)
 
-install_octave: mex/mexSLOAD.mex mex/mexSOPEN.mex mex/mexSSAVE.mex
-	install -d $(DESTDIR)$(prefix)/lib/octave/packages/mexbiosig-$(BIOSIG_VERSION)
-	install $? $(DESTDIR)$(prefix)/lib/octave/packages/mexbiosig-$(BIOSIG_VERSION)
-	echo "mexBiosig is installed in $(DESTDIR)$(prefix)/lib/octave/packages/mexbiosig-$(BIOSIG_VERSION)"
-	#octave$(OCTAVE_VERSION) --norc --eval "addpath $(DESTDIR)$(prefix)/lib/octave/packages/mexbiosig-$(BIOSIG_VERSION); savepath"
+install_mexbiosig install_octave: mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz
+	octave$(VERSION) --norc --eval "pkg install $<"
 
-uninstall_octave:
-	-$(DELETE) $(DESTDIR)$(prefix)/lib/octave/packages/mexbiosig-$(BIOSIG_VERSION)/*
-	-rmdir $(DESTDIR)$(prefix)/lib/octave/packages/mexbiosig-$(BIOSIG_VERSION)
+uninstall_mexbiosig install_octave: mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz
+	octave$(VERSION) --norc --eval "pkg uninstall $<"
 
 install_headers: biosig-dev.h biosig.h biosig2.h gdftime.h physicalunits.h
 	install -d 			$(INC)
