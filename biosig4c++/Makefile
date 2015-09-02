@@ -127,18 +127,22 @@ endif
 
 ifeq (Darwin,$(shell uname))
 	## Homebrew:
-	##	brew tap homebrew/dupes
-	##	brew install libiconv
+	##	brew install gawk
+	##	brew install gnu-tar
+	##	brew install homebrew/dupes/libiconv
+	##	brew install homebrew/science/suite-sparse
 	##
+	TAR	       = gtar
 	LD	       = ld
 	CFLAGS        += -I/usr/local/opt/libiconv/include
 	LDLIBS        += -L/usr/local/opt/libiconv/lib/ -liconv -lstdc++
-	LDFLAGS        += -dylib -arch x86_64 -macosx_version_min 10.9
+	LDFLAGS       += -dylib -arch x86_64 -macosx_version_min 10.9
 	DLEXT          = dylib
 	FULLDLEXT      = ${BIOSIG_VERSION}.dylib
 	SONAME_PREFIX  = -install_name # the last space character is crucial
 	SONAME_POSTFIX = .${MAJOR_VERSION}.${MINOR_VERSION}.$(DLEXT)
 else
+	TAR	       = tar
 	LD	       = $(CXX)
 	LDFLAGS       += -shared
 	DLEXT          = so
@@ -794,7 +798,9 @@ mex/%.mexw64: mex/%.cpp Makefile biosig.h biosig-dev.h
 		-I$(W64MAT_INC) -O2 -o "$@" -L$(GNUMEX64) -s "$<" -llibmx -llibmex -lbiosig -liconv -lssp $(LDLIBS) -lws2_32
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
-mexbiosig mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz: mex/*.cpp
+mexbiosig: mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz
+
+mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz: mex/*.cpp
 	$(eval $@_TMP := $(shell mktemp -d /tmp/biosig.XXXXXX)/mexbiosig-$(BIOSIG_VERSION))
 	echo "$($@_TMP) generated";
 	$(shell mkdir -p $($@_TMP)/doc/)
@@ -807,7 +813,7 @@ mexbiosig mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz: mex/*.cpp
 	### TODO
 	#touch $($@_TMP)/src/mex{SOPEN,SLOAD,SSAVE}.m
 	echo "mexSLOAD mexSOPEN mexSSAVE" > $($@_TMP)/INDEX
-	tar cvfz "$@" $($@_TMP)/../mexbiosig-$(BIOSIG_VERSION)
+	$(TAR) cvfz "$@" $($@_TMP)/../mexbiosig-$(BIOSIG_VERSION)
 	-(cp "$@" ~/L/public_html/biosig/prereleases/ )
 	-rm -rf $(shell dirname $($@_TMP) )
 
@@ -942,8 +948,8 @@ install_ttl2trig: bin/ttl2trig
 install_mexbiosig install_octave: mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz
 	octave$(VERSION) --norc --eval "pkg install $<"
 
-uninstall_mexbiosig install_octave: mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz
-	octave$(VERSION) --norc --eval "pkg uninstall $<"
+uninstall_mexbiosig: mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz
+	octave$(VERSION) --eval "pkg uninstall mexbiosig"
 
 install_headers: biosig-dev.h biosig.h biosig2.h gdftime.h physicalunits.h
 	install -d 			$(INC)

@@ -19,7 +19,23 @@ Generate and install mexbiosig-package
 
 == Octave on MacOSX =======================
 You need to have homebrew  (for details see http://brew.sh)
-   ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+  # 1) Install XCode from App Store
+  xcode-select --install
+
+  # 2) install homebrew
+  ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+  # 3) Install prerequisites and recommendations for Octave
+  brew install caskroom/cask/brew-cask
+  brew cask install xquartz
+  brew cask install mactex
+  brew install curl
+
+  # 4) install Octave
+  brew tap homebrew/science
+  export PATH="$PATH:/usr/texbin"
+  brew install octave --with-docs
 
 and install biosig
    brew tap schloegl/biosig
