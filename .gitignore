@@ -16,8 +16,8 @@ biosig4c++/save2gdf
 biosig4c++/mma/sload
 biosig4c++/mma/sload.exe
 # ignore mex files
-mex/mexSOPEN.cpp
-*.mex*
+biosig4c++/mex/mexSOPEN.cpp
+biosig4c++/mex/*.mex*
 # ignore intermediate files for biosig4python
 biosig4c++/python/biosig.py
 biosig4c++/python/swig_wrap.cxx

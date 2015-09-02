@@ -1,6 +1,6 @@
 /*
 
-    Copyright (C) 2011,2013 Alois Schloegl <alois.schloegl@gmail.com>
+    Copyright (C) 2011,2013,2015 Alois Schloegl <alois.schloegl@ist.ac.at>
     This file is part of the "BioSig for C/C++" repository 
     (biosig4c++) at http://biosig.sf.net/ 
 
@@ -19,10 +19,11 @@
 #include <time.h>
 
 #include <biosig.h>
-extern int VERBOSE_LEVEL; 	// used for debugging, variable is always defined
 
 #ifdef NDEBUG
 #define VERBOSE_LEVEL 0 	// turn off debugging information, but its only used without NDEBUG
+#else
+extern int VERBOSE_LEVEL; 	// used for debugging
 #endif
 
 #ifdef tmwtypes_h
