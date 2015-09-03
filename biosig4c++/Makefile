@@ -141,6 +141,15 @@ ifeq (Darwin,$(shell uname))
 	FULLDLEXT      = ${BIOSIG_VERSION}.dylib
 	SONAME_PREFIX  = -install_name # the last space character is crucial
 	SONAME_POSTFIX = .${MAJOR_VERSION}.${MINOR_VERSION}.$(DLEXT)
+else ifneq (,$(findstring MINGW, $(shell uname)))
+		## add gnulib's getlogin
+		SOURCES += win32/getlogin.c win32/getline.c win32/getdelim.c
+		OBJECTS += getlogin.o getline.o getdelim.o
+		## exclude conflicting definition of sopen from mingw's io.h
+		CFLAGS  += -I.
+#		IO_H_FILE2 = io.h
+		LIBS    += -lssp
+		LDLIBS  += -liconv -liberty -lws2_32
 else
 	TAR	       = tar
 	LD	       = $(CXX)
