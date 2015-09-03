@@ -690,19 +690,20 @@ libbiosig.def: $(OBJECTS) t240/libcnsfef.a libbiosig.pc
 	$(CXX) -o libbiosig.dll -s -shared -fPIC  $(OBJECTS) t240/libcnsfef.a $(LIBS) -Wl,--subsystem,windows,--output-def,libbiosig.def,--out-implib,libbiosig.dll.a
 
 libbiosig.pc :
-	echo "# Defines libbiosig.pc"       > libbiosig.pc
-	echo "prefix=$(prefix)"             >>libbiosig.pc
-	echo "exec_prefix=$(prefix)"        >>libbiosig.pc
-	echo "libdir=$(prefix)/lib"         >>libbiosig.pc
-	echo "includedir=$(prefix)/include" >>libbiosig.pc
-	echo                                >>libbiosig.pc
-	echo "Name: libbiosig"		    >>libbiosig.pc
-	echo "Description: Biosig library"  >>libbiosig.pc
-	echo "Version: ${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING}" >>libbiosig.pc
-	echo "URL: http://biosig.sf.net"    >>libbiosig.pc
-	echo "Libs: -L$(prefix)/lib -lbiosig $(LDLIBS)"  >>libbiosig.pc
-	#echo "Libs.private: -liconv"  >>libbiosig.pc
-	echo "Cflags: $(DEFINES) -I$(prefix)/include" >>libbiosig.pc
+	mkdir -p pkgconfig
+	echo "# Defines libbiosig.pc"       > "$@"
+	echo "prefix=$(prefix)"             >>"$@"
+	echo "exec_prefix=$(prefix)"        >>"$@"
+	echo "libdir=$(prefix)/lib"         >>"$@"
+	echo "includedir=$(prefix)/include" >>"$@"
+	echo                                >>"$@"
+	echo "Name: libbiosig"		    >>"$@"
+	echo "Description: Biosig library"  >>"$@"
+	echo "Version: ${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING}" >>"$@"
+	echo "URL: http://biosig.sf.net"    >>"$@"
+	echo "Libs: -L$(prefix)/lib -lbiosig $(LDLIBS)"  >>"$@"
+	#echo "Libs.private: -liconv"  >>"$@"
+	echo "Cflags: $(DEFINES) -I$(prefix)/include" >>"$@"
 
 libbiosig2.a: $(OBJECTS) biosig2.o t240/libcnsfef.a
 	-$(DELETE) libbiosig2.a
@@ -1003,6 +1004,7 @@ uninstall remove: uninstall_mexbiosig
 	-$(DELETE) $(LIB)/libbiosig2.*
 	-$(DELETE) $(LIB)/libphysicalunits.*
 	-$(DELETE) $(LIB)/libgdftime.*
+	-$(DELETE) $(LIB)/pkgconfig/libbiosig.pc
 	-$(DELETE) $(DESTDIR)$(prefix)/share/man/man1/save2gdf.1
 	-$(DELETE) $(DESTDIR)$(prefix)/share/man/man1/mexSLOAD.1
 	-$(DELETE) $(DESTDIR)$(prefix)/share/man/man1/sigviewer.1
