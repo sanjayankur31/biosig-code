@@ -278,8 +278,8 @@ endif
 %.mex: %.cpp
 	$(OCT) $(DEFINES) -v -g --mex "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
 
-%.oct: %.cpp Makefile biosig.h biosig-dev.h libbiosig.$(DLEXT)
-	$(OCT) $(DEFINES) "$<" $(shell $(PKGCONF) -libs libbiosig) -o "$@"
+%.oct: %.cpp
+	$(OCT) $(DEFINES) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
 
 %.mexw32: %.cpp Makefile biosig.h biosig-dev.h
 	## $(CROSS)-g++ is used instead of $(CXX), so it can be called from biosig as well as mxe. 

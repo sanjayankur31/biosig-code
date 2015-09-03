@@ -780,11 +780,11 @@ mex: mex4o mexw32 mexw64
 endif
 
 mex/%.mex: mex/%.cpp
-	$(OCT) $(DEFINES) -v -g --mex "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
+	$(OCT) $(DEFINES) -v -g --mex "$<" -Wl,-rpath,$(shell pwd) -I./ -L./ -lbiosig $(LIBS) -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
-mex/%.oct: mex/%.cpp Makefile biosig.h biosig-dev.h libbiosig.$(DLEXT)
-	$(OCT) $(DEFINES) "$<" $(shell $(PKGCONF) -libs libbiosig) -o "$@"
+mex/%.oct: mex/%.cpp
+	$(OCT) $(DEFINES) "$<" -Wl,-rpath,$(shell pwd) -I./ -L./ -lbiosig $(LIBS) -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
 mex/%.mexw32: mex/%.cpp Makefile biosig.h biosig-dev.h
@@ -948,7 +948,7 @@ install_ttl2trig: bin/ttl2trig
 install_mexbiosig install_octave: mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz
 	octave$(VERSION) --norc --eval "pkg install $<"
 
-uninstall_mexbiosig: mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz
+uninstall_mexbiosig:
 	octave$(VERSION) --eval "pkg uninstall mexbiosig"
 
 install_headers: biosig-dev.h biosig.h biosig2.h gdftime.h physicalunits.h
@@ -984,7 +984,7 @@ install_tools install_save2gdf: save2gdf doc/save2gdf.1 install_libbiosig
 	#$(MAKE)  install_sigviewer
 	#$(MAKE)  install_octave
 
-uninstall remove: uninstall_octave
+uninstall remove: uninstall_mexbiosig
 	-$(DELETE) $(BIN)/save2gdf
 	-$(DELETE) $(BIN)/heka2itx
 	-$(DELETE) $(BIN)/save2scp
