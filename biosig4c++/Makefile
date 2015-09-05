@@ -90,6 +90,8 @@ PathToSigViewerWIN64 = ../sigviewer4win64
 CFLAGS       += -fstack-protector -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -pipe -fPIC -fno-builtin-memcmp -O2 -Wno-unused-result
 CFLAGS       += -Wno-deprecated
 CFLAGS       += -D_GNU_SOURCE
+CFLAGS       += -D_XOPEN_SOURCE=700
+CFLAGS       += -D_DEFAULT_SOURCE
 CXXFLAGS      = $(CFLAGS)
 
 ## TARGET dependencies
@@ -141,15 +143,26 @@ ifeq (Darwin,$(shell uname))
 	FULLDLEXT      = ${BIOSIG_VERSION}.dylib
 	SONAME_PREFIX  = -install_name # the last space character is crucial
 	SONAME_POSTFIX = .${MAJOR_VERSION}.${MINOR_VERSION}.$(DLEXT)
+
 else ifneq (,$(findstring MINGW, $(shell uname)))
-		## add gnulib's getlogin
-		SOURCES += win32/getlogin.c win32/getline.c win32/getdelim.c
-		OBJECTS += getlogin.o getline.o getdelim.o
-		## exclude conflicting definition of sopen from mingw's io.h
-		CFLAGS  += -I.
-#		IO_H_FILE2 = io.h
-		LIBS    += -lssp
-		LDLIBS  += -liconv -liberty -lws2_32
+	## add gnulib's getlogin
+	SOURCES += win32/getlogin.c win32/getline.c win32/getdelim.c
+	OBJECTS += getlogin.o getline.o getdelim.o
+	## exclude conflicting definition of sopen from mingw's io.h
+	CC = gcc
+	CXX = g++
+	CFLAGS  += -I.
+	CFLAGS  += -pipe -fPIC -D_REENTRANT -D=BUILD_DLL
+	LDFLAGS += -shared
+	TAR	 = tar
+	LD	 = $(CXX)
+	DLEXT    = dll
+	FULLDLEXT      = .dll
+	SONAME_PREFIX  = -Wl,-soname=
+	SONAME_POSTFIX = .$(DLEXT)
+	LIBS    += -lssp
+	LDLIBS  += -liconv -lws2_32 -Wl,-subsystem,windows
+
 else
 	TAR	       = tar
 	LD	       = $(CXX)
@@ -171,7 +184,12 @@ DEFINES      += $(DEFINES_ALL)
 #DEFINES      += -D=WITHOUT_SCP_DECODE
 #DEFINES      += -D=WITH_TIMESTAMPEVENT
 #DEFINES      += -D=WITH_TIMESTAMPCHANNEL
-DEFINES      += -D=WITH_ZLIB 
+
+ifeq (,$(findstring MINGW, $(shell uname)))
+             ### MXE_OCTAVE does not provid ZLIB
+DEFINES      += -D=WITH_ZLIB
+endif
+
 DEFINES      += -D=WITH_PTHREAD
 #DEFINES      += -D=WITH_CURL
 DEFINES      += -D=__4HAERTEL__
@@ -196,7 +214,6 @@ DEFINES      += -D=WITH_FEF
 #DEFINES      += -D=WITH_WAV
 #DEFINES      += -D=WITH_NEV
 DEFINES      += -D=MAKE_EDFLIB
-
 
 
 ifneq (,$(findstring WITH_GDCM, $(DEFINES)))
@@ -231,6 +248,9 @@ ifneq (,$(findstring stack-protector, $(CFLAGS)))
 ifneq (,$(findstring CYGWIN, $(shell uname)))
   LDLIBS     += -lssp -liconv
 endif 
+ifneq (,$(findstring MINGW, $(shell uname)))
+  LDLIBS     += -lssp -liconv
+endif
 endif
 
 LIBS         += $(LDLIBS)
