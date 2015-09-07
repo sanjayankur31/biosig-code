@@ -41,8 +41,22 @@ and install biosig
    brew tap schloegl/biosig
    brew install mexbiosig
 
-== Octave/MXE on Windows/Cygwin =======================
-   not tested yet
+== Octave on Window (MXE-Octave) =======================
+   # 1) Download and install Octave 4.0.0
+	https://ftp.gnu.org/gnu/octave/windows/
+   # 2) Get biosig sources
+	either with git
+	    git clone git://git.code.sf.net/p/biosig/code biosig-code
+	or source package from http://biosig.sourceforge.net/download.html
+	    libbiosig-X.Y.Z.src.tar.gz (requires version 1.7.3 or later)
+   # 3) Start Octave and change directory to
+	.../biosig4c++/
+   # 4) Make and install libbiosig
+	system('make && make install')
+   # 5) Generate mexbiosig pkg
+	system('make mexbiosig')
+   # 6) Install mexbiosig-package
+	pkg install mex/mexbiosig-1.7.3.tar.gz
 
 
 == Matlab on Linux, MacOSX  =======================

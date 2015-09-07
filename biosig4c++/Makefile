@@ -143,6 +143,7 @@ ifeq (Darwin,$(shell uname))
 	FULLDLEXT      = ${BIOSIG_VERSION}.dylib
 	SONAME_PREFIX  = -install_name # the last space character is crucial
 	SONAME_POSTFIX = .${MAJOR_VERSION}.${MINOR_VERSION}.$(DLEXT)
+	prefix        ?= /usr/local
 
 else ifneq (,$(findstring MINGW, $(shell uname)))
 	## add gnulib's getlogin
@@ -157,11 +158,12 @@ else ifneq (,$(findstring MINGW, $(shell uname)))
 	TAR	 = tar
 	LD	 = $(CXX)
 	DLEXT    = dll
-	FULLDLEXT      = .dll
+	FULLDLEXT      = ${MAJOR_VERSION}${MINOR_VERSION}.dll
 	SONAME_PREFIX  = -Wl,-soname=
-	SONAME_POSTFIX = .$(DLEXT)
+	SONAME_POSTFIX = ${MAJOR_VERSION}${MINOR_VERSION}.$(DLEXT)
 	LIBS    += -lssp
 	LDLIBS  += -liconv -lws2_32 -Wl,-subsystem,windows
+	prefix  :=
 
 else
 	TAR	       = tar
@@ -171,10 +173,7 @@ else
 	FULLDLEXT      = so.${BIOSIG_VERSION}
 	SONAME_PREFIX  = -Wl,-soname=
 	SONAME_POSTFIX = .$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}
-endif
-
-ifeq (,$(prefix))
-	prefix  := /usr/local
+	prefix        ?= /usr/local
 endif
 
 DEFINES_ALL   = #-D=NDEBUG
@@ -488,8 +487,13 @@ sandbox.o: test0/sandbox.c  biosig.h biosig-dev.h
 
 
 ## exclude conflicting definition of sopen from mingw's io.h
-io.h:
-	$(SED) '/ sopen/ s#^#//#' $(prefix)../$(TARGET)/include/io.h > io.h
+ifeq (MINGW, $(findstring MINGW, $(shell uname)))
+### MXE-OCTAVE
+io.h: /include/io.h
+else
+io.h: $(prefix)../$(TARGET)/include/io.h
+endif
+	$(SED) '/ sopen/ s#^#//#' "$<" > "$@"
 
 win32/io.h: $(IO_H_FILE)
 	$(SED) '/ sopen/ s#^#//#' $(IO_H_FILE) > "$@"
@@ -844,8 +848,8 @@ mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz: mex/*.cpp
 	#touch $($@_TMP)/src/mex{SOPEN,SLOAD,SSAVE}.m
 	echo "mexSLOAD mexSOPEN mexSSAVE" > $($@_TMP)/INDEX
 	$(TAR) cvfz "$@" $($@_TMP)/../mexbiosig-$(BIOSIG_VERSION)
-	-(cp "$@" ~/L/public_html/biosig/prereleases/ )
-	-rm -rf $(shell dirname $($@_TMP) )
+	#-(cp "$@" ~/L/public_html/biosig/prereleases/ )
+	#-rm -rf $(shell dirname $($@_TMP) )
 
 #############################################################
 #	SigViewer
@@ -919,7 +923,7 @@ distclean:
 	-$(DELETE) *.oct
 	-$(DELETE) mex/mexSOPEN.cpp
 	-$(DELETE) libbiosig.pc
-	-$(DELETE) $(IO_H_FILE64) $(IO_H_FILE)
+	-$(DELETE) $(IO_H_FILE64) $(IO_H_FILE) io.h
 	-$(DELETE) t5.scp t6.scp save2gdf gztest test_scp_decode biosig_server biosig_client
 	-$(DELETE) t?.[bge]df* t?.hl7* t?.scp* t?.cfw* t?.gd1* t?.*.gz *.fil $(TEMP_DIR)t1.* $(DATA_DIR)t1.*
 	-$(DELETE) python/swig_wrap.* python/biosig.py* python/_biosig.so python/biosig2.py* python/_biosig2.so
