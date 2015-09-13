@@ -546,7 +546,7 @@ units.i : $(EXTERN)/units.csv
 #############################################################
 
 gdf.o: biosig.c biosig-dev.h biosig.h eventcodes.i units.i 11073-10102-AnnexB.i
-	$(CC) -c -D=ONLYGDF -D=WITHOUT_NETWORK $(DEFINES_ALL) $(CFLAGS) $(INCPATH) -o "$@" "$<"
+	$(CC) -c -D=ONLYGDF -D=WITHOUT_NETWORK $(DEFINES) $(CFLAGS) $(INCPATH) -o "$@" "$<"
 
 #getlogin_r.o: win32/getlogin_r.c
 #	$(CC) -c $(DEFINES) $(CFLAGS) $(INCPATH) -o "$@" "$<"
@@ -554,7 +554,7 @@ gdf.o: biosig.c biosig-dev.h biosig.h eventcodes.i units.i 11073-10102-AnnexB.i
 ########### WIN32 ##################
 
 win32/gdf.obj: biosig.c biosig-dev.h biosig.h
-	$(MinGWCC) -c -D=ONLYGDF $(DEFINES_ALL) $(MinGWCFLAGS) -o "$@" "$<"
+	$(MinGWCC) -c -D=ONLYGDF $(DEFINES) $(MinGWCFLAGS) -o "$@" "$<"
 
 $(PathToSigViewerWIN32): 
 	svn co https://sigviewer.svn.sourceforge.net/svnroot/sigviewer/trunk ../sigviewer4win32
@@ -577,7 +577,7 @@ win32/sigviewer.exe: win32/libbiosig.a win32/libbiosig.dll
 ########### WIN64 ##################
 
 win64/gdf.obj: biosig.c biosig-dev.h biosig.h
-	$(MinGW64CC) -c -D=ONLYGDF $(DEFINES_ALL) $(MinGW64CFLAGS) -o "$@" "$<"
+	$(MinGW64CC) -c -D=ONLYGDF $(DEFINES) $(MinGW64CFLAGS) -o "$@" "$<"
 
 $(PathToSigViewerWIN64): 
 	svn co https://sigviewer.svn.sourceforge.net/svnroot/sigviewer/trunk ../sigviewer4win64
@@ -646,11 +646,9 @@ tcl: libbiosig.$(LIBEXT) tcl/biosig.i
 
 # libraries are built in MXE
 
-win32/save2gdf.exe: save2gdf.c
-	$(MinGWLINK) $(MinGWCFLAGS) "$<" $(MinGWLIBS) -o "$@"
-
-win32/pdp2gdf.exe: pdp2gdf.c
-	$(MinGWLINK) $(MinGWCFLAGS) "$<" $(MinGWLIBS) -o "$@"
+## save2gdf, pdp2gdf
+win32/%.exe: %.c
+	$(MinGWCXX) $(DEFINES) $(MinGWCFLAGS) "$<" $(MinGWLIBS) -o "$@"
 
 win32: mexw32 win32mma
 
@@ -662,11 +660,9 @@ win32: mexw32 win32mma
 
 # Libraries are build in MXE
 
-win64/save2gdf.exe: save2gdf.c
-	$(MinGW64LINK) $(MinGW64CFLAGS) "$<" $(MinGW64LIBS) -o "$@"
-
-win64/pdp2gdf.exe: pdp2gdf.c
-	$(MinGW64LINK) $(MinGW64CFLAGS) "$<" $(MinGW64LIBS) -o "$@"
+## save2gdf, pdp2gdf
+win64/%.exe: %.c
+	$(MinGW64CXX) $(DEFINES) $(MinGW64CFLAGS) "$<" $(MinGW64LIBS) -o "$@"
 
 win64: mexw64
 
@@ -742,20 +738,18 @@ libbiosig2.a: $(OBJECTS) biosig2.o t240/libcnsfef.a
 	-$(DELETE) libbiosig2.a
 	$(AR) libbiosig2.a $(OBJECTS) biosig2.o t240/*.o
 libbiosig2.def: $(OBJECTS) biosig2.o t240/libcnsfef.a
-	$(CXX) -o libbiosig2.dll -s -shared -fPIC  $(OBJECTS) biosig2.o t240/libcnsfef.a $(LIBS) -Wl,--subsystem,windows,--output-def,libbiosig2.def,--out-implib,libbiosig2.dll.a
+	$(LD) -o libbiosig2.dll -s -shared -fPIC  $(OBJECTS) biosig2.o t240/libcnsfef.a $(LIBS) -Wl,--subsystem,windows,--output-def,libbiosig2.def,--out-implib,libbiosig2.dll.a
 
-save2gdf: save2gdf.o
-	$(CXX) $(CXXFLAGS) save2gdf.o $(shell $(PKGCONF) --libs libbiosig) -o save2gdf
-
-pdp2gdf: pdp2gdf.o
-	$(CXX) pdp2gdf.o $(shell $(PKGCONF) --libs libbiosig) -o pdp2gdf
+## save2gdf, pdp2gdf
+%: %.c
+	$(CXX) $(DEFINES) $(CXXFLAGS) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
 
 bscs: biosig_client biosig_server sandbox.o biosig.o
 biosig_client: biosig_client.c libbiosig.$(LIBEXT) biosig-network.o
-	$(CXX) $(CXXFLAGS) biosig_client.c biosig-network.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o biosig_client
+	$(CXX) $(DEFINES) $(CXXFLAGS) biosig_client.c biosig-network.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o biosig_client
 
 biosig_server: biosig_server.c libbiosig.$(LIBEXT) biosig-network.o
-	$(CXX) $(CXXFLAGS) biosig_server.c biosig-network.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o biosig_server
+	$(CXX) $(DEFINES) $(CXXFLAGS) biosig_server.c biosig-network.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o biosig_server
 
 
 #############################################################
@@ -892,14 +886,14 @@ save2aecg: save2gdf
 
 ###	TTL2TRIG
 bin/ttl2trig : src/ttl2trig.c gdf.o physicalunits.o
-	$(CXX) -D=WITH_BIOSIG $(DEFINE_ALL) "$<" gdf.o physicalunits.o -Wall -Wextra -lasound -o "$@"
+	$(CXX) -D=WITH_BIOSIG $(DEFINE) $(CFLAGS) "$^" -Wall -Wextra -lasound -o "$@"
 
 ###	FLOWMON
 flowmon.o: src/flowmon2.c 
-	$(CC)  -c $(DEFINES_ALL) $(CFLAGS) -o "$@" src/flowmon2.c 
+	$(CC)  -c $(DEFINES) $(CFLAGS) -o "$@" "$<"
         
 bin/flowmon: flowmon.o gdf.o physicalunits.o
-	$(CC) flowmon.o gdf.o physicalunits.o -lpthread -lm -o "$@"
+	$(CC) "$^" -lpthread -lm -o "$@"
 
 
 #############################################################
@@ -1260,10 +1254,7 @@ $(DATA_DIR)Newtest17-2048.bdf : $(DATA_DIR)BDFtestfiles.zip
 	unzip -u "$<" -d $(DATA_DIR)
 
 testbdf : $(DATA_DIR)Newtest17-2048.bdf
-	./save2gdf -V4 "$<" | awk '/NoChannels:/ { print $$2 } '
-	./save2gdf -V4 "$<" | awk '/NRec:/ { print $$2 } '
-	./save2gdf -V4 "$<" | awk '/Fs:/ { print $$2 } '
-	./save2gdf -V4 "$<" | awk '/Events\/Annotations:/ { print $$2 } '
+	./save2gdf -V4 "$<" | awk '/(NoChannels|NRec|Fs|Events\/Annotations):/ { print $$2 } '
 
 testpybdf : $(DATA_DIR)Newtest17-2048.bdf
 	python python/demo.py $(TEMP_DIR)*-256.bdf
