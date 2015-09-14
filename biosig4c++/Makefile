@@ -473,7 +473,7 @@ vpath %.cpp ./:./t210:./t230:./XMLParser:./mex
 
 %.cpp: %.h  biosig.h biosig-dev.h gdftime.h physicalunits.h
 
-%.o: %.c %h
+%.o: %.c
 	$(CC) -c $(DEFINES) $(CFLAGS)  $(INCPATH) -o "$@" "$<"
 
 %.o : win32/%.c
