@@ -13450,7 +13450,7 @@ int sclose(HDRTYPE* hdr)
 
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): sclose OPEN=%i %s\n",__FILE__,__LINE__,hdr->FILE.OPEN,GetFileTypeString(hdr->TYPE));
 
-#ifdef WITH_FEF
+#if defined(WITH_FEF) && !defined(ONLYGDF)
 	if (hdr->TYPE == FEF) sclose_fef_read(hdr);
 #endif
 
