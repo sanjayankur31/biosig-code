@@ -81,6 +81,7 @@ int c64ta(uint64_t ID, char *txt) {
 	}
 	txt[BSCS_ID_BITLEN>>2] = 0;
 	if (VERBOSE_LEVEL>8) fprintf(stdout,"c64ta: ID=%016"PRIx64" TXT=%s\n",ID,txt);
+	return 0;
 }
 
 
@@ -159,6 +160,9 @@ int bscs_connect(const char* hostname) {
    	}
 
 	// loop through all the results and connect to the first we can
+#ifndef NI_MAXHOST
+#define NI_MAXHOST 1025
+#endif
 	for(p = result; p != NULL; p = p->ai_next) {
         	char hostname1[NI_MAXHOST] = "";
         	int error = getnameinfo(p->ai_addr, p->ai_addrlen, hostname1, NI_MAXHOST, NULL, 0, 0); 
