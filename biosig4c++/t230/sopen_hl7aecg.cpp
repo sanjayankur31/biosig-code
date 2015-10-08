@@ -20,7 +20,7 @@
 
 #include <stdio.h>	// system includes
 #include <stdlib.h>	// for strtod(3)
-#include <string.h>
+#include <strings.h>
 
 #include "../biosig-dev.h"
 #ifdef WITH_LIBXML2

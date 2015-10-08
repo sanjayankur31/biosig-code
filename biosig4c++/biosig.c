@@ -52,7 +52,7 @@
 #include <float.h>
 #include <locale.h>
 #include <stdlib.h>
-#include <string.h>
+#include <strings.h>
 #include <sys/stat.h>
 
 #ifdef WITH_CURL
