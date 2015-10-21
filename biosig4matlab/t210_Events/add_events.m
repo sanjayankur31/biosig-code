@@ -1,5 +1,14 @@
 function EVT = add_events(EVT, TYP, POS, CHN, DUR)
 % ADD_EVENTS adds events to event table 
+%
+% Usage:
+%   EVT = add_events(EVT1, EVT2)
+%     merge eventtables EVT1 and EVT2
+%   EVT = add_events(EVT, TYP, POS)
+%   EVT = add_events(EVT, TYP, POS, CHN, DUR)
+%     add events described by TYP and POS to event table
+%
+%   Event tables with TimeStamp information is currently not supported
 
 %    Copyright (C) 2015 by Alois Schloegl <alois.schloegl@ist.ac.at>	
 %    This is part of the BIOSIG-toolbox http://biosig.sf.net/
@@ -19,7 +28,6 @@ function EVT = add_events(EVT, TYP, POS, CHN, DUR)
 
 if (nargin==2) && isstruct(TYP)
 	EVT2=TYP;
-	
 
 elseif (nargin==3) && isnumeric(TYP) && isnumeric(POS)
 	if (numel(TYP)==numel(POS))
@@ -44,6 +52,9 @@ else
 	error('input arguments not supported')
 end
 
+if isfield(EVT,'TimeStamp') || isfield(EVT2,'TimeStamp')
+	error('TimeStamps are not supported')
+end;
 
 %%%%%% CHECK INPUT %%%%%%
 if isfield(EVT,'EVENT')

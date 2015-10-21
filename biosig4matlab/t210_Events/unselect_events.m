@@ -68,6 +68,9 @@ end;
 if isfield(ET,'DUR')
 	ET.DUR(flag)=[];
 end;
+if isfield(ET,'TimeStamp')
+	ET.TimeStamp(flag)=[];
+end;
 
 %%%%%% OUTPUT %%%%%%
 if isfield(EVT,'EVENT')
