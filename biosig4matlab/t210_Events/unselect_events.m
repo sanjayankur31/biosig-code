@@ -1,21 +1,21 @@
-function EVT = unselect_event(EVT, TYPLIST, CHNLIST)
-% UNSELECT_EVENT unselect all events where TYP matches ANY in TYPLIST and
+function EVT = unselect_events(EVT, TYPLIST, CHNLIST)
+% UNSELECT_EVENTS unselect all events where TYP matches ANY in TYPLIST and
 %  AN CHN matches any CHNLIST.
 %
 % Usage:
-%   EVT = select_event(EVT, TYPLIST, CHNLIST)
+%   EVT = select_events(EVT, TYPLIST, CHNLIST)
 %     select all events where TYP matches ANY in TYPLIST OR CHN matches any CHNLIST element
 %     unselects all events where TYP is not in TYPLIST AND CHN is not in CHNLIST
 %     if you want events that where TYP is in TYPLIST AND CHN is in CHNLIST you need to do
 %
-%   EVT = select_event(select_event(EVT, TYPLIST, []), [], CHNLIST)
+%   EVT = select_events(select_event(EVT, TYPLIST, []), [], CHNLIST)
 %     select events that match TYPLIST AND CHNLIST
 %
-%   EVT = unselect_event(EVT, TYPLIST, CHNLIST)
+%   EVT = unselect_events(EVT, TYPLIST, CHNLIST)
 %     unselect all events where TYP matches ANY in TYPLIST and CHN matches any CHNLIST element
 %     selects all events where either TYP is not contained in TYPLIST or CHN is not contained in CHNLIST
 %
-%   EVT = unselect_event(unselect_event(EVT, TYPLIST, []), [], CHNLIST)
+%   EVT = unselect_events(unselect_event(EVT, TYPLIST, []), [], CHNLIST)
 %     select events that are neither in TYPLIST nor in CHNLIST 
 %
 

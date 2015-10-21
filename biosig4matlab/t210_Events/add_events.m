@@ -1,4 +1,4 @@
-function EVT = add_event(EVT, TYP, POS, CHN, DUR)
+function EVT = add_events(EVT, TYP, POS, CHN, DUR)
 % ADD_EVENTS adds events to event table 
 
 %    Copyright (C) 2015 by Alois Schloegl <alois.schloegl@ist.ac.at>	

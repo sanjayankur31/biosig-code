@@ -1,9 +1,10 @@
 % BIOSIG/T210 contains Matlab/Octave functions for handling the event table 
 %
 % A united interface is provided for all data formats:
-%  	ADD_EVENT 	add events to an event table 
-%	SELECT_EVENT	select events from an event table
-% 	UNSELECT_EVENT	event table reduced
+%  	ADD_EVENTS	add events to an event table
+%	SELECT_EVENTS	select events from an event table
+%	UNSELECT_EVENTS	event table reduced
+%	SORT_EVENTS	sort event table according to POSition
 %
 % REFERENCES: 
 % [1] http://pub.ist.ac.at/~schloegl/biosig/
