@@ -100,7 +100,7 @@ gdf_time heka2gdftime(double t) {
 void sopen_heka(HDRTYPE* hdr, FILE *itx) {
 	size_t count = hdr->HeadLen;
 
-	if (hdr->TYPE==HEKA && hdr->VERSION > 0) {
+	if (hdr->TYPE==HEKA && hdr->VERSION > 1) {
 
 		int32_t Levels=0;
 		uint16_t k;
