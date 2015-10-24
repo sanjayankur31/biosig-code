@@ -439,7 +439,8 @@ void sopen_ibw_read (HDRTYPE* hdr) {
 						biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
 						return;
 					};
-					for (size_t n = 0; n < hdr->EVENT.N; n++) {
+					size_t n;
+					for (n = 0; n < hdr->EVENT.N; n++) {
 						hdr->EVENT.TYP[n] = 0x7ffe;
 						hdr->EVENT.POS[n] = (n+1)*w5->nDim[0];
 					}
