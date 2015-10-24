@@ -304,19 +304,12 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"HEKA L2 @%i=%s %f\t%i/%i %i/%i     t=%.17g 
 				pos += Sizes.Rec.Series + 4;
 				// read number of children
 				K3 = (*(uint32_t*)(hdr->AS.Header+pos-4));
-
 				if (EventN <= hdr->EVENT.N + K3 + 2) {
 					EventN = max(max(16,EventN),hdr->EVENT.N+K3+2) * 2;
-					hdr->EVENT.TYP = (typeof(hdr->EVENT.TYP)) realloc(hdr->EVENT.TYP,EventN*sizeof(*hdr->EVENT.TYP));
-					hdr->EVENT.POS = (typeof(hdr->EVENT.POS)) realloc(hdr->EVENT.POS,EventN*sizeof(*hdr->EVENT.POS));
-#if (BIOSIG_VERSION >= 10500)
-					hdr->EVENT.TimeStamp = (gdf_time*)realloc(hdr->EVENT.TimeStamp, EventN * sizeof(gdf_time));
-#endif
-					if (hdr->EVENT.CHN != NULL && hdr->EVENT.DUR != NULL) 
-					{
-						hdr->EVENT.CHN = (typeof(hdr->EVENT.CHN)) realloc(hdr->EVENT.CHN,EventN*sizeof(*hdr->EVENT.CHN));
-						hdr->EVENT.DUR = (typeof(hdr->EVENT.DUR)) realloc(hdr->EVENT.DUR,EventN*sizeof(*hdr->EVENT.DUR));
-					}
+					if (reallocEventTable(hdr, EventN) == SIZE_MAX) {
+						biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
+						return;
+					};
 				}
 
 				if (!hdr->AS.SegSel[0] && !hdr->AS.SegSel[1] && !hdr->AS.SegSel[2]) {

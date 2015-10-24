@@ -731,6 +731,17 @@ void sort_eventtable(HDRTYPE *hdr);
 /* sort event table with respect to hdr->EVENT.POS
   --------------------------------------------------------------*/
 
+size_t reallocEventTable(HDRTYPE *hdr, size_t EventN);
+/*------------------------------------------------------------------------
+	re-allocates memory for Eventtable. 
+	hdr->EVENT.N contains actual number of events
+	EventN determines the size of the allocated memory
+
+  return value:
+	in case of success, EVENT_N is returned
+	in case of failure SIZE_MAX is returned;
+  ------------------------------------------------------------------------*/
+
 void convert2to4_eventtable(HDRTYPE *hdr);
 /* converts event table from {TYP,POS} to [TYP,POS,CHN,DUR} format
   -------------------------------------------------------------- */

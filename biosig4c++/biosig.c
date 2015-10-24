@@ -968,6 +968,10 @@ void sort_eventtable(HDRTYPE *hdr) {
 	re-allocates memory for Eventtable. 
 	hdr->EVENT.N contains actual number of events
 	EventN determines the size of the allocated memory
+
+  return value:
+	in case of success, EVENT_N is returned
+	in case of failure SIZE_MAX is returned;
   ------------------------------------------------------------------------*/
 size_t reallocEventTable(HDRTYPE *hdr, size_t EventN)
 {
@@ -979,6 +983,12 @@ size_t reallocEventTable(HDRTYPE *hdr, size_t EventN)
 #if (BIOSIG_VERSION >= 10500)
 	hdr->EVENT.TimeStamp = (gdf_time*)realloc(hdr->EVENT.TimeStamp, EventN * sizeof(gdf_time));
 #endif
+
+	if (hdr->EVENT.POS==NULL) return SIZE_MAX;
+	if (hdr->EVENT.TYP==NULL) return SIZE_MAX;
+	if (hdr->EVENT.CHN==NULL) return SIZE_MAX;
+	if (hdr->EVENT.DUR==NULL) return SIZE_MAX;
+	if (hdr->EVENT.TimeStamp==NULL) return SIZE_MAX;
 
 	for (n = hdr->EVENT.N; n< EventN; n++) {
 		hdr->EVENT.TYP[n] = 0;
@@ -4437,9 +4447,13 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"%s(line %i): EDF+ line<%s>\n",__FILE__,__LI
 
 					double t = atof(tstr);
 					if (flag > 0) {
-						if (N_EVENT <= hdr->EVENT.N+1)
+						if (N_EVENT <= hdr->EVENT.N+1) {
 							N_EVENT = reallocEventTable(hdr, max(6,hdr->EVENT.N*2));
-
+							if (N_EVENT == SIZE_MAX) {
+								biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
+								return (hdr);
+							};
+						}
 						if (flag==1) {
 							// time keeping: export event only for EDF+D
 							hdr->EVENT.TYP[hdr->EVENT.N] = 0x7ffe;
@@ -4496,17 +4510,10 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"EDF+ event\n\ts1:\t<%s>\n\ts2:\t<%s>\n\ts3:
 				size_t N = hdr->EVENT.N;	
 				hdr->EVENT.N += N_EVENT+1;
 				hdr->EVENT.SampleRate = hdr->SampleRate;
-				hdr->EVENT.POS = (uint32_t*) realloc(hdr->EVENT.POS, hdr->EVENT.N * sizeof(*hdr->EVENT.POS));
-				hdr->EVENT.TYP = (uint16_t*) realloc(hdr->EVENT.TYP, hdr->EVENT.N * sizeof(*hdr->EVENT.TYP));
-#if (BIOSIG_VERSION >= 10500)
-				hdr->EVENT.TimeStamp = (gdf_time*)realloc(hdr->EVENT.TimeStamp, hdr->EVENT.N*sizeof(gdf_time));
-#endif
-				if (hdr->EVENT.DUR && hdr->EVENT.CHN) {
-					hdr->EVENT.DUR = (uint32_t*) realloc(hdr->EVENT.DUR, hdr->EVENT.N * sizeof(*hdr->EVENT.DUR));
-					hdr->EVENT.CHN = (uint16_t*) realloc(hdr->EVENT.CHN, hdr->EVENT.N * sizeof(*hdr->EVENT.DUR));
-					memset(hdr->EVENT.DUR + N, 0, (N_EVENT+1)*sizeof(*hdr->EVENT.DUR) );
-					memset(hdr->EVENT.CHN + N, 0, (N_EVENT+1)*sizeof(*hdr->EVENT.CHN) );	
-				}	
+				if (SIZE_MAX == reallocEventtable(hdr, hdr->EVENT.N)) {
+					biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
+					return (hdr);
+				}
 				
 				d0 = ((uint32_t)Marker[2]<<16) + ((uint32_t)Marker[1]<<8) + (uint32_t)Marker[0];
 				hdr->EVENT.POS[0] = 0;        // 0-based indexing
@@ -5339,14 +5346,11 @@ fprintf(stdout,"ACQ EVENT: %i POS: %i\n",k,POS);
 				if (!strncmp(line,"0x",2)) {
 
 					if (hdr->EVENT.N+1 >= N) {
-						N += 4096;
-				 		hdr->EVENT.POS = (uint32_t*) realloc(hdr->EVENT.POS, N*sizeof(*hdr->EVENT.POS) );
-						hdr->EVENT.TYP = (uint16_t*) realloc(hdr->EVENT.TYP, N*sizeof(*hdr->EVENT.TYP) );
-						hdr->EVENT.DUR = (uint32_t*) realloc(hdr->EVENT.DUR, N*sizeof(*hdr->EVENT.DUR));
-						hdr->EVENT.CHN = (uint16_t*) realloc(hdr->EVENT.CHN, N*sizeof(*hdr->EVENT.CHN));
-#if (BIOSIG_VERSION >= 10500)
-						hdr->EVENT.TimeStamp = (gdf_time*)realloc(hdr->EVENT.TimeStamp, N*sizeof(gdf_time));
-#endif
+						N = max(4096, 2*N);
+						if (N != reallocEventTable(hdr, N)) {
+							biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
+							return (hdr);
+						};
 					}
 
 					val = line+2;
@@ -5604,11 +5608,10 @@ fprintf(stdout,"ACQ EVENT: %i POS: %i\n",k,POS);
 			if (memcmp(StatusVector, StatusVector+BCI2000_StatusVectorLength, BCI2000_StatusVectorLength)) {
 				if (N+4 >= hdr->EVENT.N) {
 					hdr->EVENT.N  += 1024;
-					hdr->EVENT.POS = (uint32_t*)realloc(hdr->EVENT.POS, hdr->EVENT.N*sizeof(*hdr->EVENT.POS));
-					hdr->EVENT.TYP = (uint16_t*)realloc(hdr->EVENT.TYP, hdr->EVENT.N*sizeof(*hdr->EVENT.TYP));
-#if (BIOSIG_VERSION >= 10500)
-					hdr->EVENT.TimeStamp = (gdf_time*)realloc(hdr->EVENT.TimeStamp, hdr->EVENT.N*sizeof(gdf_time));
-#endif
+					if (SIZE_MAX == reallocEventTable(hdr, hdr->EVENT.N)) {
+						biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
+						return (hdr);
+					};
 				}
 
 #if (BIOSIG_VERSION >= 10500)
@@ -5926,13 +5929,10 @@ if (VERBOSE_LEVEL>8)
 
 				if (hdr->EVENT.N <= N_EVENT) {
 					hdr->EVENT.N  += 256;
-			 		hdr->EVENT.POS = (uint32_t*) realloc(hdr->EVENT.POS, hdr->EVENT.N*sizeof(*hdr->EVENT.POS));
-					hdr->EVENT.TYP = (uint16_t*) realloc(hdr->EVENT.TYP, hdr->EVENT.N*sizeof(*hdr->EVENT.TYP));
-					hdr->EVENT.DUR = (uint32_t*) realloc(hdr->EVENT.DUR, hdr->EVENT.N*sizeof(*hdr->EVENT.DUR));
-					hdr->EVENT.CHN = (uint16_t*) realloc(hdr->EVENT.CHN, hdr->EVENT.N*sizeof(*hdr->EVENT.CHN));
-#if (BIOSIG_VERSION >= 10500)
-					hdr->EVENT.TimeStamp = (gdf_time*)realloc(hdr->EVENT.TimeStamp, hdr->EVENT.N*sizeof(gdf_time));
-#endif
+					if (reallocEventTable(hdr, hdr->EVENT.N) == SIZE_MAX) {
+						biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
+						return (hdr);
+					};
 				}
 				hdr->EVENT.TYP[N_EVENT] = atol(t1+p2+2);
 				hdr->EVENT.POS[N_EVENT] = atol(t1+p3+1)-1;        // 0-based indexing
@@ -6516,13 +6516,10 @@ if (VERBOSE_LEVEL>8)
 			uint8_t* buf = (uint8_t*)malloc(TeegSize);
 			count = ifread(buf, 1, TeegSize, hdr);
 			hdr->EVENT.N   = count/fieldsize;
-			hdr->EVENT.POS = (uint32_t*) realloc(hdr->EVENT.POS, hdr->EVENT.N*sizeof(hdr->EVENT.POS));
-			hdr->EVENT.TYP = (uint16_t*) realloc(hdr->EVENT.TYP, hdr->EVENT.N*sizeof(hdr->EVENT.TYP));
-			hdr->EVENT.DUR = (uint32_t*) realloc(hdr->EVENT.TYP, 0);
-			hdr->EVENT.CHN = (uint16_t*) realloc(hdr->EVENT.TYP, 0);
-#if (BIOSIG_VERSION >= 10500)
-			hdr->EVENT.TimeStamp = (gdf_time*)realloc(hdr->EVENT.TimeStamp, hdr->EVENT.N*sizeof(gdf_time));
-#endif
+			if (reallocEventTable(hdr, hdr->EVENT.N) == SIZE_MAX) {
+				biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
+				return (hdr);
+			};
 
 			for  (k = 0; k < hdr->EVENT.N; k++) {
 				hdr->EVENT.TYP[k] = leu16p(buf+k*fieldsize);	// stimulus type
@@ -6665,13 +6662,10 @@ if (VERBOSE_LEVEL>8)
 
 				if (N+1 >= hdr->EVENT.N) {
 					hdr->EVENT.N  += 256;
-			 		hdr->EVENT.POS = (uint32_t*) realloc(hdr->EVENT.POS, hdr->EVENT.N*sizeof(*hdr->EVENT.POS));
-					hdr->EVENT.TYP = (uint16_t*) realloc(hdr->EVENT.TYP, hdr->EVENT.N*sizeof(*hdr->EVENT.TYP));
-			 		hdr->EVENT.DUR = (uint32_t*) realloc(hdr->EVENT.DUR, hdr->EVENT.N*sizeof(*hdr->EVENT.POS));
-					hdr->EVENT.CHN = (uint16_t*) realloc(hdr->EVENT.CHN, hdr->EVENT.N*sizeof(*hdr->EVENT.TYP));
-#if (BIOSIG_VERSION >= 10500)
-					hdr->EVENT.TimeStamp = (gdf_time*)realloc(hdr->EVENT.TimeStamp, hdr->EVENT.N*sizeof(gdf_time));
-#endif
+					if (reallocEventTable(hdr, hdr->EVENT.N) == SIZE_MAX) {
+						biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
+						return (hdr);
+					};
 				}
 				hdr->EVENT.TYP[N] = 1;
 				hdr->EVENT.POS[N] = (uint32_t)(u1*hdr->SPR+u2*hdr->SampleRate);
@@ -7076,16 +7070,11 @@ if (VERBOSE_LEVEL>8)
 				h2 = (uint8_t*)realloc(h2,2+n2*20);
 				ifread(h2+22, 1, 2+n2*20-22, hdr);
 			}
+			if (reallocEventTable(hdr, hdr->EVENT.N+n2) == SIZE_MAX) {
+				biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
+				return (hdr);
+			};
 
-			hdr->EVENT.TYP = (typeof(hdr->EVENT.TYP)) realloc(hdr->EVENT.TYP,(hdr->EVENT.N+n2)*sizeof(*hdr->EVENT.TYP));
-			hdr->EVENT.POS = (typeof(hdr->EVENT.POS)) realloc(hdr->EVENT.POS,(hdr->EVENT.N+n2)*sizeof(*hdr->EVENT.POS));
-			hdr->EVENT.CHN = (typeof(hdr->EVENT.CHN)) realloc(hdr->EVENT.CHN,(hdr->EVENT.N+n2)*sizeof(*hdr->EVENT.CHN));
-			hdr->EVENT.DUR = (typeof(hdr->EVENT.DUR)) realloc(hdr->EVENT.DUR,(hdr->EVENT.N+n2)*sizeof(*hdr->EVENT.DUR));
-#if (BIOSIG_VERSION >= 10500)
-			hdr->EVENT.TimeStamp = (gdf_time*)realloc(hdr->EVENT.TimeStamp, (hdr->EVENT.N+n2)*sizeof(gdf_time));
-#endif
-
-//			if (n2>1) fprintf(stdout,"EEG1100: more than 1 segment [%i,%i] not supported.\n",n1,n2);
 			for (k2=0; k2<n2; k2++) {
 				pos2 = leu32p(h2 + 18 + k2*20);
 
@@ -7256,13 +7245,10 @@ if (VERBOSE_LEVEL>8)
 
 				if (VERBOSE_LEVEL>7) fprintf(stdout,"EEG1100 [254]: <%d> %d %d\n",(int)k,(int)lba,N);
 
-					hdr->EVENT.TYP = (typeof(hdr->EVENT.TYP)) realloc(hdr->EVENT.TYP,(hdr->EVENT.N+N)*sizeof(*hdr->EVENT.TYP));
-					hdr->EVENT.POS = (typeof(hdr->EVENT.POS)) realloc(hdr->EVENT.POS,(hdr->EVENT.N+N)*sizeof(*hdr->EVENT.POS));
-					hdr->EVENT.CHN = (typeof(hdr->EVENT.CHN)) realloc(hdr->EVENT.CHN,(hdr->EVENT.N+N)*sizeof(*hdr->EVENT.CHN));
-					hdr->EVENT.DUR = (typeof(hdr->EVENT.DUR)) realloc(hdr->EVENT.DUR,(hdr->EVENT.N+N)*sizeof(*hdr->EVENT.DUR));
-#if (BIOSIG_VERSION >= 10500)
-					hdr->EVENT.TimeStamp = (gdf_time*)realloc(hdr->EVENT.TimeStamp, (hdr->EVENT.N+N)*sizeof(gdf_time));
-#endif
+					if (reallocEventTable(hdr, hdr->EVENT.N+N) == SIZE_MAX) {
+						biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
+						return (hdr);
+					};
 
 					size_t k1;
 					for (k1=0; k1<N; k1++) {
@@ -7478,13 +7464,10 @@ if (VERBOSE_LEVEL>8)
 						/* falling edge */
 						if (N <= (hdr->EVENT.N + NEC*2)) {
 							N += (hdr->EVENT.N+NEC)*2;	// allocate memory for this and the terminating line.
-							hdr->EVENT.TYP = (typeof(hdr->EVENT.TYP)) realloc(hdr->EVENT.TYP, N*sizeof(*hdr->EVENT.TYP));
-							hdr->EVENT.POS = (typeof(hdr->EVENT.POS)) realloc(hdr->EVENT.POS, N*sizeof(*hdr->EVENT.POS));
-							hdr->EVENT.CHN = (typeof(hdr->EVENT.CHN)) realloc(hdr->EVENT.CHN, N*sizeof(*hdr->EVENT.CHN));
-							hdr->EVENT.DUR = (typeof(hdr->EVENT.DUR)) realloc(hdr->EVENT.DUR, N*sizeof(*hdr->EVENT.DUR));
-#if (BIOSIG_VERSION >= 10500)
-							hdr->EVENT.TimeStamp = (gdf_time*)realloc(hdr->EVENT.TimeStamp, N*sizeof(gdf_time));
-#endif
+							if (reallocEventTable(hdr, N) == SIZE_MAX) {
+								biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
+								return (hdr);
+							};
 						}
 						hdr->EVENT.TYP[hdr->EVENT.N] = k1+1;
 						hdr->EVENT.POS[hdr->EVENT.N] = ix[k1];        // 0-based indexing
@@ -7775,13 +7758,10 @@ if (VERBOSE_LEVEL>8)
 				if (hdr->EVENT.N+2 >= N_EVENTS) {
 					// memory allocation if needed
 					N_EVENTS = max(128, N_EVENTS*2);
-					hdr->EVENT.POS = (uint32_t*) realloc(hdr->EVENT.POS, N_EVENTS * sizeof(*hdr->EVENT.POS) );
-					hdr->EVENT.TYP = (uint16_t*) realloc(hdr->EVENT.TYP, N_EVENTS * sizeof(*hdr->EVENT.TYP) );
-					hdr->EVENT.DUR = (uint32_t*) realloc(hdr->EVENT.DUR, N_EVENTS * sizeof(*hdr->EVENT.DUR) );
-					hdr->EVENT.CHN = (uint16_t*) realloc(hdr->EVENT.CHN, N_EVENTS * sizeof(*hdr->EVENT.CHN) );
-#if (BIOSIG_VERSION >= 10500)
-					hdr->EVENT.TimeStamp = (gdf_time*)realloc(hdr->EVENT.TimeStamp, N_EVENTS*sizeof(gdf_time));
-#endif
+					if (reallocEventTable(hdr, N_EVENTS) == SIZE_MAX) {
+						biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
+						return (hdr);
+					};
 				}
 				FreeTextEvent(hdr,hdr->EVENT.N,(char*)buf);
 				hdr->EVENT.POS[hdr->EVENT.N] = tstart*hdr->EVENT.SampleRate; 
@@ -7842,13 +7822,10 @@ if (VERBOSE_LEVEL>8)
 					if (hdr->EVENT.N+2 >= N_EVENTS) {
 						// memory allocation if needed
 						N_EVENTS = max(128, N_EVENTS*2);
-				 		hdr->EVENT.POS = (uint32_t*) realloc(hdr->EVENT.POS, N_EVENTS * sizeof(*hdr->EVENT.POS) );
-						hdr->EVENT.TYP = (uint16_t*) realloc(hdr->EVENT.TYP, N_EVENTS * sizeof(*hdr->EVENT.TYP) );
-						hdr->EVENT.DUR = (uint32_t*) realloc(hdr->EVENT.DUR, N_EVENTS * sizeof(*hdr->EVENT.DUR) );
-						hdr->EVENT.CHN = (uint16_t*) realloc(hdr->EVENT.CHN, N_EVENTS * sizeof(*hdr->EVENT.CHN) );
-#if (BIOSIG_VERSION >= 10500)
-						hdr->EVENT.TimeStamp = (gdf_time*)realloc(hdr->EVENT.TimeStamp, N_EVENTS*sizeof(gdf_time));
-#endif
+						if (reallocEventTable(hdr, N_EVENTS) == SIZE_MAX) {
+							biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
+							return (hdr);
+						};
 					}
 
 					// add trigger event
@@ -8685,7 +8662,11 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"MFER: TLV %i %i %i %i %g \n",tag,len,buf[0]
 				if (POS>0 && Desc) {
 					size_t N = hdr->EVENT.N;
 					if (N_EVENT <= N) {
-						N_EVENT = reallocEventTable(hdr, max(16, N*2));
+						N_EVENT = reallocEventTable(hdr, N_EVENT);
+						if (N_EVENT == SIZE_MAX) {
+							biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
+							return (hdr);
+						};
 					}
 					hdr->EVENT.POS[N] = POS;
 					hdr->EVENT.CHN[N] = CHN;
@@ -10076,10 +10057,10 @@ if (VERBOSE_LEVEL>2)
 				case 4: {
 					if (NEvent < hdr->EVENT.N+2) {
 						NEvent  += max(128,NEvent);
-				 		hdr->EVENT.POS = (typeof(hdr->EVENT.POS)) realloc(hdr->EVENT.POS, NEvent*sizeof(*hdr->EVENT.POS) );
-						hdr->EVENT.TYP = (typeof(hdr->EVENT.TYP)) realloc(hdr->EVENT.TYP, NEvent*sizeof(*hdr->EVENT.TYP) );
-				 		hdr->EVENT.DUR = (typeof(hdr->EVENT.DUR)) realloc(hdr->EVENT.DUR, NEvent*sizeof(*hdr->EVENT.DUR) );
-						hdr->EVENT.CHN = (typeof(hdr->EVENT.CHN)) realloc(hdr->EVENT.CHN, NEvent*sizeof(*hdr->EVENT.CHN) );
+						if (reallocEventTable(hdr, NEvent) == SIZE_MAX) {
+							biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
+							return (hdr);
+						};
 					}
 					char *tmp2,*tmp1 = line; 
 					tmp2 = strchr(tmp1,',');   *tmp2 = 0; 				

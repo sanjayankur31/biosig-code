@@ -435,11 +435,11 @@ void sopen_ibw_read (HDRTYPE* hdr) {
 				if (nTraces > 1) {
 					// set break marker between traces
 					hdr->EVENT.N = nTraces-1;
-					reallocEventTable(hdr, hdr->EVENT.N);
-					size_t n;
-					hdr->EVENT.POS = (uint32_t*)realloc(hdr->EVENT.POS, hdr->EVENT.N * sizeof(*hdr->EVENT.POS));
-					hdr->EVENT.TYP = (uint16_t*)realloc(hdr->EVENT.TYP, hdr->EVENT.N * sizeof(*hdr->EVENT.TYP));
-					for (n = 0; n < hdr->EVENT.N; n++) {
+					if (reallocEventTable(hdr, hdr->EVENT.N) == SIZE_MAX) {
+						biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
+						return;
+					};
+					for (size_t n = 0; n < hdr->EVENT.N; n++) {
 						hdr->EVENT.TYP[n] = 0x7ffe;
 						hdr->EVENT.POS[n] = (n+1)*w5->nDim[0];
 					}
