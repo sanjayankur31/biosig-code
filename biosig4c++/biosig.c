@@ -4510,7 +4510,7 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"EDF+ event\n\ts1:\t<%s>\n\ts2:\t<%s>\n\ts3:
 				size_t N = hdr->EVENT.N;	
 				hdr->EVENT.N += N_EVENT+1;
 				hdr->EVENT.SampleRate = hdr->SampleRate;
-				if (SIZE_MAX == reallocEventtable(hdr, hdr->EVENT.N)) {
+				if (SIZE_MAX == reallocEventTable(hdr, hdr->EVENT.N)) {
 					biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
 					return (hdr);
 				}
