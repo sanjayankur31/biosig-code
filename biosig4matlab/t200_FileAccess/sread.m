@@ -168,7 +168,7 @@ elseif strcmp(HDR.TYPE,'EDF') || strcmp(HDR.TYPE,'GDF') || strcmp(HDR.TYPE,'BDF'
                 HDR.FILE.POS = round(HDR.SampleRate*StartPos);
         end;
 
-        nr     = min(HDR.NRec*HDR.SPR-HDR.FILE.POS, NoS*HDR.SampleRate);
+        nr     = min(HDR.NRec*HDR.SPR-HDR.FILE.POS, ceil(NoS*HDR.SampleRate));  % ceil - safeguard for non-integer NoS (ensures large enough data size)
 	S      = repmat(NaN,nr,length(HDR.InChanSelect)); 
 
 	block1 = floor(HDR.FILE.POS/HDR.SPR);
