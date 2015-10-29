@@ -16,7 +16,8 @@ and a much smaller memory footprint, which might be especially useful for embedd
 It's interface is the same than for libbiosig, namely biosig.h
 (1c) "libbiosig2" is a level two interface for managing multiple files, 
 it resembles the interface of edflib. It's interface is defined in biosig2.h.
-Currently, this is in an experimental state 
+It ca be used to link libbiosig2 compiled with GCC to software compiled with
+MSVisualC++.
 (1d) "libphysicalunits" provides conversion tools for physical units from 
 ascii text to 16bit integers according to ISO/IEEE 11073-10101:2004 Table A.6.3: Vital signs units of measurements 
 text strings are cached for performance reasons, and can be used in a multi-threaded application. 
@@ -38,7 +39,6 @@ There are some more defines to tweak your version.
  -D=WITH_TIMESTAMPEVENT timestamps of sweep onset in HEKA format stored in EVENT.DUR with EVENT.TYP==0x7ffe 
  
 If some libraries are not available on your system, remove the corresponding DEFINES in Makefile. 
-
 
 (2) = save2gdf = is a converter between different file formats, 
 including but not limited to SCP-ECG(EN1064), HL7aECG (FDA-XML), GDF, EDF, BDF, CWFB.
