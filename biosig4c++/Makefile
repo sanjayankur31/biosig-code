@@ -225,9 +225,15 @@ endif
 ifneq (,$(findstring WITH_PTHREAD, $(DEFINES)))
   LDLIBS     += -lpthread
 endif
+
 ifneq (,$(findstring WITH_CHOLMOD, $(DEFINES)))
   LDLIBS     += -lcholmod
+ifeq (Darwin,$(shell uname))
+  ## homebrew requires this in addition to cholmod
+  LDLIBS     += -lsuitesparseconfig
 endif
+endif
+
 ifneq (,$(findstring WITH_LIBXML2, $(DEFINES)))
   LDLIBS     += -lxml2
 endif
@@ -999,7 +1005,7 @@ install: install_libbiosig.$(DLEXT) install_libbiosig.a install_headers
 	ln -sf $(LIB)/libbiosig2${SONAME_POSTFIX}	$(LIB)/libbiosig2.${DLEXT}
 	ln -sf $(LIB)/libbiosig${SONAME_POSTFIX}	$(LIB)/libbiosig.${DLEXT}
 
-install_tools install_save2gdf: save2gdf doc/save2gdf.1 install_libbiosig
+install_tools install_save2gdf: save2gdf doc/save2gdf.1 install
 	install -d 			$(BIN) $(LIB) $(INC)
 	install save2gdf  		$(BIN)
 	install heka2itx  		$(BIN)
