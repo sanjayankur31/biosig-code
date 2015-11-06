@@ -849,7 +849,7 @@ mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz: mex/*.cpp
 	echo "mexSLOAD mexSOPEN mexSSAVE" > $($@_TMP)/INDEX
 	$(TAR) cvfz "$@" $($@_TMP)/../mexbiosig-$(BIOSIG_VERSION)
 	#-(cp "$@" ~/L/public_html/biosig/prereleases/ )
-	#-rm -rf $(shell dirname $($@_TMP) )
+	-rm -rf $(shell dirname $($@_TMP) )
 
 #############################################################
 #	SigViewer
@@ -980,10 +980,10 @@ install_ttl2trig: bin/ttl2trig
 	install bin/ttl2trig $(BIN)
 
 install_mexbiosig install_octave: mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz
-	octave$(VERSION) --norc --eval "pkg install $<"
+	PKG_CONFIG_LIBDIR=$(LIB)/pkgconfig octave$(VERSION) --eval "pkg install $<"
 
 uninstall_mexbiosig:
-	octave$(VERSION) --eval "pkg uninstall mexbiosig"
+	PKG_CONFIG_LIBDIR=$(LIB)/pkgconfig octave$(VERSION) --eval "pkg uninstall mexbiosig"
 
 install_headers: biosig-dev.h biosig.h biosig2.h gdftime.h physicalunits.h
 	install -d 			$(INC)
