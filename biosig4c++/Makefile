@@ -61,7 +61,7 @@ LIBEXT        = a
 
 ### User-specified options: its likely you want to change this
 # settings for cross compiler: tested with MXE and mce-w64 with make suitesparse zlib qt ; 
-CROSS   = $(HOME)/src/mxe.github.schloegl/usr/bin/i686-w64-mingw32.static
+CROSS   = $(HOME)/src/mxe.master/usr/bin/i686-w64-mingw32.static
 ## local MXE
 ifeq "$(wildcard $(CROSS)-gcc)" ""
 CROSS   = $(HOME)/src/mxe/usr/bin/i686-w64-mingw32.static
@@ -73,7 +73,7 @@ ifeq "$(wildcard $(CROSS)-gcc)" ""
 CROSS         = /usr/local/src/mxe/usr/bin/i686-w64-mingw32.static
 endif
 
-CROSS64       = $(HOME)/src/mxe.github.schloegl/usr/bin/x86_64-w64-mingw32.static
+CROSS64       = $(HOME)/src/mxe.master/usr/bin/x86_64-w64-mingw32.static
 ifeq "$(wildcard $(CROSS64)-gcc)" ""
 CROSS64       = $(shell pwd)/../mce-w64/usr/bin/x86_64-static-mingw32.static
 endif
@@ -138,7 +138,7 @@ ifeq (Darwin,$(shell uname))
 	LD	       = ld
 	CFLAGS        += -I/usr/local/opt/libiconv/include
 	LDLIBS        += -L/usr/local/opt/libiconv/lib/ -liconv -lstdc++
-	LDFLAGS       += -dylib -arch x86_64 -macosx_version_min 10.9
+	LDFLAGS       += -dylib -arch x86_64 -macosx_version_min 10.10
 	DLEXT          = dylib
 	FULLDLEXT      = ${BIOSIG_VERSION}.dylib
 	SONAME_PREFIX  = -install_name # the last space character is crucial
@@ -761,16 +761,17 @@ biosig_server: biosig_server.c libbiosig.$(LIBEXT) biosig-network.o
 #############################################################
 #	MathLink interface to Mathematica
 #############################################################
-mma: mma/sload
 
-mma/sload: mma/sload.tm mma/sload.c
-	$(MAKE) -C mma CROSS=$(CROSS) CROSS64=$(CROSS64) LDLIBS="$(shell $(PKGCONF) --libs libbiosig) $(LDLIBS) " sload
+mmaall: mma win32mma win64mma
+
+mma: mma/sload.tm mma/sload.c
+	$(MAKE) -C mma mma
 
 win32mma: mma/sload.tm mma/sload.c
-	$(MAKE) -C mma CROSS=$(CROSS) CROSS64=$(CROSS64) LDLIBS="$(LDLIBS) -liconv" sload.exe
+	$(MAKE) -C mma CROSS=$(CROSS) LDLIBS="$(LDLIBS) -liconv" win32mma
 
 win64mma: mma/sload.tm mma/sload.c
-	$(MAKE) -C mma CROSS=$(CROSS) CROSS64=$(CROSS64) LDLIBS="$(LDLIBS) -liconv" sload.w64.exe
+	$(MAKE) -C mma CROSS64=$(CROSS64) LDLIBS="$(LDLIBS) -liconv" win64mma
 
 
 #############################################################

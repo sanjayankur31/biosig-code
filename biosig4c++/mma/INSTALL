@@ -1,5 +1,4 @@
 
-
 == Compiling on Debian and derivatives ===============
 
 == 1. REQUIREMENTS ==
@@ -43,7 +42,7 @@ Try again
 == 4. INSTALL ==
 copy the files
 
-  mma/sload mma/*.nb
+  mma/*/sload mma/*.nb
 
 into your working directory.
 
@@ -53,25 +52,11 @@ Start mathematica
    link=Install["sload"]
    ?sload
 
-mySLOAD.nb zeigt wie man sload in mathematica verwendet.
+mySLOAD.nb demonstrates how to use sload in mathematica.
 
 
 === OTHER PLATFORMS === 
- are currently not maintained. The information below might be outdated. 
-
-
-    
-
-
-   = Compiling on Windows =
-   Prerequisites: 
-	MinGW 
-	Mathematica (tested with v7.0) 
-	Download and extract sources of biosig4c++ (v0.96.2 or later)
-	Start MinGW shell 
-
-		cd biosig4c++/mma
-		make -f Makefile.win32 sload.exe 
+   are currently not maintained. The information below might be outdated.
 
 
    = Cross-Compiling on Linux for Windows =
@@ -92,8 +77,7 @@ mySLOAD.nb zeigt wie man sload in mathematica verwendet.
 The installation can be tested by starting Mathematica, loading and running test.nb. 
 
 
-
-Copyright (C) 2011,2013 Alois Schloegl 
+Copyright (C) 2011,2013,2015 Alois Schloegl
 [1] http://pub.ist.ac.at/~schloegl/biosig/TESTED
 
 
