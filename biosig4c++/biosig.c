@@ -106,12 +106,11 @@ void CSstart () {
 #endif
 
 
+#ifndef  ONLYGDF
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-
-#ifndef  ONLYGDF
 
 int sopen_SCP_read     (HDRTYPE* hdr);
 int sopen_SCP_write    (HDRTYPE* hdr);
