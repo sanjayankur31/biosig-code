@@ -56,10 +56,12 @@ EXTRALIBS += -lm -ldl # Set these with appropriate libs for your system.
 
 ifeq (Darwin,$(shell uname))
 MLLIB   = MLi${MLIVER} # ML32i3 # Set this to ML64i3 if using a 64-bit system
+SED	= gsed
 else
 MLLIB   = ML64i${MLIVER} # ML32i3 # Set this to ML64i3 if using a 64-bit system
-LD 	= ${CC}
 EXTRALIBS += -lrt
+LD 	= ${CC}
+SED	= sed
 endif
 
 
@@ -78,7 +80,7 @@ mma : sload.exe
 sloadtm.c: sload.tm
 	${MPREP} "$<" -o "$@"
 	# enable macro expansion
-	sed -i 's# __DATE__# ",__DATE__," ",__TIME__,"#' "$@"
+	${SED} -i 's# __DATE__# ",__DATE__," ",__TIME__,"#' "$@"
 
 sload.exe: sload.o sloadtm.o
 	# static linking
