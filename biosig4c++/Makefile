@@ -13,6 +13,8 @@
 #
 ## make save2gdf   - makes converter
 ## make install_save2gdf   - installs converter
+## make install_mma 	installs biosig's sload for Mathematica in $PREFIX/share/biosig/mathematica
+## make install_mex 	installs mexbiosig for Matlab in $PREFIX/share/biosig/mex
 #
 ## make mex4o      - makes mexSLOAD, mexSOPEN for Octave (requires Octave-headers)
 ## make mex4m      - makes mexSLOAD, mexSOPEN for Matlab (requires Matlab, mex -setup must be configured)
@@ -345,7 +347,7 @@ OBJ	      = ./obj
 INC	      = $(DESTDIR)$(prefix)/include
 BIN	      = $(DESTDIR)$(prefix)/bin
 LIB	      = $(DESTDIR)$(prefix)/lib
-
+SHARE	      = $(DESTDIR)$(prefix)/share
 
 ####### Files
 SOURCES      += biosig.c \
@@ -765,7 +767,9 @@ biosig_server: biosig_server.c libbiosig.$(LIBEXT) biosig-network.o
 mmaall: mma/sload.tm mma/sload.c
 	$(MAKE) -C mma CROSS=$(CROSS) CROSS64=$(CROSS64) LDLIBS="$(LDLIBS) -liconv" all
 
-mma: mma/sload.tm mma/sload.c
+mma : mma/sload.exe
+
+mma/sload.exe: mma/sload.tm mma/sload.c
 	$(MAKE) -C mma CROSS=$(CROSS) CROSS64=$(CROSS64) LDLIBS="$(LDLIBS) -liconv" mma
 
 win32mma: mma/sload.tm mma/sload.c
@@ -981,12 +985,6 @@ install_sigviewer: sigviewer
 install_ttl2trig: bin/ttl2trig
 	install bin/ttl2trig $(BIN)
 
-install_mexbiosig install_octave: mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz
-	PKG_CONFIG_LIBDIR=$(LIB)/pkgconfig octave$(VERSION) --eval "pkg install $<"
-
-uninstall_mexbiosig:
-	PKG_CONFIG_LIBDIR=$(LIB)/pkgconfig octave$(VERSION) --eval "pkg uninstall mexbiosig"
-
 install_headers: biosig-dev.h biosig.h biosig2.h gdftime.h physicalunits.h
 	install -d 			$(INC)
 	install $?		    	$(INC)
@@ -1019,6 +1017,39 @@ install_tools install_save2gdf: save2gdf doc/save2gdf.1 install
 	#install libbiosig.man 		$(DESTDIR)$(prefix)/share/
 	#$(MAKE)  install_sigviewer
 	#$(MAKE)  install_octave
+
+### Install mexbiosig for Octave
+install_mexbiosig install_octave: mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz
+	PKG_CONFIG_LIBDIR=$(LIB)/pkgconfig octave$(VERSION) --eval "pkg install $<"
+
+uninstall_mexbiosig:
+	PKG_CONFIG_LIBDIR=$(LIB)/pkgconfig octave$(VERSION) --eval "pkg uninstall mexbiosig"
+
+### Install mexbiosig for Matlab and Octave
+install_mex: mex4m mex4o
+	mkdir -p $(SHARE)/biosig/mex
+	install mex/mex*.mex*	$(SHARE)/biosig/mex
+	@echo "  mexBiosig for Matlab is installed in $(SHARE)/biosig/mex";
+	@echo "  Usage: Start Matlab and addpath ";
+	@echo "\taddpath(\"$(SHARE)/biosig/mex)";
+	@echo "\tmexSLOAD";
+
+uninstall_mex:
+	${RM} $(SHARE)/biosig/mex/*
+	cd $(SHARE) && rmdir -p biosig/mex
+
+### Install Biosig for Mathematica
+install_mma : mma/sload.exe
+	mkdir -p $(SHARE)/biosig/mathematica
+	install mma/sload.exe	$(SHARE)/biosig/mathematica/
+	@echo "  Biosig for Mathematica is installed in $(SHARE)/biosig/mathematica/sload.exe";
+	@echo "  Usage: Start Mathematica and run";
+	@echo "\tlink=Install[\"$(SHARE)/biosig/mathematica/sload.exe\"];";
+	@echo "\t?sload";
+
+uninstall_mma:
+	${RM} $(SHARE)/biosig/mathematica/sload.exe
+	cd $(SHARE) && rmdir -p biosig/mathematica
 
 uninstall remove: uninstall_mexbiosig
 	-$(DELETE) $(BIN)/save2gdf
