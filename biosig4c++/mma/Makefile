@@ -1,6 +1,6 @@
 ####### Makefile to compile sload.exe for loading data supported by libbiosig into Mathematica
 ###
-###  Copyright (C) 2010,2011,2012,2013 Alois Schloegl, IST Austria <alois.schloegl@ist.ac.at>
+###  Copyright (C) 2010,2011,2012,2013,2015 Alois Schloegl, IST Austria <alois.schloegl@ist.ac.at>
 ###  This file is part of the "BioSig for C/C++" repository
 ###  (biosig4c++) at http://biosig.sf.net/
 ###
@@ -35,13 +35,6 @@ endif
 # 10.0 supports 3 and 4, 9.0 and earlier supports only 3,
 MLIVER := $(shell ${CC} mliver.c -I${MLINKDIR}/SystemFiles/Links/MathLink/DeveloperKit/${SYS}/CompilerAdditions/ -E -o - | tail -1)
 
-ifeq (Darwin,$(shell uname))
-MLLIB   = MLi${MLIVER} # ML32i3 # Set this to ML64i3 if using a 64-bit system
-else
-MLLIB   = ML64i${MLIVER} # ML32i3 # Set this to ML64i3 if using a 64-bit system
-LD 	= ${CC}
-endif
-
 #
 # Windows
 #MLINKDIR  = /usr/local/Wolfram/gridMathematicaServer/7.0/SystemFiles/Links/MathLink/DeveloperKit
@@ -61,14 +54,23 @@ LIBDIR   += -L${CADDSDIR}
 
 EXTRALIBS += -lm -ldl # Set these with appropriate libs for your system.
 
+ifeq (Darwin,$(shell uname))
+MLLIB   = MLi${MLIVER} # ML32i3 # Set this to ML64i3 if using a 64-bit system
+else
+MLLIB   = ML64i${MLIVER} # ML32i3 # Set this to ML64i3 if using a 64-bit system
+LD 	= ${CC}
+EXTRALIBS += -lrt
+endif
+
+
 ifneq (${MLIVER},)
 CFLAGS += -DMLINTERFACE=${MLIVER}
 endif
 
 MPREP     = ${CADDSDIR}/mprep
 
-all : ${SYS}/sload ${SYSwin}/sload.exe ${SYSwin64}/sload.exe
-mma : ${SYS}/sload
+all : sload.exe ${SYSwin}/sload.exe ${SYSwin64}/sload.exe
+mma : sload.exe
 
 .c.o:
 	${CC} ${CFLAGS} -c ${INCDIR} "$<"
@@ -78,12 +80,16 @@ sloadtm.c: sload.tm
 	# enable macro expansion
 	sed -i 's# __DATE__# ",__DATE__," ",__TIME__,"#' "$@"
 
-${SYS}/sload: sload.o sloadtm.o
+sload.exe: sload.o sloadtm.o
+	# static linking
+	#${LD} ${LDFLAGS} sloadtm.o sload.o ../libbiosig2.a $(shell pkg-config --libs libbiosig) -lstdc++ ${LIBDIR} -l${MLLIB} ${EXTRALIBS} -o "$@"
+	# dynamic linking
+	${LD} ${LDFLAGS} sloadtm.o sload.o $(shell pkg-config --libs libbiosig) -lbiosig2 -lstdc++ ${LIBDIR} -l${MLLIB} ${EXTRALIBS} -o "$@"
 	mkdir -p ${SYS}
-	${LD} ${LDFLAGS} sloadtm.o sload.o  $(shell pkg-config --libs libbiosig) -lbiosig2 -lsupc++ ${LIBDIR} ${EXTRALIBS} -l${MLLIB} -o "$@"
-	# copy to users directory if available
-	#-cp "$@" ~/K/Software/MathematicaTools/
-	#-cp "$@" ~/K/Software/MathematicaTools/sload-$(shell date +%Y%m%d)
+	cp "$@" ${SYS}/
+	# copy to user directory if available
+	#-cp -r ${SYS} ~/K/Software/MathematicaTools/
+	#-cp "$@" ~/K/Software/MathematicaTools/${SYS}/sload-$(shell date +%Y%m%d)
 
 
 ###########################################
@@ -114,8 +120,8 @@ ${SYSwin}/sload.exe : sload.obj sloadtm.obj
 	mkdir -p ${SYSwin}
 	${CCw32} sload.obj sloadtm.obj -static-libgcc -static-libstdc++ -lbiosig2 -lssp -L${LIBDIRwin} -l${MLLIBwin} ${EXTRALIBSwin} -o "$@"
 	# copy to users directory if available
-	#-cp "$@" ~/K/Software/MathematicaTools/
-	#-cp "$@" ~/K/Software/MathematicaTools/sload-$(shell date +%Y%m%d).exe
+	#-cp -r ${SYSwin} ~/K/Software/MathematicaTools/
+	#-cp "$@" ~/K/Software/MathematicaTools/${SYSwin}/sload-$(shell date +%Y%m%d).exe
 
 
 ###########################################
@@ -144,8 +150,8 @@ ${SYSwin64}/sload.exe : sload.w64.obj sloadtm.w64.obj
 	mkdir -p ${SYSwin64}
 	${CCw64} sload.w64.obj sloadtm.w64.obj -static-libgcc -static-libstdc++  -lbiosig2 -lssp -L${LIBDIRwin64} -l${MLLIBwin64} ${EXTRALIBSwin} -o "$@"
 	# copy to users directory if available
-	#-cp "$@" ~/K/Software/MathematicaTools/sload.win64.exe
-	#-cp "$@" ~/K/Software/MathematicaTools/sload-$(shell date +%Y%m%d).win64.exe
+	#-cp -r ${SYSwin64} ~/K/Software/MathematicaTools/
+	#-cp "$@" ~/K/Software/MathematicaTools/${SYSwin64}/sload-$(shell date +%Y%m%d).exe
 
 	
 ###########################################

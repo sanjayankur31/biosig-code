@@ -762,10 +762,11 @@ biosig_server: biosig_server.c libbiosig.$(LIBEXT) biosig-network.o
 #	MathLink interface to Mathematica
 #############################################################
 
-mmaall: mma win32mma win64mma
+mmaall: mma/sload.tm mma/sload.c
+	$(MAKE) -C mma CROSS=$(CROSS) CROSS64=$(CROSS64) LDLIBS="$(LDLIBS) -liconv" all
 
 mma: mma/sload.tm mma/sload.c
-	$(MAKE) -C mma mma
+	$(MAKE) -C mma CROSS=$(CROSS) CROSS64=$(CROSS64) LDLIBS="$(LDLIBS) -liconv" mma
 
 win32mma: mma/sload.tm mma/sload.c
 	$(MAKE) -C mma CROSS=$(CROSS) LDLIBS="$(LDLIBS) -liconv" win32mma

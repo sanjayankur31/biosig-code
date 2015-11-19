@@ -17,15 +17,8 @@ or checkout the latest version from the git repository
 
 == 3. COMPILATION ==
 
-   make libbiosig.a
+   make libbiosig && make install
    make mma
-
-At the end, there are certainly some error messages, caused by the
-failed attempt of copying
-  mma/sload to ../../mma/
-you can ignore these. The important part is whether the file
-   mma/sload
-has been built.
 
 If it fails (file mma/sload not available), you might need to edit
 mma/Makefile (line 18)
@@ -42,14 +35,14 @@ Try again
 == 4. INSTALL ==
 copy the files
 
-  mma/*/sload mma/*.nb
+  mma/$SystemID/sload.exe mma/*.nb
 
 into your working directory.
 
 == 5. USAGE ==
 Start mathematica
 
-   link=Install["sload"]
+   link=Install["sload.exe"]
    ?sload
 
 mySLOAD.nb demonstrates how to use sload in mathematica.
