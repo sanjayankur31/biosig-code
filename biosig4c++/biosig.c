@@ -4445,7 +4445,7 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"%s(line %i): EDF+ line<%s>\n",__FILE__,__LI
 					}
 
 					double t = atof(tstr);
-					if (flag > 0) {
+					if (flag>0 || s2!=NULL) {
 						if (N_EVENT <= hdr->EVENT.N+1) {
 							N_EVENT = reallocEventTable(hdr, max(6,hdr->EVENT.N*2));
 							if (N_EVENT == SIZE_MAX) {
@@ -4453,23 +4453,33 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"%s(line %i): EDF+ line<%s>\n",__FILE__,__LI
 								return (hdr);
 							};
 						}
-						if (flag==1) {
-							// time keeping: export event only for EDF+D
+						switch (flag) {
+						case 0:
+							// EDF+C
+							FreeTextEvent(hdr, hdr->EVENT.N, s2);   // set hdr->EVENT.TYP
+							hdr->EVENT.POS[hdr->EVENT.N] = t * hdr->EVENT.SampleRate;
+							break;
+						case 1:
+							// EDF+D: marker for beginning of segment
 							hdr->EVENT.TYP[hdr->EVENT.N] = 0x7ffe;
 							hdr->EVENT.POS[hdr->EVENT.N] = k3 * hdr->SPR;
 							timeKeeping = t; 
-						} else {
+							flag = 2;
+							break;
+						default:
+							// EDF+D: real annotation
 							FreeTextEvent(hdr, hdr->EVENT.N, s2);   // set hdr->EVENT.TYP
 							hdr->EVENT.POS[hdr->EVENT.N] = k3 * hdr->SPR + (t-timeKeeping) * hdr->EVENT.SampleRate;
+							break;
 						}
+
 #if (BIOSIG_VERSION >= 10500)
-						hdr->EVENT.TimeStamp[hdr->EVENT.N] = hdr->T0 + ldexp(t/(24*60),32); ; 
+						hdr->EVENT.TimeStamp[hdr->EVENT.N] = hdr->T0 + ldexp(t/(24*3600),32);
 #endif
 						hdr->EVENT.DUR[hdr->EVENT.N] = durstr ? (atof(durstr)*hdr->EVENT.SampleRate) : 0; 
 						hdr->EVENT.CHN[hdr->EVENT.N] = 0; 
 						hdr->EVENT.N++;
 					}
-					flag = 2; 
 
 if (VERBOSE_LEVEL>7) fprintf(stdout,"EDF+ event\n\ts1:\t<%s>\n\ts2:\t<%s>\n\ts3:\t<%s>\n\tsdelay:\t<%s>\n\tdur:\t<%s>\n\t\n",s1,s2,s3,tstr,durstr);
 
