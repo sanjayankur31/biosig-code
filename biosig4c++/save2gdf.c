@@ -26,6 +26,7 @@
 #define T1T2
 
 
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,7 +52,14 @@ int main(int argc, char **argv){
     HDRTYPE 	*hdr; 
     size_t 	count, k1, ne=0;
     char 	*source, *dest, *tmpstr; 
-    enum FileFormat SOURCE_TYPE, TARGET_TYPE=GDF; 		// type of file format
+    enum FileFormat SOURCE_TYPE; 		// type of file format
+    struct {
+	enum FileFormat TYPE;
+	float VERSION;
+    } TARGET;
+    TARGET.TYPE=GDF;
+    TARGET.VERSION=-1.0;
+
     int		COMPRESSION_LEVEL=0;
     int		status; 	
     uint16_t	k;
@@ -144,25 +152,37 @@ int main(int argc, char **argv){
     	else if (!strncmp(argv[k],"-f=",3))  	{
     		if (0) {}
     		else if (!strncmp(argv[k],"-f=ASCII",8))
-			TARGET_TYPE=ASCII;
+			TARGET.TYPE=ASCII;
 		else if (!strcmp(argv[k],"-f=ATF"))
-			TARGET_TYPE=ATF;
+			TARGET.TYPE=ATF;
     		else if (!strcmp(argv[k],"-f=BDF"))
-			TARGET_TYPE=BDF;
+			TARGET.TYPE=BDF;
     		else if (!strncmp(argv[k],"-f=BIN",6))
-			TARGET_TYPE=BIN;
+			TARGET.TYPE=BIN;
     		else if (!strncmp(argv[k],"-f=BVA",6))
-			TARGET_TYPE=BrainVision;
+			TARGET.TYPE=BrainVision;
     		else if (!strncmp(argv[k],"-f=CFWB",7))
-			TARGET_TYPE=CFWB;
+			TARGET.TYPE=CFWB;
     		else if (!strcmp(argv[k],"-f=EDF"))
-			TARGET_TYPE=EDF;
+			TARGET.TYPE=EDF;
     	 	else if (!strcmp(argv[k],"-f=GDF"))
-			TARGET_TYPE=GDF;
-    		else if (!strcmp(argv[k],"-f=GDF1"))
-			TARGET_TYPE=GDF1;
+			TARGET.TYPE=GDF;
+		else if (!strcmp(argv[k],"-f=GDF1")) {
+			TARGET.TYPE=GDF;
+			TARGET.VERSION=1.0;
+		}
+		else if (!strcmp(argv[k],"-f=GDF2")) {
+			TARGET.TYPE=GDF;
+			TARGET.VERSION=2.0;
+		}
+#if (BIOSIG_VERSION >= 10700)
+		else if (!strcmp(argv[k],"-f=GDF3") && (get_biosig_version() > 0x010703) ) {
+			TARGET.TYPE=GDF;
+			TARGET.VERSION=3.0;
+		}
+#endif
     		else if (!strncmp(argv[k],"-f=HL7",6))
-			TARGET_TYPE=HL7aECG;
+			TARGET.TYPE=HL7aECG;
 		else if (!strncmp(argv[k],"-f=CSV",6)) {
 			FLAG_CSV = 1;
 		}
@@ -170,13 +190,19 @@ int main(int argc, char **argv){
 			FLAG_DYGRAPH = 1;
 		}
     		else if (!strncmp(argv[k],"-f=MFER",7))
-			TARGET_TYPE=MFER;
+			TARGET.TYPE=MFER;
+#if (BIOSIG_VERSION >= 10700)
+		else if (!strncmp(argv[k],"-f=SCP3",7) && (get_biosig_version() > 0x010703) ) {
+			TARGET.TYPE=SCP_ECG;
+			TARGET.VERSION=3.0;
+		}
+#endif
     		else if (!strncmp(argv[k],"-f=SCP",6))
-			TARGET_TYPE=SCP_ECG;
+			TARGET.TYPE=SCP_ECG;
 //    		else if (!strncmp(argv[k],"-f=TMSi",7))
-//			TARGET_TYPE=TMSiLOG;
+//			TARGET.TYPE=TMSiLOG;
     		else if (!strncmp(argv[k],"-f=ITX",6))
-			TARGET_TYPE=ITX;
+			TARGET.TYPE=ITX;
 		else {
 			fprintf(stderr,"format %s not supported.\n",argv[k]);
 			return(-1);
@@ -232,7 +258,7 @@ int main(int argc, char **argv){
 	tzset();
 	hdr = constructHDR(0,0);
 	// hdr->FLAG.OVERFLOWDETECTION = FlagOverflowDetection; 
-	hdr->FLAG.UCAL = ((TARGET_TYPE==BIN) || (TARGET_TYPE==SCP_ECG));
+	hdr->FLAG.UCAL = ((TARGET.TYPE==BIN) || (TARGET.TYPE==SCP_ECG));
 	hdr->FLAG.TARGETSEGMENT = TARGETSEGMENT;
 	// hdr->FLAG.ANONYMOUS = 0; 	// personal names are processed 
 	
@@ -246,7 +272,7 @@ int main(int argc, char **argv){
 	}
 
 	// HEKA2ITX hack
-	if (TARGET_TYPE==ITX) {
+	if (TARGET.TYPE==ITX) {
 		// hack: HEKA->ITX conversion will be done in SOPEN	
 		hdr->aECG = dest;
 	}
@@ -259,7 +285,7 @@ int main(int argc, char **argv){
 	}
 #endif
 	// HEKA2ITX hack
-        if (TARGET_TYPE==ITX) {
+        if (TARGET.TYPE==ITX) {
 	if (hdr->TYPE==HEKA) {
 		// hack: HEKA->ITX conversion is already done in SOPEN	
 		dest = NULL; 
@@ -395,9 +421,10 @@ int main(int argc, char **argv){
 		fprintf(stdout,"\n%s (line %i): File %s closed sd=%i/%i\n",__FILE__,__LINE__,hdr->FileName,hdr->FILE.OPEN,hdr->FILE.Des);
 
 	SOURCE_TYPE = hdr->TYPE;
-	if (FLAG_DYGRAPH) TARGET_TYPE=SOURCE_TYPE;
-	hdr->TYPE = TARGET_TYPE;
-	if ((hdr->TYPE==GDF) && (hdr->VERSION<2)) hdr->VERSION = 2.0;
+	if (FLAG_DYGRAPH) TARGET.TYPE=SOURCE_TYPE;
+
+	hdr->TYPE = TARGET.TYPE;
+	if (TARGET.VERSION>=0) hdr->VERSION = TARGET.VERSION;
 
 	hdr->FILE.COMPRESSION = COMPRESSION_LEVEL;
 
@@ -410,7 +437,7 @@ int main(int argc, char **argv){
     		for (k=0; k<hdr->NS; k++)
 		    	if (hdr->CHANNEL[k].OnOff && hdr->CHANNEL[k].SPR) 
 				asGCD = gcd(asGCD, hdr->CHANNEL[k].SPR);
-		if (TARGET_TYPE==EDF) {
+		if (TARGET.TYPE==EDF) {
 			double d = asGCD / hdr->SampleRate;
 			if (d==ceil(d)) asGCD = d; 	// make block duration 1 second	
 		}
@@ -521,10 +548,10 @@ int main(int argc, char **argv){
 			MinValueD = MinValue;
 		}
 
-		if ((SOURCE_TYPE==alpha) && (hdr->CHANNEL[k].GDFTYP==(255+12)) && (TARGET_TYPE==GDF)) 
+		if ((SOURCE_TYPE==alpha) && (hdr->CHANNEL[k].GDFTYP==(255+12)) && (TARGET.TYPE==GDF))
 			// 12 bit into 16 bit 
 			; //hdr->CHANNEL[k].GDFTYP = 3;
-		else if ((SOURCE_TYPE==ETG4000) && (TARGET_TYPE==GDF)) {
+		else if ((SOURCE_TYPE==ETG4000) && (TARGET.TYPE==GDF)) {
 			hdr->CHANNEL[k].GDFTYP  = 16;
 			hdr->CHANNEL[k].PhysMax = MaxValueF;
 			hdr->CHANNEL[k].PhysMin = MinValueF;
@@ -533,14 +560,14 @@ int main(int argc, char **argv){
 		}
 /* TODO: check whether this is really needed - was probably just a workaround for another bug
 		
-		else if ((SOURCE_TYPE==GDF) && (TARGET_TYPE==GDF)) 
+		else if ((SOURCE_TYPE==GDF) && (TARGET.TYPE==GDF))
 			;
 		else if (SOURCE_TYPE==HEKA)
 			;
 		else if (SOURCE_TYPE==ABF)
 			;
 */
-		else if (TARGET_TYPE==SCP_ECG && !hdr->FLAG.UCAL) {
+		else if (TARGET.TYPE==SCP_ECG && !hdr->FLAG.UCAL) {
 			double scale = PhysDimScale(hdr->CHANNEL[k].PhysDimCode) *1e9;
 			if (hdr->FLAG.ROW_BASED_CHANNELS) {
 				for (k1=0; k1<N; k1++)
@@ -558,7 +585,7 @@ int main(int argc, char **argv){
 	    		hdr->CHANNEL[k].PhysMax = PhysMax;
 	    		hdr->CHANNEL[k].PhysMin = -PhysMax;
 		}
-		else if (TARGET_TYPE==EDF) {
+		else if (TARGET.TYPE==EDF) {
 	    		hdr->CHANNEL[k].GDFTYP = 3;
 	    		hdr->CHANNEL[k].DigMax = ldexp(1.0,15)-1.0;
 	    		hdr->CHANNEL[k].DigMin = -hdr->CHANNEL[k].DigMax;
@@ -567,7 +594,7 @@ int main(int argc, char **argv){
 	    		hdr->CHANNEL[k].Cal = (hdr->CHANNEL[k].PhysMax - hdr->CHANNEL[k].PhysMin) / (hdr->CHANNEL[k].DigMax - hdr->CHANNEL[k].DigMin);
 	    		hdr->CHANNEL[k].Off = hdr->CHANNEL[k].PhysMin - hdr->CHANNEL[k].DigMin * hdr->CHANNEL[k].Cal;
 		}
-		else if ((hdr->CHANNEL[k].GDFTYP<10 ) && (TARGET_TYPE==GDF || TARGET_TYPE==CFWB)) {
+		else if ((hdr->CHANNEL[k].GDFTYP<10 ) && (TARGET.TYPE==GDF || TARGET.TYPE==CFWB)) {
 			/* heuristic to determine optimal data type */
 
 			if (VERBOSE_LEVEL > 7) fprintf(stdout,"%s (line %i): #%i %i %f %f %f %f %f %f\n",__FILE__,__LINE__,k+1,(int)hdr->FLAG.UCAL,MinValue,MaxValue,MinValueF,MaxValueF,MinValueD,MaxValueD);
@@ -593,7 +620,7 @@ int main(int argc, char **argv){
 		k2++;
 	}
 	if (!FLAG_CONVERSION_TESTED) 
-		fprintf(stderr,"Warning SAVE2GDF: conversion from %s to %s not tested\n",GetFileTypeString(SOURCE_TYPE),GetFileTypeString(TARGET_TYPE));
+		fprintf(stderr,"Warning SAVE2GDF: conversion from %s to %s not tested\n",GetFileTypeString(SOURCE_TYPE),GetFileTypeString(TARGET.TYPE));
 
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): UCAL=%i\n",__FILE__,__LINE__, hdr->FLAG.UCAL);
 

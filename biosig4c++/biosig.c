@@ -2563,19 +2563,31 @@ void struct2gdfbin(HDRTYPE *hdr)
 	     	/* end */
 
 		if (hdr->TYPE==GDF) {
+			if (0.0 < hdr->VERSION && hdr->VERSION < 1.9) {
+				hdr->VERSION = 1.25;
+			}
+			else if (hdr->VERSION < 3.0) {
+				// this is currently still the default version
 #if (BIOSIG_VERSION >= 10500)
-			hdr->VERSION = 2.51;
+				hdr->VERSION = 2.51;
 #else
-			hdr->VERSION = 2.22;
+				hdr->VERSION = 2.22;
 #endif
-			if (hdr->HeadLen & 0x00ff)	// in case of GDF v2, make HeadLen a multiple of 256.
-			hdr->HeadLen = (hdr->HeadLen & 0xff00) + 256;
+			}
+			else {
+				hdr->VERSION = 3.0;
+			}
+
+			// in case of GDF v2, make HeadLen a multiple of 256.
+			if ((hdr->VERSION > 2.0) && (hdr->HeadLen & 0x00ff))
+				hdr->HeadLen = (hdr->HeadLen & 0xff00) + 256;
 		}
 		else if (hdr->TYPE==GDF1) {
+			fprintf(stderr,"libbiosig@sopen(hdr,\"w\") with hdr->TYPE=GDF1 is deprecated. Use hdr->TYPE=GDF and hdr->VERSION=1.25 instead\n");
 			hdr->VERSION = 1.25;
 			hdr->TYPE = GDF;
 		}
-		else
+
 
 	     	if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw101 %i %i\n",hdr->HeadLen,TagNLen[1]);
 
@@ -11567,7 +11579,9 @@ else if (!strncmp(MODE,"w",1))	 /* --- WRITE --- */
 #endif //ONLYGDF 
 
 	      if ((hdr->TYPE==GDF) || (hdr->TYPE==GDF1)) {
-
+		/* use of GDF1 is deprecated, instead hdr->TYPE=GDF and hdr->VERSION=1.25 should be used.
+                   a test and a warning is about this is implemented within struct2gdfbin
+		*/
 		struct2gdfbin(hdr);
 
 		size_t bpb8 = 0;
