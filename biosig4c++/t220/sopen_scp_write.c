@@ -109,8 +109,8 @@ EXTERN_C int sopen_SCP_write(HDRTYPE* hdr) {
 		disable channels with physical units other than Voltage.
 		The number of channels for conversion is stored in NS.
 	*/
-	typeof(hdr->NS) NS = 0;
-	for (typeof(hdr->NS) k=0; k < hdr->NS; k++) {
+	typeof(hdr->NS) NS = 0, k;
+	for (k=0; k < hdr->NS; k++) {
 		CHANNEL_TYPE *CH=hdr->CHANNEL+k;
 
 		if ( CH->LeadIdCode > 255) CH->OnOff = 0;
@@ -521,7 +521,7 @@ EXTERN_C int sopen_SCP_write(HDRTYPE* hdr) {
 
 			// Create all the fields
 			char flagfirst = 1;
-			for (typeof(hdr->NS) i = 0; i < hdr->NS; i++) {
+			for (i = 0; i < hdr->NS; i++) {
 				CHANNEL_TYPE *CH=hdr->CHANNEL+i;
 				if (CH->OnOff != 1) continue;
 
