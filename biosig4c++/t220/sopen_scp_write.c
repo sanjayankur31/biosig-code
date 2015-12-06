@@ -1,6 +1,6 @@
 /*
 
-    Copyright (C) 2005,2006,2007,2012,2013 Alois Schloegl <alois.schloegl@gmail.com>
+    Copyright (C) 2005,2006,2007,2012,2013,2015 Alois Schloegl <alois.schloegl@ist.ac.at>
 
     This file is part of the "BioSig for C/C++" repository 
     (biosig4c++) at http://biosig.sf.net/ 
@@ -15,6 +15,7 @@
  */
 
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,14 +23,11 @@
 
 EXTERN_C int sopen_SCP_write(HDRTYPE* hdr) {	
 /*
-	this function is a stub or placeholder and need to be defined in order to be useful. 
-	It will be called by the function SOPEN in "biosig.c"
+	This function is an auxillary function and is only called by the function SOPEN in "biosig.c"
 
 	Input: 
-		char* Header	// contains the file content
-		
-	Output: 
-		HDRTYPE *hdr	// defines the HDR structure accoring to "biosig.h"
+		HDRTYPE *hdr	// defines the HDR structure according to "biosig.h"
+		hdr->VERSION 	specifies the target version
 */	
 	uint8_t*	ptr; 	// pointer to memory mapping of the file layout
 	uint8_t*	PtrCurSect;	// point to current section 
@@ -43,9 +41,12 @@ EXTERN_C int sopen_SCP_write(HDRTYPE* hdr) {
 	uint16_t	avm16; 
 	struct aecg*	aECG;		
 
+	assert(hdr != NULL);
+	assert(hdr->TYPE == SCP_ECG);
+
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"SOPEN_SCP_WRITE 101\n");
 
-	if ((fabs(hdr->VERSION - 1.3)<0.01) && (fabs(hdr->VERSION-2.0)<0.01))  
+	if ((fabs(hdr->VERSION - 1.3)<0.01) && (fabs(hdr->VERSION-2.0)<0.01))
 		fprintf(stderr,"Warning SOPEN (SCP-WRITE): Version %f not supported\n",hdr->VERSION);
 		
 
@@ -94,12 +95,30 @@ EXTERN_C int sopen_SCP_write(HDRTYPE* hdr) {
 	aECG->Section5.Length = 0; 
 	aECG->Section6.Length = 0; 
 
+
 	/*  */
 	aECG->FLAG.HUFFMAN = 0;
 	aECG->FLAG.REF_BEAT= 0;
-	aECG->FLAG.DIFF 	= 0;
+	aECG->FLAG.DIFF    = 0;
 	aECG->FLAG.BIMODAL = 0;
 
+
+	/*
+		check channels:
+		disable channels that do not have a known ECG LeadId
+		disable channels with physical units other than Voltage.
+		The number of channels for conversion is stored in NS.
+	*/
+	typeof(hdr->NS) NS = 0;
+	for (typeof(hdr->NS) k=0; k < hdr->NS; k++) {
+		CHANNEL_TYPE *CH=hdr->CHANNEL+k;
+
+		if ( CH->LeadIdCode > 255) CH->OnOff = 0;
+		if ( (CH->PhysDimCode & 0xffe0) != PhysDimCode("V")) CH->OnOff = 0;
+
+		if (CH->OnOff != 1) continue;
+		NS++;
+	}
 
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"SOPEN_SCP_WRITE 111\n");
 
@@ -374,27 +393,30 @@ EXTERN_C int sopen_SCP_write(HDRTYPE* hdr) {
 			*(ptr+sectionStart+curSectLen+5) = (uint8_t)T0_tm->tm_sec; 	// second
 			curSectLen += 6; 
 
-			if (hdr->NS>0)  {
+			if (NS>0)  {
+				CHANNEL_TYPE *CH = hdr->CHANNEL;
+				while (CH->OnOff != 1) CH++;
+
 			// Tag 27 (len = 3) highpass filter 
 			*(ptr+sectionStart+curSectLen) = 27;	// tag
 			leu16a(2, ptr+sectionStart+curSectLen+1);	// length
-			leu16a((uint16_t)hdr->CHANNEL[1].HighPass, ptr+sectionStart+curSectLen+3);	// hour
+			leu16a((uint16_t)CH->HighPass, ptr+sectionStart+curSectLen+3);	// hour
 			curSectLen += 5; 
 
 			// Tag 28 (len = 3)  lowpass filter
 			*(ptr+sectionStart+curSectLen) = 28;	// tag
 			leu16a(2, ptr+sectionStart+curSectLen+1);	// length
-			leu16a((uint16_t)hdr->CHANNEL[1].LowPass, ptr+sectionStart+curSectLen+3);	// hour
+			leu16a((uint16_t)CH->LowPass, ptr+sectionStart+curSectLen+3);	// hour
 			curSectLen += 5; 
 
 			// Tag 29 (len = 1) filter bitmap
 			uint8_t bitmap = 0; 
-        		if (fabs(hdr->CHANNEL[1].LowPass-60.0)<0.01) 
-				bitmap = 1; 
-        		else if (fabs(hdr->CHANNEL[1].LowPass-50.0)<0.01) 
+			if (fabs(CH->LowPass-60.0)<0.01)
+				bitmap = 1;
+			else if (fabs(CH->LowPass-50.0)<0.01)
 				bitmap = 2;
-			else 
-				bitmap = 0; 		 
+			else
+				bitmap = 0;
 			*(ptr+sectionStart+curSectLen) = 29;	// tag
 			leu16a(1, ptr+sectionStart+curSectLen+1);	// length			
 			*(ptr+sectionStart+curSectLen+3) = bitmap; 
@@ -443,23 +465,26 @@ EXTERN_C int sopen_SCP_write(HDRTYPE* hdr) {
 		}
     		else if (curSect==3)  // SECTION 3 
 		{
-			ptr = (uint8_t*)realloc(ptr,sectionStart+16+2+9*hdr->NS+1); 
+			ptr = (uint8_t*)realloc(ptr,sectionStart+16+2+9*NS+1);
 			PtrCurSect = ptr+sectionStart; 
 			curSectLen = 16; // current section length
 
 			// Number of leads enclosed
-			*(ptr+sectionStart+curSectLen++) = hdr->NS;
+			*(ptr+sectionStart+curSectLen++) = NS;
 
 // ### Situations with reference beat subtraction are not supported
 // Situations with not all the leads simultaneously recorded are not supported
 // Situations number of leads simultaneouly recorded != total number of leads are not supported
 // We assume all the leads are recorded simultaneously
-			*(ptr+sectionStart+curSectLen++) = (hdr->NS<<3) | 0x04;
+			*(ptr+sectionStart+curSectLen++) = (NS<<3) | 0x04;
 
 			for (i = 0; i < hdr->NS; i++) {
+				CHANNEL_TYPE *CH=hdr->CHANNEL+i;
+				if (CH->OnOff != 1) continue;
+
 				leu32a(1L, ptr+sectionStart+curSectLen);
 				leu32a(hdr->data.size[0], ptr+sectionStart+curSectLen+4);
-				*(ptr+sectionStart+curSectLen+8) = (uint8_t)hdr->CHANNEL[i].LeadIdCode;
+				*(ptr+sectionStart+curSectLen+8) = (uint8_t)CH->LeadIdCode;
 				curSectLen += 9;
 			}
 
@@ -478,24 +503,37 @@ EXTERN_C int sopen_SCP_write(HDRTYPE* hdr) {
 			aECG->Section5.StartPtr = sectionStart; 
 			aECG->Section5.Length = curSectLen; 
 		}
-		else if (curSect==6)  // SECTION 6 
+		else if (curSect==6)  // SECTION 6
 		{
-			uint16_t GDFTYP = 3; 
+			uint16_t GDFTYP = 3;
 			size_t SZ = GDFTYP_BITS[GDFTYP]>>3;
-			for (i = 0; i < hdr->NS; i++) 
+			typeof(hdr->NS) i=0;
+			for (i = 0; i < hdr->NS; i++) {
+				CHANNEL_TYPE *CH=hdr->CHANNEL+i;
+				if (CH->OnOff != 1) continue;
+
 				hdr->CHANNEL[i].GDFTYP = GDFTYP; 
-			ptr = (uint8_t*)realloc(ptr,sectionStart+16+6+2*hdr->NS+SZ*(hdr->data.size[0]*hdr->data.size[1])); 
+			}
+			ptr = (uint8_t*)realloc(ptr,sectionStart+16+6+2*NS+SZ*(hdr->data.size[0]*hdr->data.size[1]));
 
 			PtrCurSect = ptr+sectionStart; 
 			curSectLen = 16; // current section length
 
 			// Create all the fields
-			// Amplitude Value Multiplier (AVM)
-			i = 0;			
-			AVM = hdr->CHANNEL[i].Cal * 1e9 * PhysDimScale(hdr->CHANNEL[i].PhysDimCode);
-			for (i = 1; i < hdr->NS; i++) {
+			char flagfirst = 1;
+			for (typeof(hdr->NS) i = 0; i < hdr->NS; i++) {
+				CHANNEL_TYPE *CH=hdr->CHANNEL+i;
+				if (CH->OnOff != 1) continue;
+
 				// check for physical dimension and adjust scaling factor to "nV"
-				avm = hdr->CHANNEL[i].Cal * 1e9 * PhysDimScale(hdr->CHANNEL[i].PhysDimCode);
+				avm = CH->Cal * 1e9 * PhysDimScale(CH->PhysDimCode);
+				if (flagfirst) {
+					// Amplitude Value Multiplier (AVM)
+					AVM = avm;
+					flagfirst=0;
+					continue;
+				}
+
 				// check whether all channels have the same scaling factor
 				if (fabs((AVM - avm)/AVM) > 1e-14)
 					fprintf(stderr,"Warning SOPEN (SCP-WRITE): scaling factors differ between channel #1 and #%i. Scaling factor of 1st channel is used.\n",i+1);
@@ -529,7 +567,7 @@ EXTERN_C int sopen_SCP_write(HDRTYPE* hdr) {
 			*/
 			
 			// Fill the length block
-			for (i = 0; i < hdr->NS; i++) {
+			for (i = 0; i < NS; i++) {
 				leu16a((uint16_t)hdr->data.size[0]*2, ptr+sectionStart+curSectLen);
 				avm = leu16p(ptr+sectionStart+curSectLen);
 				AVM = hdr->data.size[0]*2;
@@ -547,7 +585,7 @@ EXTERN_C int sopen_SCP_write(HDRTYPE* hdr) {
 			// Prepare filling the data block with the ECG samples by SWRITE
 			// free(hdr->AS.rawdata);
 			// hdr->AS.rawdata = PtrCurSect+16+6+2*hdr->NS;
-			curSectLen += SZ*(hdr->data.size[0]*hdr->data.size[1]);
+			curSectLen += SZ * (hdr->data.size[hdr->FLAG.ROW_BASED_CHANNELS] * NS);
 
 			// Evaluate the size and correct it if odd
 			if ((curSectLen % 2) != 0) {
