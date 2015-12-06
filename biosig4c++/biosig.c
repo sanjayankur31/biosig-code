@@ -2732,7 +2732,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 			else
 				tmpstr = hdr->CHANNEL[k].Label;
 
-		     	len = strlen(tmpstr);
+			len = strlen(tmpstr)+1;
 		     	memcpy(Header2+16*k2,tmpstr,min(len,16));
                         Header2[16*k2+min(len,16)] = 0; 
 
@@ -2741,7 +2741,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 			Header2[80*k2 + min(len,80) + 16*NS] = 0; 
 		     	
 			tmpstr = PhysDim3(hdr->CHANNEL[k].PhysDimCode);
-		     	len = strlen(tmpstr);
+			len = strlen(tmpstr)+1;
 		     	if (hdr->VERSION < 1.9)
 		     		memcpy(Header2+ 8*k2 + 96*NS, tmpstr, min(8,len));
 		     	else {
