@@ -1779,9 +1779,27 @@ HDRTYPE* getfiletype(HDRTYPE* hdr)
     		else if ((hdr->VERSION>=41.0) & (U32 ==1944)) hdr->TYPE = ACQ;
 	    	if (hdr->TYPE == ACQ) {
     			hdr->HeadLen = U32; // length of fixed header
+			hdr->FILE.LittleEndian = 1;
     			return(hdr);
     		}
     	}
+
+	U32 = beu32p(hdr->AS.Header+2);
+	if ((U32==83)) {
+		hdr->VERSION = (float)U32;
+		U32 = beu32p(hdr->AS.Header+6);
+
+		if      ((hdr->VERSION == 83) & (U32 == 1564)) hdr->TYPE = ACQ;
+
+		if (hdr->TYPE == ACQ) {
+			hdr->HeadLen = U32; // length of fixed header
+			hdr->FILE.LittleEndian = 0;
+			return(hdr);
+		}
+	}
+
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s (..): %u %u %u\n", __FILE__,__LINE__,__func__,beu32p(hdr->AS.Header+2),beu32p(hdr->AS.Header+6),beu32p(hdr->AS.Header+10));
+
 #endif //ONLYGDF
 
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"[GETFILETYPE 200] %x %x!\n",leu16p(hdr->AS.Header),leu16p(hdr->AS.Header+154));
@@ -4713,6 +4731,17 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"EDF+ event\n\ts1:\t<%s>\n\ts2:\t<%s>\n\ts3:
 #endif // WITH_ATF
 
 	else if (hdr->TYPE==ACQ) {
+
+		if ( !hdr->FILE.LittleEndian ) {
+			hdr->NS = bei16p(hdr->AS.Header + 10);
+			hdr->HeadLen += hdr->NS*1714;
+
+			if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s (..): v%g noChan=%u HeadLen=%u\n", __FILE__, __LINE__, __func__, hdr->VERSION, hdr->NS, hdr->HeadLen);
+
+			biosigERROR(hdr, B4C_DATATYPE_UNSUPPORTED, "BigEndian ACQ file format is currently not supported");
+			return(hdr);
+		}
+
 		/* defined in http://biopac.com/AppNotes/app156FileFormat/FileFormat.htm */
 		hdr->NS   = lei16p(hdr->AS.Header+10);
 		hdr->SampleRate = 1000.0/lef64p(hdr->AS.Header+16);
