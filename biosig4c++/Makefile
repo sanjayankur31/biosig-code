@@ -456,7 +456,7 @@ MinGW64OBJECTS  = $(patsubst win32/%.obj, win64/%.obj, $(MinGWOBJECTS))
 LIB_OBJECTS = libbiosig.a libbiosig2.a libgdf.a libgdftime.a libphysicalunits.a libbiosig.$(DLEXT) libbiosig2.$(DLEXT) libgdf.$(DLEXT) libgdftime.$(DLEXT) libphysicalunits.$(DLEXT)
 
 first: $(IO_H_FILE2) lib
-tools: save2gdf
+tools: save2gdf pu
 all:   first mex4o biosig4python sigviewer win32 win64 win32/sigviewer.exe win64/sigviewer.exe #biosig_client biosig_server mma java tcl perl php ruby #sigviewer 
 
 .PHONY : io.h libbiosig lib
@@ -654,7 +654,7 @@ tcl: libbiosig.$(LIBEXT) tcl/biosig.i
 
 # libraries are built in MXE
 
-## save2gdf, pdp2gdf
+## save2gdf, pdp2gdf, pu
 win32/%.exe: %.c
 	$(MinGWCXX) $(DEFINES) $(MinGWCFLAGS) "$<" $(MinGWLIBS) -o "$@"
 
@@ -668,7 +668,7 @@ win32: mexw32 win32mma
 
 # Libraries are build in MXE
 
-## save2gdf, pdp2gdf
+## save2gdf, pdp2gdf, pu
 win64/%.exe: %.c
 	$(MinGW64CXX) $(DEFINES) $(MinGW64CFLAGS) "$<" $(MinGW64LIBS) -o "$@"
 
@@ -1090,8 +1090,8 @@ fetchdata: $(TEMP_DIR)scp/redred/PFE103.scp  $(TEMP_DIR)Osas2002plusQRS.edf $(DA
 
 $(TEMP_DIR)scp/redred/PFE103.scp:
 	# scp example data sets
-	wget  -q -P$(DATA_DIR) http://www.openecg.net/ECGsamples.zip
-	wget  -q -P$(DATA_DIR) http://www.openecg.net/ECGsamplesc.zip
+	#wget  -q -P$(DATA_DIR) http://www.openecg.net/ECGsamples.zip
+	#wget  -q -P$(DATA_DIR) http://www.openecg.net/ECGsamplesc.zip
 	unzip -u $(DATA_DIR)ECGsamples.zip "scp*.zip" -d $(TEMP_DIR)
 	unzip -u $(DATA_DIR)ECGsamplesc.zip "scp*.zip" -d $(TEMP_DIR)
 	mkdir -p $(TEMP_DIR)scp/high
@@ -1164,6 +1164,10 @@ testscp: $(DATA_DIR)t1.scp save2gdf
 
 testscp2: $(DATA_DIR)t1.scp
 	find test/scp -iname '*.scp' -exec ./save2gdf -V0 {} /dev/null \;
+
+testscp3: $(DATA_DIR)t1.scp
+	find test/scp -iname '*.scp' -exec ./save2gdf -f=SCP3 -V0 {} {}.scp3  \;
+
 
 
 testhl7: $(TEMP_DIR)t1.hl7 save2gdf
