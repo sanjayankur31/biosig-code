@@ -752,6 +752,9 @@ libbiosig2.def: $(OBJECTS) biosig2.o t240/libcnsfef.a
 %: %.c
 	$(CXX) $(DEFINES) $(CXXFLAGS) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
 
+pu : pu.c physicalunits.o
+	$(CC) -std=gnu11 $^ -o $@
+
 bscs: biosig_client biosig_server sandbox.o biosig.o
 biosig_client: biosig_client.c libbiosig.$(LIBEXT) biosig-network.o
 	$(CXX) $(DEFINES) $(CXXFLAGS) biosig_client.c biosig-network.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o biosig_client
@@ -914,19 +917,14 @@ bin/flowmon: flowmon.o gdf.o physicalunits.o
 
 .PHONY: clean distclean install remove install_sigviewer asc bin testscp testhl7 testbin test test6 zip
 
-distclean:
+distclean: clean
 	-$(DELETE) -r autom4te.cache
 	-$(DELETE) aclocal.m4 config.guess config.h config.h.in config.log config.sub config.status depcomp missing stamp-h1
 	-$(DELETE) Makefile.am doc/Makefile.am mex/Makefile.am python/Makefile.am
 	-$(DELETE) install-sh ltmain.sh
-	-$(DELETE) *.a
-	-$(DELETE) *.i
-	-$(DELETE) *.o
 	-$(DELETE) *.lib
 	-$(DELETE) *.so *.dylib
 	-$(DELETE) *.so.*
-	-$(DELETE) *.mex*
-	-$(DELETE) *.oct
 	-$(DELETE) mex/mexSOPEN.cpp
 	-$(DELETE) libbiosig.pc
 	-$(DELETE) $(IO_H_FILE64) $(IO_H_FILE) io.h
@@ -969,7 +967,7 @@ clean:
 	-$(DELETE) t240/*.o*
 	-$(DELETE) t240/libcnsfef.a
 	-$(DELETE) libbiosig.* libbiosig2.*
-	-$(DELETE) pdp2gdf
+	-$(DELETE) pdp2gdf save2gdf pu
 	-$(DELETE) mex/*.o mex/*.obj mex/*.o64 mex/core mex/octave-core mex/*.oct mex/*~ mex/*.mex* 
 	-$(MAKE) -C java clean
 	-$(MAKE) -C matlab clean
@@ -1005,18 +1003,28 @@ install: install_libbiosig.$(DLEXT) install_libbiosig.a install_headers
 	ln -sf $(LIB)/libbiosig2${SONAME_POSTFIX}	$(LIB)/libbiosig2.${DLEXT}
 	ln -sf $(LIB)/libbiosig${SONAME_POSTFIX}	$(LIB)/libbiosig.${DLEXT}
 
-install_tools install_save2gdf: save2gdf doc/save2gdf.1 install
-	install -d 			$(BIN) $(LIB) $(INC)
+install_tools: pu save2gdf doc/save2gdf.1 install
+	install -d 			$(BIN)
 	install save2gdf  		$(BIN)
 	install heka2itx  		$(BIN)
 	install save2aecg 		$(BIN)
 	install save2scp  		$(BIN)
-	-install bin/ttl2trig  		$(BIN)
+	install pu  			$(BIN)
 	mkdir -p  			$(DESTDIR)$(prefix)/share/man/man1
 	install doc/*.1  		$(DESTDIR)$(prefix)/share/man/man1
 	#install libbiosig.man 		$(DESTDIR)$(prefix)/share/
 	#$(MAKE)  install_sigviewer
 	#$(MAKE)  install_octave
+
+uninstall_tools:
+	${RM} $(BIN)/save2gdf
+	${RM} $(BIN)/pu
+	${RM} $(BIN)/heka2itx
+	${RM} $(BIN)/save2aecg
+	${RM} $(BIN)/save2scp
+	${RM} $(DESTDIR)$(prefix)/share/man/man1/pu.1
+	${RM} $(DESTDIR)$(prefix)/share/man/man1/save2gdf.1
+	${RM} $(DESTDIR)$(prefix)/share/man/man1/heka2itx.1
 
 ### Install mexbiosig for Octave
 install_mexbiosig install_octave: mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz
@@ -1051,11 +1059,7 @@ uninstall_mma:
 	${RM} $(SHARE)/biosig/mathematica/sload.exe
 	cd $(SHARE) && rmdir -p biosig/mathematica
 
-uninstall remove: uninstall_mexbiosig
-	-$(DELETE) $(BIN)/save2gdf
-	-$(DELETE) $(BIN)/heka2itx
-	-$(DELETE) $(BIN)/save2scp
-	-$(DELETE) $(BIN)/save2aecg
+uninstall remove: uninstall_mexbiosig uninstall_tools
 	-$(DELETE) $(BIN)/ttl2trig
 	#-$(DELETE) $(BIN)/rec2bin
 	#-$(DELETE) $(BIN)/bin2rec
@@ -1071,11 +1075,6 @@ uninstall remove: uninstall_mexbiosig
 	-$(DELETE) $(LIB)/libphysicalunits.*
 	-$(DELETE) $(LIB)/libgdftime.*
 	-$(DELETE) $(LIB)/pkgconfig/libbiosig.pc
-	-$(DELETE) $(DESTDIR)$(prefix)/share/man/man1/save2gdf.1
-	-$(DELETE) $(DESTDIR)$(prefix)/share/man/man1/mexSLOAD.1
-	-$(DELETE) $(DESTDIR)$(prefix)/share/man/man1/sigviewer.1
-	#-$(DELETE) $(DESTDIR)$(prefix)/share/man/man1/rec2bin.1
-	#-$(DELETE) $(DESTDIR)$(prefix)/share/man/man1/bin2rec.1
 
 
 #############################################################
@@ -1167,8 +1166,6 @@ testscp2: $(DATA_DIR)t1.scp
 
 testscp3: $(DATA_DIR)t1.scp
 	find test/scp -iname '*.scp' -exec ./save2gdf -f=SCP3 -V0 {} {}.scp3  \;
-
-
 
 testhl7: $(TEMP_DIR)t1.hl7 save2gdf
 	# test converting HL7aECG data
