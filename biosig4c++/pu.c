@@ -34,17 +34,18 @@ const char help[] =
 		"Usage:\n\tpu units\n\tpu code (decimal or hexadecimal)\n\n"
 		"The output returns the <physical unit>,<decimal code>,<hexadecimal code>,<scaling>,<physical unit w/o prefix>\n\n"
 		"Examples:\n   pu mV\n"
-		"\tuV:	4275	0x10b3	1e-06	V\n\n"
+		"\tuV	4275	0x10b3	1e-06	V\n\n"
 		"   pu 4275\n"
-		"\tuV:	4275	0x10b3	1e-06	V\n\n"
-		"./pu mV nA 4180 kg dag degree rpm\n"
-		"\tmV:	4274	0x10b2	0.001	V\n"
-		"\tnA:	4180	0x1054	1e-09	A\n"
-		"\tnA:	4180	0x1054	1e-09	A\n"
-		"\tkg:	1731	0x6c3	1000	g\n"
-		"\tdag:	1729	0x6c1	10	g\n"
-		"\tdegree:	736	0x2e0	1	degree\n"
-		"\trpm:	6816	0x1aa0	1	rpm\n";
+		"\tuV	4275	0x10b3	1e-06	V\n\n"
+		"   pu mV nA 4180 kg dag degree \"kg l-1\" rpm\n"
+		"\tmV	4274	0x10b2	0.001	V\n"
+		"\tnA	4180	0x1054	1e-09	A\n"
+		"\tnA	4180	0x1054	1e-09	A\n"
+		"\tkg	1731	0x6c3	1000	g\n"
+		"\tdag	1729	0x6c1	10	g\n"
+		"\tdegree	736	0x2e0	1	degree\n"
+		"\tkg l-1	2015	0x0803	1000	g l-1\n"
+		"\trpm	6816	0x1aa0	1	rpm\n";
 
 int main(int argc, char **argv) {
 
@@ -54,6 +55,9 @@ int main(int argc, char **argv) {
 	const char *out1; 
 	const char *out2; 
 	char *E;
+
+    if (argc<2)
+	fprintf(stdout,"%s", help);
 
     for (int k=1; k<argc; k++) {
     	if (!strcmp(argv[k],"-v") || !strcmp(argv[k],"--version") ) {
@@ -86,7 +90,7 @@ int main(int argc, char **argv) {
 			out1   = PhysDim3(pdc);
 			out2   = PhysDim3(pdc & 0xffe0);
 		}
-		fprintf(stdout,"%s:\t%u\t0x%04x\t%g\t%s\n",out1,pdc,pdc,scale,out2);
+		fprintf(stdout,"%s\t%u\t0x%04x\t%g\t%s\n",out1,pdc,pdc,scale,out2);
 	}
     }
 }
