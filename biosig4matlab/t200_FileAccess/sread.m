@@ -109,14 +109,15 @@ elseif strcmp(HDR.TYPE,'BDF'),
                 if (HDR.AS.spb*nb<=2^22), % faster access
 			S  = repmat(NaN,HDR.SPR*nb,length(HDR.InChanSelect)); 
                         [s,c] = fread(HDR.FILE.FID,[3*HDR.AS.spb, nb],'uint8');
-                        s = reshape(2.^[0,8,16]*reshape(s(:),3,c/3),[HDR.AS.spb, nb]);
-                        c = c/3;
+                        s  = reshape(2.^[0,8,16]*reshape(s(:),3,c/3),[HDR.AS.spb, nb]);
+                        c  = c/3;
+                        bi = HDR.AS.bi/3;
                         for k = 1:length(HDR.InChanSelect),
                                K = HDR.InChanSelect(k);
                                if (HDR.AS.SPR(K)>0)
-                                       S(:,k) = rs(reshape(s(HDR.AS.bi(K)+1:HDR.AS.bi(K+1),:),HDR.AS.SPR(K)*nb,1),HDR.AS.SPR(K),HDR.SPR);
+					S(:,k) = rs(reshape(s(bi(K)+1:bi(K+1),:), HDR.AS.SPR(K)*nb,1), HDR.AS.SPR(K), HDR.SPR);
                                else
-                                       S(:,k) = NaN;
+					S(:,k) = NaN;
                                end;
                         end;
                         S = S(ix1+1:ix1+nr,:);
@@ -138,7 +139,7 @@ elseif strcmp(HDR.TYPE,'BDF'),
                                 s1    = zeros(HDR.SPR*c/(3*HDR.AS.spb),length(HDR.InChanSelect));
                                 for k = 1:length(HDR.InChanSelect), 
                                         K = HDR.InChanSelect(k);
-                                        tmp = 2.^[0,8,16]*double(reshape(s(HDR.AS.bi(K)*3+1:HDR.AS.bi(K+1)*3,:),3,HDR.AS.SPR(K)*c/HDR.AS.bpb));
+					tmp = 2.^[0,8,16]*double(reshape(s(HDR.AS.bi(K)+1:HDR.AS.bi(K+1),:), 3, HDR.AS.SPR(K)*c/HDR.AS.bpb));
                                         if (HDR.AS.SPR(K)>0)
                                                 s1(:,k) = rs(tmp',HDR.AS.SPR(K),HDR.SPR);
                                         else
@@ -148,8 +149,8 @@ elseif strcmp(HDR.TYPE,'BDF'),
 	                        if HDR.FLAG.OVERFLOWDETECTION && isfield(HDR,'BDF') && isfield(HDR.BDF,'Status') && isfield(HDR.BDF.Status,'Channel'),  
 					% BDF overflow detection is based on Status bit20
 		                        K = HDR.BDF.Status.Channel;
-                                        tmp = 2.^[0,8,16]*double(reshape(s(HDR.AS.bi(K)*3+1:HDR.AS.bi(K+1)*3,:),3,HDR.AS.SPR(K)*c/HDR.AS.bpb));
-                                        OVERFLOW = rs(~bitand(tmp',2^19),HDR.AS.SPR(K),HDR.SPR);
+					tmp = 2.^[0,8,16]*double(reshape(s(HDR.AS.bi(K)+1:HDR.AS.bi(K+1),:), 3, HDR.AS.SPR(K)*c/HDR.AS.bpb));
+					OVERFLOW = rs(~bitand(tmp',2^19),HDR.AS.SPR(K),HDR.SPR);
 	        	                s1(OVERFLOW>0,:)=NaN; 
 	        	        end;        
                                 ix2   = min(nr-count, size(s1,1)-ix1);
