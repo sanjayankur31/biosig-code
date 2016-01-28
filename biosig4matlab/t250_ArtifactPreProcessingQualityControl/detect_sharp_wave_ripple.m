@@ -26,8 +26,10 @@ function [HDR, s] = detect_sharp_wave_ripple(fn, chan, varargin)
 %	trigger_channel: channel used for triggering/segmenting the data
 %	coincidenceWindow: [default: 40 ms]
 %		if defined, (TYP=4) indicates a ripple where the current-envelope-peak occured
-%               within a time window centered on the LFP-envelope peak. if this criteria is not
+%               within a time window centered on the LFP-envelope peak. If this criteria is not
 %               met or the coincidence window is undefined (empty), TYP=3 is used.
+%               Only the first two channels are are used, if data set contains more than two
+%               channels, a warning is displayed.
 %
 %	outputFilename
 %		name of file for storing the resulting data with the
@@ -86,7 +88,7 @@ function [HDR, s] = detect_sharp_wave_ripple(fn, chan, varargin)
 % [5] Jian Gan, 2015, unpublished
 
 
-%    Copyright (C) 2014,2015 by Alois Schloegl <alois.schloegl@ist.ac.at>
+%    Copyright (C) 2014,2015,2016 by Alois Schloegl <alois.schloegl@ist.ac.at>
 %    This is part of the BIOSIG-toolbox http://biosig.sf.net/
 %
 %    BioSig is free software: you can redistribute it and/or modify
@@ -384,8 +386,11 @@ Fs = 20000; 	% assumed samplerate
 	if (method < 14)
 	TYP=repmat(3,size(POS));
 	if ~isempty(coincidenceWindow)
-		assert(HDR.NS==2);
-		for k = 1:HDR.NS,
+		assert(HDR.NS>=2);
+		if (HDR.NS>2)
+			fprintf(2,'Warning: (%s) coincidence dection is based on first two channels',fn);
+		end;
+		for k = 1:min(2,HDR.NS)
 			for pp=1:length(POS)
 				% extract envelope of other channel around +-50 ms , and find maximum envelope
 				tix = max(1,POS(pp) - 0.050*HDR.SampleRate/2):min(size(E,1),POS(pp) + 0.050*HDR.SampleRate/2);
