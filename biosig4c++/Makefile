@@ -89,6 +89,7 @@ PathToSigViewer = ../sigviewer
 PathToSigViewerWIN32 = ../sigviewer4win32
 PathToSigViewerWIN64 = ../sigviewer4win64
 
+##CFLAGS       += -std=gnu99
 CFLAGS       += -fstack-protector -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -pipe -fPIC -fno-builtin-memcmp -O2 -Wno-unused-result
 CFLAGS       += -Wno-deprecated
 CFLAGS       += -D_GNU_SOURCE
@@ -198,6 +199,7 @@ DEFINES      += -D=WITH_FAMOS
 DEFINES      += -D=WITH_FIFF
 DEFINES      += -D=WITH_CHOLMOD
 DEFINES      += -D=WITHOUT_NETWORK
+#DEFINES      += -D=WITH_SCP3
 #DEFINES      += -D=WITH_HDF
 #DEFINES      += -D=WITH_MATIO
 #DEFINES      += -D=WITH_LIBXML2 
@@ -857,7 +859,7 @@ mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz: mex/*.cpp
 	#touch $($@_TMP)/src/mex{SOPEN,SLOAD,SSAVE}.m
 	echo "mexSLOAD mexSOPEN mexSSAVE" > $($@_TMP)/INDEX
 	$(TAR) cvfz "$@" $($@_TMP)/../mexbiosig-$(BIOSIG_VERSION)
-	#-(cp "$@" ~/L/public_html/biosig/prereleases/ )
+	-(cp "$@" ~/L/public_html/biosig/prereleases/ )
 	-rm -rf $(shell dirname $($@_TMP) )
 
 #############################################################

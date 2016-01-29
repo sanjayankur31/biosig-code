@@ -1,7 +1,6 @@
 /*
 
-    $Id$
-    Copyright (C) 2000,2005,2007-2013 Alois Schloegl <alois.schloegl@gmail.com>
+    Copyright (C) 2000,2005,2007-2016 Alois Schloegl <alois.schloegl@gmail.com>
     Copyright (C) 2007 Elias Apostolopoulos
     This file is part of the "BioSig for C/C++" repository 
     (biosig4c++) at http://biosig.sf.net/ 
@@ -191,7 +190,7 @@ int main(int argc, char **argv){
 		}
     		else if (!strncmp(argv[k],"-f=MFER",7))
 			TARGET.TYPE=MFER;
-#if (BIOSIG_VERSION >= 10700)
+#if defined(WITH_SCP3)
 		else if (!strncmp(argv[k],"-f=SCP3",7) && (get_biosig_version() > 0x010703) ) {
 			TARGET.TYPE=SCP_ECG;
 			TARGET.VERSION=3.0;

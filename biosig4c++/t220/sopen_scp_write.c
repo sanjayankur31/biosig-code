@@ -643,7 +643,7 @@ EXTERN_C int sopen_SCP_write(HDRTYPE* hdr) {
 				memcpy(PtrCurSect+16,hdr->SCP.Section11,hdr->SCP.Section11Length);
 			}
 		}
-#if (BIOSIG_VERSION >= 10700)
+#if defined(WITH_SCP3)
 		else if (curSect==12) // SECTION 12
 		{
 			if ( (VERSION == 30) && (hdr->SCP.Section12.NumberOfEntries > 0) ) {

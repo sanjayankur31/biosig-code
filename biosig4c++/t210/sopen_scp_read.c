@@ -1507,7 +1507,7 @@ EXTERN_C int sopen_SCP_read(HDRTYPE* hdr) {
 		}
 
 		/**** SECTION 12 ****/
-#if (BIOSIG_VERSION >= 10700)
+#if defined(WITH_SCP3)
 		else if ( (curSect==12)  &&  (versionSection  = 30) && (versionProtocol == 30) ) {
 			size_t n, sz = (leu32p(PtrCurSect+4) - curSectPos);
 			hdr->SCP.Section12.NumberOfEntries = sz / sizeof(hdr->SCP.Section12.annotatedECG[0]);
