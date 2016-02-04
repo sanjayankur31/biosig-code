@@ -44,7 +44,7 @@ function [HDR,H1,h2] = sopen(arg1,PERMISSION,CHAN,MODE,arg5,arg6)
 % see also: SLOAD, SREAD, SSEEK, STELL, SCLOSE, SWRITE, SEOF, BDF2BIOSIG_EVENTS
 
 
-%    Copyright (C) 1997-2014 by Alois Schloegl <alois.schloegl@ist.ac.at>	
+%    Copyright (C) 1997-2016 by Alois Schloegl <alois.schloegl@ist.ac.at>
 %    This is part of the BIOSIG-toolbox http://biosig.sf.net/
 %
 %    BioSig is free software: you can redistribute it and/or modify
@@ -1043,7 +1043,7 @@ end;
                         	ReRefMx(:,tmp) = [];
                         end;	
 
-                        status = fseek(HDR.FILE.FID,HDR.HeadLen+HDR.AS.bi(HDR.BDF.Status.Channel)*3,'bof');
+                        status = fseek(HDR.FILE.FID,HDR.HeadLen+HDR.AS.bi(HDR.BDF.Status.Channel),'bof');
                         %t = fread(HDR.FILE.FID,[3,inf],'uint8',HDR.AS.bpb-HDR.AS.SPR(HDR.BDF.Status.Channel)*3);
                         [t,c] = fread(HDR.FILE.FID,inf,[int2str(HDR.AS.SPR(HDR.BDF.Status.Channel)*3),'*uint8'],HDR.AS.bpb-HDR.AS.SPR(HDR.BDF.Status.Channel)*3);
 			if (c>HDR.NRec*HDR.SPR*3)
