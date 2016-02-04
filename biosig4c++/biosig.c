@@ -1204,7 +1204,7 @@ void FreeTextEvent(HDRTYPE* hdr,size_t N_EVENT, const char* annotation) {
   -------------------------------------------------------------- */
 const char* GetEventDescription(HDRTYPE *hdr, size_t N) {
         if (hdr==NULL || N >= hdr->EVENT.N) return NULL; 
-        uint16_t TYP = hdr->EVENT.TYP[N]; 
+        uint16_t TYP = hdr->EVENT.TYP[N];
 
         if (TYP < hdr->EVENT.LenCodeDesc) // user-specified events, TYP < 256
                 return hdr->EVENT.CodeDesc[TYP]; 
@@ -4542,12 +4542,24 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"EDF+ event\n\ts1:\t<%s>\n\ts2:\t<%s>\n\ts3:
 				for (d0=0, k=0; k < len/3; d0 = d1, k++) {
 					d1 = ((uint32_t)Marker[3*k+2]<<16) + ((uint32_t)Marker[3*k+1]<<8) + (uint32_t)Marker[3*k];
 
+				/*	count raising edges */
+					if (d1 & 0x010000)
+						d1 = 0;
+					else
+						d1 &=  0x00ffff;
+
+					if (d0 < d1) ++N_EVENT;
+
+				/* 	raising and falling edges
 					if ((d1 & 0x010000) != (d0 & 0x010000)) ++N_EVENT;
 					if ((d1 & 0x00ffff) != (d0 & 0x00ffff)) ++N_EVENT;
-
+				*/
 				}
 
-				if (SIZE_MAX == reallocEventTable(hdr, hdr->EVENT.N + N_EVENT)) {
+
+				hdr->EVENT.POS = (uint32_t*)realloc(hdr->EVENT.POS, (hdr->EVENT.N + N_EVENT) * sizeof(*hdr->EVENT.POS));
+				hdr->EVENT.TYP = (uint16_t*)realloc(hdr->EVENT.TYP, (hdr->EVENT.N + N_EVENT) * sizeof(*hdr->EVENT.TYP));
+				if (hdr->EVENT.POS==NULL || hdr->EVENT.TYP==NULL) {
 					biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
 					return (hdr);
 				}
@@ -4555,6 +4567,19 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"EDF+ event\n\ts1:\t<%s>\n\ts2:\t<%s>\n\ts3:
 				for (d0=0, k=0; k < len/3; d0=d1, k++) {
 					d1 = ((uint32_t)Marker[3*k+2]<<16) + ((uint32_t)Marker[3*k+1]<<8) + (uint32_t)Marker[3*k];
 
+				/*	raising edges */
+					if (d1 & 0x010000)
+						d1  = 0;
+					else
+						d1 &= 0x00ffff;
+
+					if (d0 < d1) {
+						hdr->EVENT.POS[hdr->EVENT.N] = k;        // 0-based indexing
+						hdr->EVENT.TYP[hdr->EVENT.N] = d1;
+						++hdr->EVENT.N;
+					}
+
+				/* 	raising and falling edges
 					if ((d1 & 0x010000) != (d0 & 0x010000)) {
 						hdr->EVENT.POS[hdr->EVENT.N] = k;        // 0-based indexing
 						hdr->EVENT.TYP[hdr->EVENT.N] = 0x7ffe;
@@ -4570,6 +4595,7 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"EDF+ event\n\ts1:\t<%s>\n\ts2:\t<%s>\n\ts3:
 						if (d2==0x7ffe)
 							fprintf(stdout,"Warning: BDF file %s uses ambigous code 0x7ffe; For details see file eventcodes.txt. \n",hdr->FileName);
 					}
+				*/
 				}
 				free(Marker);
 
