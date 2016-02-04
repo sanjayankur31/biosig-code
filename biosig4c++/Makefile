@@ -103,6 +103,7 @@ ifeq (,$(TARGET))
 	CXX     ?= g++
 	AR      := ar rcs
 	PKGCONF := pkg-config
+	PREFIX  ?= /usr/local
 ifneq (Darwin,$(shell uname))
 	LFLAGS  += -Wl,-z,relro,-z,now
 endif
@@ -111,8 +112,10 @@ else ifeq (intel,$(TARGET))
 	CXX     := /opt/intel/bin/icc
 	LD      := /opt/intel/bin/xild
 	AR      := /opt/intel/bin/xiar crs
+	PREFIX  ?= /usr/local
 else 
 	prefix  := $(subst /bin/,/,$(dir $(shell which $(TARGET)-gcc)))
+	PREFIX	?= $(dir $(dir $(prefix)))$(TARGET)
 	CC      := $(TARGET)-gcc
 	CXX     := $(TARGET)-g++
 	LD      := $(TARGET)-ld
@@ -346,7 +349,6 @@ endif
 
 ####### Output directory
 OBJ	      = ./obj
-PREFIX	      = $(dir $(dir $(prefix)))$(TARGET)
 INC	      = $(DESTDIR)$(PREFIX)/include
 BIN	      = $(DESTDIR)$(PREFIX)/bin
 LIB	      = $(DESTDIR)$(PREFIX)/lib
