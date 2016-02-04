@@ -1,6 +1,6 @@
 /*
 
-    Copyright (C) 2005-2015 Alois Schloegl <alois.schloegl@ist.ac.at>
+    Copyright (C) 2005-2016 Alois Schloegl <alois.schloegl@ist.ac.at>
     Copyright (C) 2011 Stoyan Mihaylov
     This file is part of the "BioSig for C/C++" repository
     (biosig4c++) at http://biosig.sf.net/
@@ -4538,47 +4538,38 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"EDF+ event\n\ts1:\t<%s>\n\ts2:\t<%s>\n\ts3:
 				hdr->EVENT.SampleRate = hdr->SampleRate;
 
 				/* convert BDF status channel into event table*/
-				uint32_t d1, d0 = ((uint32_t)Marker[2]<<16) + ((uint32_t)Marker[1]<<8) + (uint32_t)Marker[0];
-				for (k=1; k<len/3; k++) {
+				uint32_t d1, d0;
+				for (d0=0, k=0; k < len/3; d0 = d1, k++) {
 					d1 = ((uint32_t)Marker[3*k+2]<<16) + ((uint32_t)Marker[3*k+1]<<8) + (uint32_t)Marker[3*k];
+
 					if ((d1 & 0x010000) != (d0 & 0x010000)) ++N_EVENT;
 					if ((d1 & 0x00ffff) != (d0 & 0x00ffff)) ++N_EVENT;
-					d0 = d1;
+
 				}
 
-				size_t N = hdr->EVENT.N;	
-				hdr->EVENT.N += N_EVENT+1;
-				hdr->EVENT.SampleRate = hdr->SampleRate;
-				if (SIZE_MAX == reallocEventTable(hdr, hdr->EVENT.N)) {
+				if (SIZE_MAX == reallocEventTable(hdr, hdr->EVENT.N + N_EVENT)) {
 					biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
 					return (hdr);
 				}
 				
-				d0 = ((uint32_t)Marker[2]<<16) + ((uint32_t)Marker[1]<<8) + (uint32_t)Marker[0];
-				hdr->EVENT.POS[0] = 0;        // 0-based indexing
-				hdr->EVENT.TYP[0] = d0 & 0x00ffff;
-#if (BIOSIG_VERSION >= 10500)
-				hdr->EVENT.TimeStamp[N_EVENT] = 0;
-#endif
-				for (N_EVENT=1, k=1; k<len/3; k++) {
-
+				for (d0=0, k=0; k < len/3; d0=d1, k++) {
 					d1 = ((uint32_t)Marker[3*k+2]<<16) + ((uint32_t)Marker[3*k+1]<<8) + (uint32_t)Marker[3*k];
+
 					if ((d1 & 0x010000) != (d0 & 0x010000)) {
-						hdr->EVENT.POS[N_EVENT] = k;        // 0-based indexing
-						hdr->EVENT.TYP[N_EVENT] = 0x7ffe;
-						++N_EVENT;
+						hdr->EVENT.POS[hdr->EVENT.N] = k;        // 0-based indexing
+						hdr->EVENT.TYP[hdr->EVENT.N] = 0x7ffe;
+						++hdr->EVENT.N;
 					}
 
 					if ((d1 & 0x00ffff) != (d0 & 0x00ffff)) {
-						hdr->EVENT.POS[N_EVENT] = k;        // 0-based indexing
+						hdr->EVENT.POS[hdr->EVENT.N] = k;        // 0-based indexing
 						uint16_t d2 = d1 & 0x00ffff;
 						if (!d2) d2 = (uint16_t)(d0 & 0x00ffff) | 0x8000;
-						hdr->EVENT.TYP[N_EVENT] = d2;
-						++N_EVENT;
+						hdr->EVENT.TYP[hdr->EVENT.N] = d2;
+						++hdr->EVENT.N;
 						if (d2==0x7ffe)
 							fprintf(stdout,"Warning: BDF file %s uses ambigous code 0x7ffe; For details see file eventcodes.txt. \n",hdr->FileName);
 					}
-					d0 = d1;
 				}
 				free(Marker);
 
