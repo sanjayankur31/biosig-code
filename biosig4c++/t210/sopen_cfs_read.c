@@ -337,11 +337,28 @@ if (VERBOSE_LEVEL>7) 		{
 					if (VERBOSE_LEVEL>7) fprintf(stdout,"Warning : #%i of section %i contains %i samples \n", (int)k, (int)m, (int)xspr);
 
 				if (m > 0) {
-					// FIXME: issue 1617K2AA.DAT
 					if ( (hc->Cal != Cal)
 					  || (hc->Off != Off)
 					   )
-					biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "CED/CFS: channel properties changes between segments - this is not supported yet.\n");
+					switch (hc->GDFTYP) {
+					case 0:
+					case 1:
+					case 2:
+					case 3:
+					case 4:
+					case 5:
+					case 6:
+					case 16:
+						hc->GDFTYP = 16; 	// float, single precision
+						break;
+					case 7:
+					case 8:
+					case 17:
+						hc->GDFTYP = 17; 	// double
+						break;
+					case 18:  	// quadruple
+					default: ;
+					}
 				}
 				else {
 					hc->Cal = Cal;
@@ -363,7 +380,7 @@ if (VERBOSE_LEVEL>7) 		{
 				}
 
 				sz  += hc->SPR * GDFTYP_BITS[hc->GDFTYP] >> 3;
-				assert(hc->bi == bpb);
+				hc->bi = bpb;
 				bpb += GDFTYP_BITS[hc->GDFTYP]>>3;	// per single sample
 				hdr->AS.length += hc->SPR;
 
@@ -371,8 +388,7 @@ if (VERBOSE_LEVEL>7) 		{
 
 			SPR += xspr0;
 			SZ  += sz;
-			if (hdr->AS.bpb != bpb)
-				biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "CED/CFS: channel properties changes between segments - this is not supported yet.\n");
+			hdr->AS.bpb = bpb;
 		}
 
 		/*
@@ -399,7 +415,8 @@ if (VERBOSE_LEVEL>7) 		{
 			hdr->AS.first  = 0;
 			hdr->AS.length = 0;
 			char flag_firstchan = 1;
-			uint32_t xspr0= 0;
+			uint32_t xspr0 = 0;
+			float Cal, Off;
 			for (k = 0; k < hdr->NS; k++) {
 				uint8_t *pos = hdr->AS.Header + datapos + 30 + 24 * k;
 
@@ -408,17 +425,17 @@ if (VERBOSE_LEVEL>7) 		{
 				//uint32_t bi = leu32p(pos);	// unused
 				uint32_t xspr = leu32p(pos+4);
 				hc->SPR     = leu32p(pos+4);
-/*
 				hc->Cal     = lef32p(pos+8);
 				hc->Off     = lef32p(pos+12);
-*/
+				Cal         = lef32p(pos+8);
+				Off         = lef32p(pos+12);
 				double XCal = lef32p(pos+16);
 				double XOff = lef32p(pos+20);// unused
 
 				if (xspr0 == 0)
 					xspr0 = xspr;
 				else if (xspr>0)
-					xspr0 = lcm(xspr0,xspr);
+					xspr0 = lcm(xspr0, xspr);
 				else if (xspr==0)
 					if (VERBOSE_LEVEL>7) fprintf(stdout,"Warning : #%i of section %i contains %i samples \n", (int)k, (int)m, (int)xspr);
 
@@ -467,20 +484,15 @@ if (VERBOSE_LEVEL>7) 		{
 					uint16_t gdftyp    = dataType < 5 ? dataType+1 : dataType+11;
 
 if (VERBOSE_LEVEL>7) fprintf(stdout,"CFS 412 #%i %i %i %i %i: %i @%p %i\n", k, hc->SPR, gdftyp,hc->GDFTYP, stride, memoffset, srcaddr, leu32p(hdr->AS.Header+datapos + 4) + leu32p(hdr->AS.Header + datapos + 30 + 24 * k));
-					if (gdftyp != hc->GDFTYP) {
-						biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "CED/CFS: data type changes between segments - this is not supported yet.");
-					}
 					if ((hc->SPR > 0) && (xspr0 != hc->SPR)) {
 						biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "CED/CFS: samples-per-record (SPR) changes between channels - this is not supported yet.");
 					}
 
 					size_t k2;
-					for (k2 = 0; k2 < xspr0; k2++) {
+					if (gdftyp == hc->GDFTYP) {
+					    for (k2 = 0; k2 < xspr0; k2++) {
 
 						uint8_t *ptr = srcaddr + memoffset + k2*stride;
-
-if (VERBOSE_LEVEL>8) fprintf(stdout,"512 %i %i %i %i %i \n",(int)stride,(int)hc->bi,(int)SPR,(int)k2,(int)hdr->AS.bpb);
-
 						uint8_t *dest = hdr->AS.rawdata + hc->bi + (SPR + k2) * hdr->AS.bpb;
 						double val=NAN;
 
@@ -534,6 +546,78 @@ if (VERBOSE_LEVEL>8) fprintf(stdout,"512 %i %i %i %i %i \n",(int)stride,(int)hc-
 							hdr->EVENT.POS[hdr->EVENT.N] = lround( (val * hc->Cal + hc->Off) * hdr->SampleRate) + SPR;
 							hdr->EVENT.N++;
 						}
+					    }
+					}
+					else {
+					    for (k2 = 0; k2 < xspr0; k2++) {
+
+						uint8_t *ptr = srcaddr + memoffset + k2*stride;
+						uint8_t *dest = hdr->AS.rawdata + hc->bi + (SPR + k2) * hdr->AS.bpb;
+						double val;
+
+						if (hc->GDFTYP==16) {	// float
+							switch (gdftyp) {
+							// reorder for performance reasons - more frequent gdftyp's come first
+							case 3:  val = lei16p(ptr) * Cal + Off;
+								break;
+							case 4:  val = leu16p(ptr) * Cal + Off;
+								break;
+							case 16: val = lef32p(ptr) * Cal + Off;
+								break;
+							case 7:  val = lei64p(ptr) * Cal + Off;
+								break;
+							case 8:  val = leu64p(ptr) * Cal + Off;
+								break;
+							case 17: val = lef64p(ptr) * Cal + Off;
+								break;
+							case 0:  val = (*(   char*) ptr) * Cal + Off;
+								break;
+							case 1:  val = (*( int8_t*) ptr) * Cal + Off;
+								break;
+							case 2:  val = (*(uint8_t*) ptr) * Cal + Off;
+								break;
+							case 5:  val = lei32p(ptr) * Cal + Off;
+								break;
+							case 6:  val = leu32p(ptr) * Cal + Off;
+								break;
+							default:
+								val = NAN;
+								biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "CED/CFS: invalid data type");
+							}
+
+							lef32a(val, dest);	// hdr->AS.rawdata uses the native endian format of the platform
+						}
+						else {
+							// any conversion to anything but float is not supported yet.
+							biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "CED/CFS: data type changes between segments - this is not supported yet.");
+						}
+
+						// scaling has been already consider when converting to float, do not scale in sread anymore.
+						hc->Cal = 1.0;
+						hc->Off = 0.0;
+						if (hc->OnOff) continue;
+
+						if (!strncmp(hc->Label,"Marker",6) && hc->PhysDimCode==2176 && hc->GDFTYP==5 && next != 0) {
+							// matrix data might contain time markers.
+
+							// memory allocation for additional events - more efficient implementation would be nice
+							hdr->EVENT.TYP = (typeof(hdr->EVENT.TYP)) realloc(hdr->EVENT.TYP, (hdr->EVENT.N + NumberOfDataSections) * sizeof(*hdr->EVENT.TYP));
+							hdr->EVENT.POS = (typeof(hdr->EVENT.POS)) realloc(hdr->EVENT.POS, (hdr->EVENT.N + NumberOfDataSections) * sizeof(*hdr->EVENT.POS));
+
+							/*
+							char Desc[2]; Desc[0] = srcaddr[hdr->CHANNEL[next].bi + k2*stride]; Desc[1] = 0;
+								this does currently not work because FreeTextEvent expects that
+								the string constant is available as long as hdr, which is not the case here.
+							*/
+
+							// typically a single character within a 4 byte integer, this should be sufficient to ensure \0 termination
+							char *Desc = (char*)srcaddr + hdr->CHANNEL[next].bi + k2 * stride;
+							Desc[1] = 0;
+							FreeTextEvent(hdr, hdr->EVENT.N, Desc);
+							hdr->EVENT.POS[hdr->EVENT.N] = lround( (val * hc->Cal + hc->Off) * hdr->SampleRate) + SPR;
+							hdr->EVENT.N++;
+						}
+					    }
 					}
 					ns += hc->OnOff;
 				}
