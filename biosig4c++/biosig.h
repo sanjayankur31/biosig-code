@@ -1,6 +1,6 @@
 /*
 
-% Copyright (C) 2005-2013,2015 Alois Schloegl <alois.schloegl@ist.ac.at>
+% Copyright (C) 2005-2016 Alois Schloegl <alois.schloegl@ist.ac.at>
 % This file is part of the "BioSig for C/C++" repository
 % (biosig4c++) at http://biosig.sf.net/
 
@@ -40,7 +40,7 @@
 
 #define BIOSIG_VERSION_MAJOR 1
 #define BIOSIG_VERSION_MINOR 7
-#define BIOSIG_PATCHLEVEL 5
+#define BIOSIG_PATCHLEVEL 6
 // for backward compatibility
 #define BIOSIG_VERSION_STEPPING BIOSIG_PATCHLEVEL
 #define BIOSIG_VERSION (BIOSIG_VERSION_MAJOR * 10000 + BIOSIG_VERSION_MINOR * 100 + BIOSIG_PATCHLEVEL)
