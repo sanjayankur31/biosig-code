@@ -1,6 +1,6 @@
 /*
 
-    Copyright (C) 2010,2011,2012,2015 Alois Schloegl <alois.schloegl@ist.ac.at>
+    Copyright (C) 2010,2011,2012,2015,2016 Alois Schloegl <alois.schloegl@ist.ac.at>
 
     This file is part of the "BioSig for C/C++" repository
     (biosig4c++) at http://biosig.sf.net/
@@ -229,7 +229,7 @@ else if (VERBOSE_LEVEL>7)
 			}
 		}
 
-if (VERBOSE_LEVEL>7) fprintf(stdout,"\n******* Data Section variable information (n=%i,%i)*********\n", d,NumberOfDataSections);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"\n******* Data Section variable information (n=%i,%i)*********\n", d,NumberOfDataSections);
 		datapos = LastDataSectionHeaderOffset; //H1LEN + H2LEN*hdr->NS + n*36;
 		// reverse order of data sections
 		uint32_t *DATAPOS = (uint32_t*)malloc(sizeof(uint32_t)*NumberOfDataSections);
@@ -238,7 +238,7 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"\n******* Data Section variable information
 		for (m = NumberOfDataSections; 0 < m; ) {
 			DATAPOS[--m] = datapos;
 			datapos      = leu32p(hdr->AS.Header + datapos);
-if (VERBOSE_LEVEL>7) fprintf(stdout, "%s:%i sopen_cfs_read started: section %"PRIi16" pos %"PRIuPTR" 0x%"PRIxPTR"\n",__FILE__,__LINE__,m,datapos,datapos);
+			if (VERBOSE_LEVEL>7) fprintf(stdout, "%s:%i sopen_cfs_read started: section %"PRIi16" pos %"PRIuPTR" 0x%"PRIxPTR"\n",__FILE__,__LINE__,m,datapos,datapos);
 		}
 
 		if (hdr->AS.SegSel[0] > NumberOfDataSections) {
@@ -300,15 +300,17 @@ if (VERBOSE_LEVEL>7) 		{
 
 			if (!leu32p(hdr->AS.Header+datapos+8)) continue; 	// empty segment
 
-if (VERBOSE_LEVEL>7) fprintf(stdout,"\n******* DATA SECTION --%03i-- %i *********\n",m,flag_ChanInfoChanged);
-if (VERBOSE_LEVEL>7) fprintf(stdout,"\n[DS#%3i] 0x%x 0x%x [0x%x 0x%x szChanData=%i] 0x02%x\n", m, FileHeaderSize, (int)datapos, leu32p(hdr->AS.Header+datapos), leu32p(hdr->AS.Header+datapos+4), leu32p(hdr->AS.Header+datapos+8), leu16p(hdr->AS.Header+datapos+12));
+			if (VERBOSE_LEVEL>7) fprintf(stdout,"\n******* DATA SECTION --%03i-- %i *********\n",m,flag_ChanInfoChanged);
+			if (VERBOSE_LEVEL>7) fprintf(stdout,"\n[DS#%3i] 0x%x 0x%x [0x%x 0x%x szChanData=%i] 0x02%x\n", m, FileHeaderSize, \
+						(int)datapos, leu32p(hdr->AS.Header+datapos), leu32p(hdr->AS.Header+datapos+4), \
+						leu32p(hdr->AS.Header+datapos+8), leu16p(hdr->AS.Header+datapos+12));
 
 			uint32_t sz    = 0;
 			uint32_t bpb   = 0, spr = 0;
 			hdr->AS.first  = 0;
 			hdr->AS.length = 0;
 			char flag_firstchan = 1;
-			uint32_t xspr0= 0;
+			uint32_t xspr0 = 0;
 
 			for (k = 0; k < hdr->NS; k++) {
 				uint8_t *pos = hdr->AS.Header + datapos + 30 + 24 * k;
@@ -321,15 +323,21 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"\n[DS#%3i] 0x%x 0x%x [0x%x 0x%x szChanData=
 				float Off    = lef32p(pos+12);
 				double XCal  = lef32p(pos+16);
 				double XOff  = lef32p(pos+20);// unused
-				if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): %i/%i %i/%i %f+%f change SPR:%i->%i, Cal:%f->%f, Off: %f->%f\n",__FILE__,__LINE__, (int)m, (int)NumberOfDataSections, (int)k,(int)hdr->NS, XCal, XOff, (int)hc->SPR,(int)xspr,hc->Cal,Cal,hc->Off,Off);
+				if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): %i/%i %i/%i %f+%f change SPR:%i->%i, Cal:%f->%f, Off: %f->%f\n", \
+							__FILE__,__LINE__, (int)m, (int)NumberOfDataSections, (int)k,(int)hdr->NS, XCal, XOff, \
+							(int)hc->SPR,(int)xspr,hc->Cal,Cal,hc->Off,Off);
 
-				if (k==0) xspr0 = xspr;
-				else if (xspr0 != xspr) {
-					if (VERBOSE_LEVEL>7) fprintf(stdout,"Error %s (line %i): %i/%i %i/%i change SPR:%i->%i\n",__FILE__,__LINE__, (int)m, (int)NumberOfDataSections, (int)k,(int)hdr->NS,(int)hc->SPR,(int)xspr);
-					biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "CED/CFS: samples per record change - this is not supported yet.\n");
-				}
+				if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) [%i %i] %i %i %p %i\n", __FILE__, __LINE__, m, k, xspr0, xspr, pos, datapos + 30 + 24 * k);
+
+				if (xspr0 == 0)
+					xspr0 = xspr;
+				else if (xspr>0)
+					xspr0 = lcm(xspr0,xspr);
+				else if (xspr==0)
+					if (VERBOSE_LEVEL>7) fprintf(stdout,"Warning : #%i of section %i contains %i samples \n", (int)k, (int)m, (int)xspr);
 
 				if (m > 0) {
+					// FIXME: issue 1617K2AA.DAT
 					if ( (hc->Cal != Cal)
 					  || (hc->Off != Off)
 					   )
@@ -340,7 +348,7 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"\n[DS#%3i] 0x%x 0x%x [0x%x 0x%x szChanData=
 					hc->Off = Off;
 				}
 
-if (VERBOSE_LEVEL>7) fprintf(stdout,"CFS 408: %i #%i: SPR=%i=%i=%i  x%f+-%f %i x%g %g %g\n",m,k,spr,(int)SPR,hc->SPR,hc->Cal,hc->Off,hc->bi,xPhysDimScale[k], XCal, XOff);
+				if (VERBOSE_LEVEL>7) fprintf(stdout,"CFS 408: %i #%i: SPR=%i=%i=%i  x%f+-%f %i x%g %g %g\n",m,k,spr,(int)SPR,hc->SPR,hc->Cal,hc->Off,hc->bi,xPhysDimScale[k], XCal, XOff);
 
 				double Fs = 1.0 / (xPhysDimScale[k] * XCal);
 				if ( (hc->OnOff == 0) || (XCal == 0.0) ) {
@@ -407,10 +415,14 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"CFS 408: %i #%i: SPR=%i=%i=%i  x%f+-%f %i x
 				double XCal = lef32p(pos+16);
 				double XOff = lef32p(pos+20);// unused
 
-				if (k==0) xspr0 = xspr;
-				assert(xspr0 == xspr);
+				if (xspr0 == 0)
+					xspr0 = xspr;
+				else if (xspr>0)
+					xspr0 = lcm(xspr0,xspr);
+				else if (xspr==0)
+					if (VERBOSE_LEVEL>7) fprintf(stdout,"Warning : #%i of section %i contains %i samples \n", (int)k, (int)m, (int)xspr);
 
-if (VERBOSE_LEVEL>7) fprintf(stdout,"CFS 409: %i #%i: SPR=%i=%i=%i  x%f+-%f %i x%g %g %g %g %g\n",m,k,spr, (int)SPR, hc->SPR, hc->Cal, hc->Off, hc->bi, xPhysDimScale[k], lef32p(pos+8), lef32p(pos+12), XCal, XOff);
+				assert( (xspr==0) || ((xspr0 % xspr) == 0) );
 
 				double Fs = 1.0 / (xPhysDimScale[k] * XCal);
 				if ( (hc->OnOff == 0) || (XCal == 0.0) ) {
@@ -431,7 +443,7 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"CFS 409: %i #%i: SPR=%i=%i=%i  x%f+-%f %i x
 
 			}
 
-			if (1) {
+			if (xspr0 > 0) {
 				/* hack: copy data into a single block (rawdata)
 				   this is used as a data cache, no I/O is needed in sread, at the cost that sopen is slower
 				   sread_raw does not attempt to reload the data
@@ -458,9 +470,11 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"CFS 412 #%i %i %i %i %i: %i @%p %i\n", k, h
 					if (gdftyp != hc->GDFTYP) {
 						biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "CED/CFS: data type changes between segments - this is not supported yet.");
 					}
+					if ((hc->SPR > 0) && (xspr0 != hc->SPR)) {
+						biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "CED/CFS: samples-per-record (SPR) changes between channels - this is not supported yet.");
+					}
 
 					size_t k2;
-
 					for (k2 = 0; k2 < xspr0; k2++) {
 
 						uint8_t *ptr = srcaddr + memoffset + k2*stride;
