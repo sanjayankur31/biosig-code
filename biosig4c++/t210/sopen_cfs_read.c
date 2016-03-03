@@ -28,6 +28,29 @@
 #include <string.h>
 #include "../biosig-dev.h"
 
+uint16_t cfs_data_type(uint8_t dataType) {
+	switch (dataType) {
+	case 0:	//int8
+		return 1;
+	case 1: //uint8
+		return 3;
+	case 2: //int16
+		return 3;
+	case 3:	// uint16
+		return 4;
+	case 4: // int32
+		return 5;
+	case 5: //float
+		return 16;
+	case 6: // double
+		return 17;
+	case 7: // char
+		return 0;
+	default:
+		return 0xffff;
+	}
+}
+
 
 EXTERN_C void sopen_cfs_read(HDRTYPE* hdr) {
 /*
@@ -132,7 +155,10 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"%s(line %i) Channel #%i: %i<%s>/%i<%s>\n",_
 			//uint8_t  dataKind  = H2[43 + k*H2LEN];
 			//uint16_t byteSpace = leu16p(H2+44 + k*H2LEN);		// stride
 			//uint16_t next      = leu16p(H2+46 + k*H2LEN);
-			hc->GDFTYP = dataType < 5 ? dataType+1 : dataType+11;
+			hc->GDFTYP = cfs_data_type(dataType);
+			if (hc->GDFTYP > 580)	// sizeof GDFTYP_BITS[]
+				biosigERROR(hdr, B4C_DATATYPE_UNSUPPORTED, "CFS: unknown/unsupported data type !");
+
 			if (H2[43 + k * H2LEN] == 1) {
 				// Matrix data does not return an extra channel, but contains Markers and goes into the event table.
 				hc->OnOff = 0;
@@ -481,7 +507,9 @@ if (VERBOSE_LEVEL>7) 		{
 					//uint8_t  dataKind  = H2[43 + k*H2LEN];		// equidistant, Subsidiary or Matrix data
 					//uint16_t stride = leu16p(H2+44 + k*H2LEN);		// byteSpace
 					uint16_t next      = leu16p(H2+46 + k*H2LEN);
-					uint16_t gdftyp    = dataType < 5 ? dataType+1 : dataType+11;
+					uint16_t gdftyp    = cfs_data_type(dataType);
+					if (gdftyp > 580)	// sizeof GDFTYP_BITS[]
+						biosigERROR(hdr, B4C_DATATYPE_UNSUPPORTED, "CFS: unknown/unsupported data type !");
 
 if (VERBOSE_LEVEL>7) fprintf(stdout,"CFS 412 #%i %i %i %i %i: %i @%p %i\n", k, hc->SPR, gdftyp,hc->GDFTYP, stride, memoffset, srcaddr, leu32p(hdr->AS.Header+datapos + 4) + leu32p(hdr->AS.Header + datapos + 30 + 24 * k));
 					if ((hc->SPR > 0) && (xspr0 != hc->SPR)) {
