@@ -512,6 +512,9 @@ if (VERBOSE_LEVEL>7) 		{
 						biosigERROR(hdr, B4C_DATATYPE_UNSUPPORTED, "CFS: unknown/unsupported data type !");
 
 if (VERBOSE_LEVEL>7) fprintf(stdout,"CFS 412 #%i %i %i %i %i: %i @%p %i\n", k, hc->SPR, gdftyp,hc->GDFTYP, stride, memoffset, srcaddr, leu32p(hdr->AS.Header+datapos + 4) + leu32p(hdr->AS.Header + datapos + 30 + 24 * k));
+
+					if (hc->OnOff==0) continue;	// Time and Marker channels are not supported, yet
+
 					if ((hc->SPR > 0) && (xspr0 != hc->SPR)) {
 						biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "CED/CFS: samples-per-record (SPR) changes between channels - this is not supported yet.");
 					}
