@@ -52,6 +52,27 @@ uint16_t cfs_data_type(uint8_t dataType) {
 }
 
 
+/*
+	trim trailing whitespaces from pascal string,
+	maxLength prevents adding a 0-character when there is no space available.
+	maxLength must specify the string length w/o count or terminating zero byte.
+	pascal string: first byte contains lengths, followed by characters, not null-terminated
+*/
+char *trim_trailing_space(uint8_t *pstr, int maxLength) {
+	uint8_t len = pstr[0];
+	while (isspace(pstr[len]) && (len>0)) {
+		len--;
+	}
+	len++;
+
+	if (len<=maxLength) {
+		pstr[len]=0;
+		pstr[0]=len;
+	}
+	return (pstr+1);
+}
+
+
 EXTERN_C void sopen_cfs_read(HDRTYPE* hdr) {
 /*
 	this function will be called by the function SOPEN in "biosig.c"
@@ -147,9 +168,9 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) CFS - %d,%d,%d,0x%x,0x%x,0x%x,
 
 if (VERBOSE_LEVEL>7) fprintf(stdout,"%s(line %i) Channel #%i: %i<%s>/%i<%s>\n",__FILE__,__LINE__,k+1, H2[22 + k*H2LEN], H2 + 23 + k*H2LEN, H2[32 + k*H2LEN], H2 + 33 + k*H2LEN);
 
-
-			hc->PhysDimCode  = PhysDimCode (H2 + 22 + 1 + k*H2LEN);			// Y axis units
-			xPhysDimScale[k] = PhysDimScale(PhysDimCode(H2 + 32 + 1 + k*H2LEN));	// X axis units
+			// trim trailing whitespace
+			hc->PhysDimCode  = PhysDimCode (trim_trailing_space(H2 + 22 + k*H2LEN,9));		// Y axis units
+			xPhysDimScale[k] = PhysDimScale(PhysDimCode(trim_trailing_space(H2 + 32 + k*H2LEN,9)));	// X axis units
 
 			uint8_t  dataType  = H2[42 + k*H2LEN];
 			//uint8_t  dataKind  = H2[43 + k*H2LEN];
