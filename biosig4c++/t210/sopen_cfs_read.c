@@ -59,7 +59,7 @@ uint16_t cfs_data_type(uint8_t dataType) {
 	pascal string: first byte contains lengths, followed by characters, not null-terminated
 */
 char *trim_trailing_space(uint8_t *pstr, int maxLength) {
-	uint8_t len = pstr[0];
+	uint8_t len = min(pstr[0], maxLength);
 	while (isspace(pstr[len]) && (len>0)) {
 		len--;
 	}
