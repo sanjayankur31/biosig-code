@@ -1565,7 +1565,22 @@ end;
                         else
                                 HDR.AS.SPR=reshape(HDR.AS.SPR(1:HDR.NS),HDR.NS,1);
                         end;
+
                         
+			assert(numel(HDR.TOffset)==HDR.NS);
+			assert(numel(HDR.Cal)==HDR.NS);
+			assert(numel(HDR.Off)==HDR.NS);
+			assert(numel(HDR.PhysMax)==HDR.NS);
+			assert(numel(HDR.PhysMin)==HDR.NS);
+			assert(numel(HDR.DigMax)==HDR.NS);
+			assert(numel(HDR.DigMin)==HDR.NS);
+			assert(numel(HDR.GDFTYP)==HDR.NS);
+			assert(numel(HDR.PhysDimCode)==HDR.NS);
+			assert(numel(HDR.Impedance)==HDR.NS);
+			assert(numel(HDR.fZ)==HDR.NS);
+
+			assert(size(HDR.ELEC.XYZ,1)==HDR.NS);
+
                 end;	% header 2
 
                 %%%%%% generate Header 3,  Tag-Length-Value
