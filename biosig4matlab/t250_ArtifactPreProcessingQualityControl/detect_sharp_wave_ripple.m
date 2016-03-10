@@ -295,7 +295,7 @@ Fs = 20000; 	% assumed samplerate
 	end
 
 	% Detection
-	for k = 1:HDR.NS(:)',
+	for k = chan(:)',
 		if any(method==[1:3])
 			% start and end point detection
 			% "integrated power (i.e. RMS) trace crossed the mean + 1 SD line"
