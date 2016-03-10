@@ -53,22 +53,29 @@ uint16_t cfs_data_type(uint8_t dataType) {
 
 
 /*
-	trim trailing whitespaces from pascal string,
-	maxLength prevents adding a 0-character when there is no space available.
-	maxLength must specify the string length w/o count or terminating zero byte.
+    trim_trailing_space:
+	trims trailing whitespaces from pascal string (pstr), and the string
+	becomes always 0-terminated. This may mean that the last string character
+	might be deleted, if all bytes are filled with non-zero values.
+
+	no memory allocation or reallication is performed, maxLength+1 is
+	the size of the memory allocation for pstr (pstr[0] to pstr[maxLength]).
+	maxLength specify the string length w/o count or terminating zero byte.
+
 	pascal string: first byte contains lengths, followed by characters, not null-terminated
 */
-char *trim_trailing_space(uint8_t *pstr, int maxLength) {
-	uint8_t len = min(pstr[0], maxLength);
+char *trim_trailing_space(uint8_t *pstr, unsigned maxLength) {
+	unsigned len = min(pstr[0], maxLength);
 	while (isspace(pstr[len]) && (len>0)) {
 		len--;
 	}
-	len++;
 
-	if (len<=maxLength) {
-		pstr[len]=0;
-		pstr[0]=len;
-	}
+	if (len==maxLength) fprintf(stdout,"Warning %s: last and %i-th  character of string <%c%c%c%c...> has been deleted\n",__func__,len,pstr[1],pstr[2],pstr[3],pstr[4]);
+
+	len = min(len+1,maxLength);
+	pstr[len]=0;
+	pstr[0]=len;
+
 	return (pstr+1);
 }
 
@@ -160,15 +167,9 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) CFS - %d,%d,%d,0x%x,0x%x,0x%x,
 			hc->LeadIdCode = 0;
 			hc->bi8 = 0;
 
-			uint8_t len = min(21, MAX_LENGTH_LABEL);
-			strncpy(hc->Label, H2 + 1 + k*H2LEN, len);	// Channel name
-			len = strlen(hc->Label);
-			while (isspace(hc->Label[len])) len--;		// remove trailing blanks
-			hc->Label[len+1] = 0;
-
 if (VERBOSE_LEVEL>7) fprintf(stdout,"%s(line %i) Channel #%i: %i<%s>/%i<%s>\n",__FILE__,__LINE__,k+1, H2[22 + k*H2LEN], H2 + 23 + k*H2LEN, H2[32 + k*H2LEN], H2 + 33 + k*H2LEN);
 
-			// trim trailing whitespace
+			strncpy(hc->Label,              trim_trailing_space(H2 + k*H2LEN, 20), 21);	// Channel name
 			hc->PhysDimCode  = PhysDimCode (trim_trailing_space(H2 + 22 + k*H2LEN,9));		// Y axis units
 			xPhysDimScale[k] = PhysDimScale(PhysDimCode(trim_trailing_space(H2 + 32 + k*H2LEN,9)));	// X axis units
 
