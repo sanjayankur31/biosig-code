@@ -212,7 +212,7 @@ if ~isfield(HDR.FLAG,'OUTPUT')
 end; 
 FLAG.BDF.status2event = regexp (MODE, '(^BDF:|[ \t;,]BDF:)(\d*)([ \t;,]|$)','tokens');
 if ~isempty(FLAG.BDF.status2event)
-	FLAG.BDF.status2event = num2int(FLAG.BDF.status2event{1}{2})
+	FLAG.BDF.status2event = num2int(FLAG.BDF.status2event{1}{2});
 end; 
 
 if ~isfield(HDR,'EVENT');
@@ -1576,8 +1576,8 @@ end;
 			assert(numel(HDR.DigMin)==HDR.NS);
 			assert(numel(HDR.GDFTYP)==HDR.NS);
 			assert(numel(HDR.PhysDimCode)==HDR.NS);
-			assert(numel(HDR.Impedance)==HDR.NS);
-			assert(numel(HDR.fZ)==HDR.NS);
+			assert(~isfield(HDR,'Impedance') || (numel(HDR.Impedance)==HDR.NS));
+			assert(~isfield(HDR,'fZ')        || (numel(HDR.fZ)==HDR.NS));
 
 			assert(size(HDR.ELEC.XYZ,1)==HDR.NS);
 
