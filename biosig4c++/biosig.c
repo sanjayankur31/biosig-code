@@ -3007,7 +3007,7 @@ int gdfbin2struct(HDRTYPE *hdr)
 		else
 			Dur = lef64p(hdr->AS.Header+244);
 
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"[GDFBIN2STRUCT 212] #%i Ver=%f\n", hdr->NS, hdr->VERSION);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) #%i  Ver=%g\n",__func__,__LINE__, hdr->NS, hdr->VERSION);
 
 	    	if (hdr->VERSION > 1.90) {
 
@@ -3025,7 +3025,7 @@ int gdfbin2struct(HDRTYPE *hdr)
 		    		strncpy(hdr->Patient.Name,tmpptr,MAX_LENGTH_NAME);
 		    	}
 
-			if (VERBOSE_LEVEL>7) fprintf(stdout,"[202] FMT=%s Ver=%4.2f\n",GetFileTypeString(hdr->TYPE),hdr->VERSION);
+			if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) FMT=%s Ver=%4.2f\n",__func__,__LINE__, GetFileTypeString(hdr->TYPE), hdr->VERSION);
 
 	    		hdr->Patient.Smoking      =  Header1[84]%4;
 	    		hdr->Patient.AlcoholAbuse = (Header1[84]>>2)%4;
@@ -3054,7 +3054,7 @@ int gdfbin2struct(HDRTYPE *hdr)
 				memcpy(&hdr->LOC, hdr->AS.Header+152, 16);
 			}
 
-			if (VERBOSE_LEVEL>7) fprintf(stdout,"[203] FMT=%s Ver=%4.2f\n",GetFileTypeString(hdr->TYPE),hdr->VERSION);
+			if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) FMT=%s Ver=%4.2f\n",__func__,__LINE__, GetFileTypeString(hdr->TYPE), hdr->VERSION);
 
 			hdr->T0 		= lei64p(hdr->AS.Header+168);
 			hdr->Patient.Birthday 	= lei64p(hdr->AS.Header+176);
@@ -3084,7 +3084,7 @@ int gdfbin2struct(HDRTYPE *hdr)
 			    	}
 		    	}
 
-			if (VERBOSE_LEVEL>8) fprintf(stdout,"[209] FMT=%s Ver=%4.2f\n",GetFileTypeString(hdr->TYPE),hdr->VERSION);
+			if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) FMT=%s Ver=%4.2f\n",__func__,__LINE__, GetFileTypeString(hdr->TYPE), hdr->VERSION);
 
 	    	}
 	    	else if (hdr->VERSION > 0.0) {
@@ -3122,7 +3122,7 @@ int gdfbin2struct(HDRTYPE *hdr)
 	    		return (hdr->AS.B4C_ERRNUM);
 	    	}
 
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"[GDFBIN2STRUCT 242] #%i Ver=%f\n", hdr->NS, hdr->VERSION);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) #%i Ver=%4.2f\n",__func__,__LINE__, hdr->NS, hdr->VERSION);
 
 		if (hdr->HeadLen < (256u * (hdr->NS + 1u))) {
 			biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "(GDF) Length of Header is too small");
@@ -3137,7 +3137,7 @@ int gdfbin2struct(HDRTYPE *hdr)
 		for (k=0; k<hdr->NS; k++)	{
 			CHANNEL_TYPE *hc = hdr->CHANNEL+k;
 
-			if (VERBOSE_LEVEL>7) fprintf(stdout,"[GDF 252] #=%i/%i\n",k,hdr->NS);
+			if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) #%i/%i\n",__func__,__LINE__, k, hdr->NS);
 
 			hc->LeadIdCode = 0;
 			size_t len = min(16, MAX_LENGTH_LABEL);
@@ -3727,7 +3727,7 @@ int read_header(HDRTYPE *hdr) {
 	-3	error reading event table
  */
 
-	if (VERBOSE_LEVEL>7) fprintf(stdout,"READ_HEADER: %i %i %f\n", (int)hdr->FILE.size, (int)hdr->HeadLen, hdr->VERSION);
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): %i %i %f\n",__func__,__LINE__, (int)hdr->FILE.size, (int)hdr->HeadLen, hdr->VERSION);
 
 	size_t count = hdr->HeadLen;
 	if (hdr->HeadLen<=512) {
@@ -3749,7 +3749,7 @@ int read_header(HDRTYPE *hdr) {
 	else
 	    	hdr->HeadLen = leu64p(hdr->AS.Header+184);
 
-	if (VERBOSE_LEVEL>7) fprintf(stdout,"READ_HEADER: %i %i %i %f\n", (int)hdr->FILE.size, (int)hdr->HeadLen, (int)count, hdr->VERSION);
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): %i %i %i %f\n", __func__, __LINE__,(int)hdr->FILE.size, (int)hdr->HeadLen, (int)count, hdr->VERSION);
 
 	hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header,hdr->HeadLen);
         if (count < hdr->HeadLen) {
@@ -3757,20 +3757,22 @@ int read_header(HDRTYPE *hdr) {
 	    	count += ifread(hdr->AS.Header+count, 1, hdr->HeadLen-count, hdr);
 	}
 
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): %i %i %i %f\n",__func__, __LINE__, (int)hdr->FILE.size, (int)hdr->HeadLen, (int)count, hdr->VERSION);
+
         if (count < hdr->HeadLen) {
 		if (VERBOSE_LEVEL>7) fprintf(stdout,"ambigous GDF header size: %i %i\n",(int)count,hdr->HeadLen);
                 biosigERROR(hdr, B4C_INCOMPLETE_FILE, "reading GDF header failed");
                 return(-2);
 	}
 
-	if (VERBOSE_LEVEL>7) fprintf(stdout,"READ_HEADER: %i %i %i %f\n", (int)hdr->FILE.size, (int)hdr->HeadLen, (int)count, hdr->VERSION);
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): %i %i %i %f\n",__func__, __LINE__, (int)hdr->FILE.size, (int)hdr->HeadLen, (int)count, hdr->VERSION);
 
 	if ( gdfbin2struct(hdr) ) {
-	if (VERBOSE_LEVEL>7) fprintf(stdout,"READ_HEADER--: %i %i %i %f\n", (int)hdr->FILE.size, (int)hdr->HeadLen, (int)count, hdr->VERSION);
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): %i %i %i %f\n",__func__, __LINE__, (int)hdr->FILE.size, (int)hdr->HeadLen, (int)count, hdr->VERSION);
 		return(-2);
 	}
 
-	if (VERBOSE_LEVEL>7) fprintf(stdout,"READ_HEADER: %i %i %i %f\n", (int)hdr->FILE.size, (int)hdr->HeadLen, (int)count, hdr->VERSION);
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): %i %i %i %f\n",__func__, __LINE__, (int)hdr->FILE.size, (int)hdr->HeadLen, (int)count, hdr->VERSION);
 
  	hdr->EVENT.N   = 0;
 	hdr->EVENT.POS = NULL;
