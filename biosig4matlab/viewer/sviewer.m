@@ -1633,7 +1633,7 @@ if isequal(get(findobj('Tag','Startdetection'),'Label'),'Start                  
     Event_string = Event_string(1:end-2);
     Data.Detection.Event_string = Event_string;
     
-    if isfield(Data.Detection,'EventMatrix')
+    if isfield(Data.Detection,'EventMatrix') && (numel(Data.Detection.EventMatrix)>1)
         typ = Data.Detection.EventMatrix(1,2);
     else
         typ = hex2dec('0101');    
@@ -1919,8 +1919,12 @@ else
     if tmpflag,
         H = Data.HDR;
     else
-        H = sopen([path file]);
-        H = sclose(H);
+	try
+		H = mexSOPEN([path file]);
+	catch
+	        H = sopen([path file]);
+		H = sclose(H);
+	end;
     end
     try
         typ = H.EVENT.TYP;
