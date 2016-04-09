@@ -646,7 +646,7 @@ if (VERBOSE_LEVEL>8) fprintf(stdout,"REQ EVT: %i %"PRIiPTR" \n",s,LEN);
 		while (LEN > (size_t)count) {
 			count += recv(sd, TC hdr->AS.rawEventData+count, LEN-count, 0);
 		}
-	   	rawEVT2hdrEVT(hdr); // TODO: replace this function because it is inefficient  
+		rawEVT2hdrEVT(hdr, count); // TODO: replace this function because it is inefficient
    	}
 
 if (VERBOSE_LEVEL>8) fprintf(stdout,"REQ EVT: %i %"PRIiPTR" \n",s,LEN);

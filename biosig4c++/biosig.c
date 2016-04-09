@@ -2983,12 +2983,19 @@ int gdfbin2struct(HDRTYPE *hdr)
 	struct tm 	tm_time;
 //	time_t		tt;
 
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"[GDFBIN2STRUCT 202] #%i \n",hdr->NS);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %p\n",__func__,__LINE__,hdr->AS.Header);
+
+		if (!memcmp("GDF",(char*)(hdr->AS.Header+3),3)) {
+			biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "Only GDF is supported");
+			return (hdr->AS.B4C_ERRNUM);
+		}
+
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) #%i \n",__func__,__LINE__, (int)hdr->NS);
 
       	    	strncpy(tmp,(char*)(hdr->AS.Header+3),5); tmp[5]=0;
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"[GDFBIN2STRUCT 202] #%i Ver=<%s>\n",hdr->NS,tmp);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) #%i  Ver=<%s>\n",__func__,__LINE__, (int)hdr->NS,tmp);
 	    	hdr->VERSION 	= atof(tmp);
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"[GDFBIN2STRUCT 202] #%i Ver=<%s>\n",hdr->NS,tmp);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) #%i  Ver=<%s>\n",__func__,__LINE__, (int)hdr->NS,tmp);
 
 	    	hdr->NRec 	= lei64p(hdr->AS.Header+236);
 	    	hdr->NS   	= leu16p(hdr->AS.Header+252);
@@ -3453,11 +3460,11 @@ size_t hdrEVT2rawEVT(HDRTYPE *hdr) {
 	
 	TODO: support of EVENT.TimeStamp
  *********************************************************************************/
-void rawEVT2hdrEVT(HDRTYPE *hdr) {
+void rawEVT2hdrEVT(HDRTYPE *hdr, size_t length_rawEventData) {
 	// TODO: avoid additional copying
 	size_t k;
 			uint8_t *buf = hdr->AS.rawEventData;
-			if (buf==NULL) {
+			if ((buf==NULL) || (length_rawEventData < 8)) {
 				hdr->EVENT.N = 0;
 				return;
 			}
@@ -3479,6 +3486,12 @@ void rawEVT2hdrEVT(HDRTYPE *hdr) {
 			char flag = buf[0];
 			int sze = (flag & 2) ? 12 : 6;
 			if (flag & 4) sze+=8;
+
+			if (sze*hdr->EVENT.N+8 < length_rawEventData) {
+				hdr->EVENT.N = 0;
+		                biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "Error GDF: event table is corrupted");
+		                return;
+			}
 
 			if (hdr->NS==0 && !isfinite(hdr->SampleRate)) hdr->SampleRate = hdr->EVENT.SampleRate; 
 
@@ -3787,27 +3800,22 @@ int read_header(HDRTYPE *hdr) {
     			uint8_t *buf = hdr->AS.rawEventData;
 
 			if (c<8) {
-				hdr->EVENT.SampleRate = hdr->SampleRate;
 				hdr->EVENT.N = 0;
 			}
 			else if (hdr->VERSION < 1.94) {
-				if (buf[1] | buf[2] | buf[3])
-					hdr->EVENT.SampleRate = buf[1] + (buf[2] + buf[3]*256.0)*256.0;
-				else {
-					fprintf(stdout,"Warning GDF v1: SampleRate in Eventtable is not set in %s !!!\n",hdr->FileName);
-					hdr->EVENT.SampleRate = hdr->SampleRate;
-				}
 				hdr->EVENT.N = leu32p(buf + 4);
 			}
 			else {
 				hdr->EVENT.N = buf[1] + (buf[2] + buf[3]*256)*256;
-				hdr->EVENT.SampleRate = lef32p(buf + 4);
 			}
 
 			if (VERBOSE_LEVEL > 7) 
 				fprintf(stdout,"EVENT.N = %i,%i\n",hdr->EVENT.N,(int)c); 
 
-			int sze = (buf[0]>1) ? 12 : 6;
+			char flag = buf[0];
+			int sze = (flag & 2) ? 12 : 6;
+			if (flag & 4) sze+=8;
+
 			hdr->AS.rawEventData = (uint8_t*)realloc(hdr->AS.rawEventData,8+hdr->EVENT.N*sze);
 			c = ifread(hdr->AS.rawEventData+8, sze, hdr->EVENT.N, hdr);
 			ifseek(hdr, hdr->HeadLen, SEEK_SET);
@@ -3815,7 +3823,7 @@ int read_header(HDRTYPE *hdr) {
                                 biosigERROR(hdr, B4C_INCOMPLETE_FILE, "reading GDF eventtable failed");
                                 return(-3);
 			}
-			rawEVT2hdrEVT(hdr);
+			rawEVT2hdrEVT(hdr, 8+hdr->EVENT.N*sze);
 		}
 		else
 			hdr->EVENT.N = 0;

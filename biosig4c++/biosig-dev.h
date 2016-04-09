@@ -549,7 +549,7 @@ int gdfbin2struct(HDRTYPE *hdr);
  ------------------------------------------------------------------------*/
 
 size_t hdrEVT2rawEVT(HDRTYPE *hdr);
-void rawEVT2hdrEVT(HDRTYPE *hdr);
+void rawEVT2hdrEVT(HDRTYPE *hdr, size_t length_rawEventTable);
 /* rawEVT2hdrEVT and hdrEVT2rawEVT
 	convert between streamed event table and the structure
 	HDRTYPE.EVENT.
