@@ -12191,16 +12191,13 @@ size_t bpb8_collapsed_rawdata(HDRTYPE *hdr)
 	as been already converted into the event table)
 	that are not needed in GDF.
 
-	re-allocates buffer (buf) to hold collapsed data
-	bpb are the bytes per block.
+	if buf==NULL, hdr->AS.rawdata will be collapsed
 
  ****************************************************************************/
+void collapse_rawdata(HDRTYPE *hdr, void *buf, size_t count) {
 
-void collapse_rawdata(HDRTYPE *hdr)
-{
 	CHANNEL_TYPE *CHptr;
-	size_t bpb;
-	size_t	count,k4;
+	size_t bpb, k4;
 	typeof (hdr->NS) numSegments,k1;
 
 	if (VERBOSE_LEVEL>8) fprintf(stdout,"collapse: started\n");
@@ -12215,8 +12212,10 @@ void collapse_rawdata(HDRTYPE *hdr)
 
 	if (VERBOSE_LEVEL>8) fprintf(stdout,"collapse: bpb=%i/%i\n",(int)bpb,hdr->AS.bpb);
 
-	void *buf   = hdr->AS.rawdata;
-	count = hdr->AS.length;
+	if (buf == NULL) {
+		buf   = hdr->AS.rawdata;
+		count = hdr->AS.length;
+	}
 
 	// prepare idxlist for copying segments within a single block (i.e. record)
 	size_t *idxList1= malloc(3*hdr->NS*sizeof(size_t));
@@ -12281,20 +12280,34 @@ size_t sread_raw(size_t start, size_t length, HDRTYPE* hdr, char flag, void *buf
  *
  *	  flag!=0 : unused channels (those channels k where HDR.CHANNEL[k].OnOff==0)
  *		are collapsed
+ *
+ * 	  for reading whole data section, bufsize must be length*hdr->AS.bpb (also if flag is set)
  */
 
 	if (buf != NULL) {
-		length = min(length, bufsize / hdr->AS.bpb);
-		if (flag) fprintf(stderr, "Warning %s (line %i): collapsing raw data when using buf is not supported, yet.\n",__func__, __LINE__);
-		assert(!flag);
+		if (length > (bufsize / hdr->AS.bpb)) {
+			fprintf(stderr, "Warning %s (line %i): bufsize is not large enough for converting %i blocks.\n", \
+				__func__, __LINE__, (int)length);
+			length = bufsize / hdr->AS.bpb;
+		}
 
-		if ((hdr->AS.first <= start) && ((start+length) <= (hdr->AS.first+hdr->AS.length)) && !hdr->AS.flag_collapsed_rawdata) {
+		if ( (hdr->AS.first <= start) && ((start+length) <= (hdr->AS.first+hdr->AS.length)) ) {
 			/****  copy from rawData if available:
 				- better performance
-				- required for some data formats (e.g. CFS, when rawDate is pobulated in SOPEN)
+				- required for some data formats (e.g. CFS, when hdr->AS.rawdata is populated in SOPEN)
 			 ****/
-			memcpy(buf, hdr->AS.rawdata + (start - hdr->AS.first) * hdr->AS.bpb, bufsize);
-			return (bufsize / hdr->AS.bpb);
+
+			if (!hdr->AS.flag_collapsed_rawdata) {
+				memcpy(buf, hdr->AS.rawdata + (start - hdr->AS.first) * hdr->AS.bpb, bufsize);
+				if (flag) collapse_rawdata(hdr, buf, length);
+				return (length);
+			}
+			else if (flag) {
+				size_t bpb = bpb8_collapsed_rawdata(hdr)>>3;
+				memcpy(buf, hdr->AS.rawdata + (start - hdr->AS.first) * bpb, bufsize);
+				return (bufsize / bpb);
+			}
+			// else if (hdr->AS.flag_collapsed_rawdata && !flag) is handled below
 		}
 	}
 
@@ -12399,7 +12412,7 @@ size_t sread_raw(size_t start, size_t length, HDRTYPE* hdr, char flag, void *buf
 	// (uncollapsed) data is now in buffer hdr->AS.rawdata
 
 	if (flag) {
-		collapse_rawdata(hdr);
+		collapse_rawdata(hdr, NULL, 0);
 	}
 	return(count);
 }
