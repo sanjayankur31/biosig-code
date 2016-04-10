@@ -250,7 +250,7 @@ fprintf(stdout,"16 %i\n",hdr->EVENT.N);
 		     	}	
 		     	else {
 		     	
-		     		sread_raw(0,hdr->NRec,hdr,1); 	// collapse rawdata (remove obsolete channels) 
+				sread_raw(0,hdr->NRec,hdr,1,NULL,0); 	// collapse rawdata (remove obsolete channels)
 				size_t bpb = bpb8_collapsed_rawdata(hdr)>>3;
 				if (serror2(hdr)) {
 					sclose(hdr);

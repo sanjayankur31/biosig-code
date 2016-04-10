@@ -12254,7 +12254,7 @@ void collapse_rawdata(HDRTYPE *hdr)
 /****************************************************************************/
 /**	SREAD_RAW : segment-based                                          **/
 /****************************************************************************/
-size_t sread_raw(size_t start, size_t length, HDRTYPE* hdr, char flag) {
+size_t sread_raw(size_t start, size_t length, HDRTYPE* hdr, char flag, void *buf, size_t bufsize) {
 /*
  *	Reads LENGTH blocks with HDR.AS.bpb BYTES each
  * 	(and HDR.SPR samples).
@@ -12268,25 +12268,37 @@ size_t sread_raw(size_t start, size_t length, HDRTYPE* hdr, char flag) {
  *		are collapsed
  */
 
+	if (buf != NULL) {
+		length = min(length, bufsize / hdr->AS.bpb);
+		if (flag) fprintf(stderr, "Warning %s (line %i): collapsing raw data when using buf is not supported, yet.\n",__func__, __LINE__);
+		assert(!flag);
+
+		if ((hdr->AS.first <= start) && ((start+length) <= (hdr->AS.first+hdr->AS.length)) && !hdr->AS.flag_collapsed_rawdata) {
+			/****  copy from rawData if available:
+				- better performance
+				- required for some data formats (e.g. CFS, when rawDate is pobulated in SOPEN)
+			 ****/
+			memcpy(buf, hdr->AS.rawdata + (start - hdr->AS.first) * hdr->AS.bpb, bufsize);
+			return (bufsize / hdr->AS.bpb);
+		}
+	}
+
 	if (hdr->AS.flag_collapsed_rawdata && !flag)
 		hdr->AS.length = 0; // 	force reloading of data
 
 	size_t	count, nelem;
 
 	if (VERBOSE_LEVEL>7)
-		fprintf(stdout,"####SREAD-RAW########## start=%d length=%d bpb=%i\n",(int)start,(int)length, hdr->AS.bpb);
-
-	if (VERBOSE_LEVEL>7)
-		fprintf(stdout,"sread raw 211: %d %d %d %d\n",(int)start, (int)length,  (int)hdr->NRec, (int)hdr->FILE.POS);
+		fprintf(stdout,"%s (line %i): start=%d length=%d nrec=%d POS=%d bpb=%i\n",__func__,__LINE__, \
+			(int)start,(int)length,(int)hdr->NRec, (int)hdr->FILE.POS, hdr->AS.bpb);
 
 	if ((nrec_t)start > hdr->NRec)
 		return(0);
 	else if ((ssize_t)start < 0)
 		start = hdr->FILE.POS;
 
-
 	if (VERBOSE_LEVEL>7)
-		fprintf(stdout,"sread raw 216: %d %d %d %d\n",(int)start, (int)length, (int)hdr->NRec, (int)hdr->FILE.POS);
+		fprintf(stdout,"%s (line %i): %d %d %d %d\n",__func__,__LINE__, (int)start, (int)length, (int)hdr->NRec, (int)hdr->FILE.POS);
 
 	// limit reading to end of data block
 	if (hdr->NRec<0)
@@ -12297,19 +12309,16 @@ size_t sread_raw(size_t start, size_t length, HDRTYPE* hdr, char flag) {
 		nelem = min(length, hdr->NRec - start);
 
 	if (VERBOSE_LEVEL>7)
-		fprintf(stdout,"sread raw 221: %i %i %i %i %i\n",(int)start, (int)length, (int)nelem, (int)hdr->NRec, (int)hdr->FILE.POS);
+		fprintf(stdout,"%s (line %i): %i %i %i %i %i %p\n",__func__,__LINE__, \
+			(int)start, (int)length, (int)nelem, (int)hdr->NRec, (int)hdr->FILE.POS, hdr->AS.rawdata);
 
-	if (VERBOSE_LEVEL>7)
-		fprintf(stdout,"sread raw 221 %i=?=%i  %i=?=%i \n", (int)start,(int)hdr->AS.first,(int)(start+nelem),(int)hdr->AS.length);
-
-
-	if ((start >= hdr->AS.first) && ((start+nelem) <= (hdr->AS.first+hdr->AS.length))) {
+	if ( (buf == NULL) && (start >= hdr->AS.first) && ( (start + nelem) <= (hdr->AS.first + hdr->AS.length) ) ) {
 		// Caching, no file-IO, data is already loaded into hdr->AS.rawdata
 		hdr->FILE.POS = start;
 		count = nelem;
 
 		if (VERBOSE_LEVEL>7)
-			fprintf(stdout,"sread-raw: 222\n");
+			fprintf(stdout,"%s (line %i): \n",__func__,__LINE__);
 
 	}
 #ifndef WITHOUT_NETWORK
@@ -12327,7 +12336,7 @@ size_t sread_raw(size_t start, size_t length, HDRTYPE* hdr, char flag) {
 		assert(hdr->TYPE != SMR);	// CFS data has been already cached in SOPEN
 
 		if (VERBOSE_LEVEL>7)
-			fprintf(stdout,"sread-raw: 223\n");
+			fprintf(stdout,"%s (line %i): \n",__func__,__LINE__);
 
 		// read required data block(s)
 		if (ifseek(hdr, start*hdr->AS.bpb + hdr->HeadLen, SEEK_SET)<0) {
@@ -12339,33 +12348,38 @@ size_t sread_raw(size_t start, size_t length, HDRTYPE* hdr, char flag) {
 			hdr->FILE.POS = start;
 
 		if (VERBOSE_LEVEL>7)
-			fprintf(stdout,"sread-raw: 224 %i\n",hdr->AS.bpb);
+			fprintf(stdout,"%s (line %i): bpb=%i\n",__func__,__LINE__,(int)hdr->AS.bpb);
 
 		// allocate AS.rawdata
-		void *tmpptr = realloc(hdr->AS.rawdata, hdr->AS.bpb*nelem);
-		if (tmpptr!=NULL || hdr->AS.bpb*nelem==0) 
-			hdr->AS.rawdata = (uint8_t*) tmpptr;
-		else {
-                        biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "memory allocation failed");
-                        return(0);
-		}	
+		void* tmpptr = buf;
+		if (buf == NULL) {
+			tmpptr = realloc(hdr->AS.rawdata, hdr->AS.bpb*nelem);
+			if ((tmpptr!=NULL) || (hdr->AS.bpb*nelem==0)) {
+				if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i)  %i %i \n",__func__,__LINE__,(int)hdr->AS.bpb,(int)nelem);
+				hdr->AS.rawdata = (uint8_t*) tmpptr;
+			}
+			else {
+				biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "memory allocation failed");
+				return(0);
+			}
+		}
 
 		if (VERBOSE_LEVEL>8)
 			fprintf(stdout,"#sread(%i %li)\n",(int)(hdr->HeadLen + hdr->FILE.POS*hdr->AS.bpb), iftell(hdr));
 
 		// read data
-		count = ifread(hdr->AS.rawdata, hdr->AS.bpb, nelem, hdr);
-		hdr->AS.flag_collapsed_rawdata = 0;	// is rawdata not collapsed
-//		if ((count<nelem) && ((hdr->NRec < 0) || (hdr->NRec > start+count))) hdr->NRec = start+count; // get NRec if NRec undefined, not tested yet.
+		count = ifread(tmpptr, hdr->AS.bpb, nelem, hdr);
+		if (buf != NULL) {
+			hdr->AS.flag_collapsed_rawdata = 0;	// is rawdata not collapsed
+			hdr->AS.first = start;
+			hdr->AS.length= count;
+		}
+
 		if (count < nelem) {
 			fprintf(stderr,"warning: less than the number of requested blocks read (%i/%i) from file %s - something went wrong\n",(int)count,(int)nelem,hdr->FileName);
 			if (VERBOSE_LEVEL>7)
 				fprintf(stderr,"warning: only %i instead of %i blocks read - something went wrong (bpb=%i,pos=%li)\n",(int)count,(int)nelem,hdr->AS.bpb,iftell(hdr));
 		}
-//		else    fprintf(stderr,"              %i            %i blocks read                        (bpb=%i,pos=%li)\n",count,nelem,hdr->AS.bpb,iftell(hdr));
-
-		hdr->AS.first = start;
-		hdr->AS.length= count;
 	}
 	// (uncollapsed) data is now in buffer hdr->AS.rawdata
 
@@ -12381,7 +12395,7 @@ size_t sread_raw(size_t start, size_t length, HDRTYPE* hdr, char flag) {
  ****************************************************************************/
 int cachingWholeFile(HDRTYPE* hdr) {
 
-	sread_raw(0,hdr->NRec,hdr, 0);
+	sread_raw(0,hdr->NRec,hdr, 0, NULL, 0);
 
 	return((hdr->AS.first != 0) || (hdr->AS.length != (size_t)hdr->NRec));
 }
@@ -12444,7 +12458,7 @@ size_t sread(biosig_data_type* data, size_t start, size_t length, HDRTYPE* hdr) 
 		count = hdr->NRec;
 		break;
 	default: 
-	 	count = sread_raw(start, length, hdr, 0);
+		count = sread_raw(start, length, hdr, 0, NULL, 0);
 	}
 
 	if (hdr->AS.B4C_ERRNUM) return(0);
@@ -12460,7 +12474,9 @@ size_t sread(biosig_data_type* data, size_t start, size_t length, HDRTYPE* hdr) 
 		if (hdr->CHANNEL[k1].OnOff) ++NS;
 
 	if (VERBOSE_LEVEL>7)
-		fprintf(stdout,"SREAD: count=%i pos=[%i,%i,%i,%i], size of data = %ix%ix%ix%i = %i\n",(int)count,(int)start,(int)length,(int)POS,(int)hdr->FILE.POS,(int)hdr->SPR, (int)count, (int)NS, (int)sizeof(biosig_data_type), (int)(hdr->SPR * count * NS * sizeof(biosig_data_type)));
+		fprintf(stdout,"SREAD: count=%i pos=[%i,%i,%i,%i], size of data = %ix%ix%ix%i = %i\n", \
+			(int)count,(int)start,(int)length,(int)POS,(int)hdr->FILE.POS,(int)hdr->SPR, (int)count, \
+			(int)NS, (int)sizeof(biosig_data_type), (int)(hdr->SPR * count * NS * sizeof(biosig_data_type)));
 
 #ifndef ANDROID 
 //Stoyan: Arm has some problem with log2 - or I dont know how to fix it - it exists but do not work.
@@ -12510,13 +12526,13 @@ size_t sread(biosig_data_type* data, size_t start, size_t length, HDRTYPE* hdr) 
 #endif //ONLYGDF
 
 	if (VERBOSE_LEVEL>7)
-		fprintf(stdout,"sread 223 alpha12bit=%i SWAP=%i spr=%i   %p\n", ALPHA12BIT, SWAP, hdr->SPR, hdr->AS.rawdata);
+		fprintf(stdout,"%s (line %i)  alpha12bit=%i SWAP=%i spr=%i   %p\n",__func__,__LINE__, ALPHA12BIT, SWAP, hdr->SPR, hdr->AS.rawdata);
 
 	for (k1=0,k2=0; k1<hdr->NS; k1++) {
 		CHANNEL_TYPE *CHptr = hdr->CHANNEL+k1;
 
 	if (VERBOSE_LEVEL>7)
-		fprintf(stdout,"sread 223a #%i#%i: alpha12bit=%i SWAP=%i spr=%i   %p | bi=%i bpb=%i \n", (int)k1, (int)k2, ALPHA12BIT, SWAP, hdr->SPR, hdr->AS.rawdata,(int)CHptr->bi,(int)hdr->AS.bpb );
+		fprintf(stdout,"%s (line %i) #%i#%i: alpha12bit=%i SWAP=%i spr=%i   %p | bi=%i bpb=%i \n",__func__,__LINE__, (int)k1, (int)k2, ALPHA12BIT, SWAP, hdr->SPR, hdr->AS.rawdata,(int)CHptr->bi,(int)hdr->AS.bpb );
 
 	if (CHptr->OnOff) {	/* read selected channels only */
 	if (CHptr->SPR > 0) {
