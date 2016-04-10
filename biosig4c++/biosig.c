@@ -12200,8 +12200,8 @@ void collapse_rawdata(HDRTYPE *hdr)
 {
 	CHANNEL_TYPE *CHptr;
 	size_t bpb;
-//	char bitflag = 0;
-	size_t	k1,k4,count,SZ;
+	size_t	count,k4;
+	typeof (hdr->NS) numSegments,k1;
 
 	if (VERBOSE_LEVEL>8) fprintf(stdout,"collapse: started\n");
 
@@ -12215,40 +12215,55 @@ void collapse_rawdata(HDRTYPE *hdr)
 
 	if (VERBOSE_LEVEL>8) fprintf(stdout,"collapse: bpb=%i/%i\n",(int)bpb,hdr->AS.bpb);
 
+	void *buf   = hdr->AS.rawdata;
 	count = hdr->AS.length;
 
-	uint8_t *buf = (uint8_t*) malloc(count*bpb);
-	size_t bi = 0;
-	for (k1=0; k1<hdr->NS; k1++) {
-		CHptr 	= hdr->CHANNEL+k1;
-
-		SZ = (size_t)CHptr->SPR*GDFTYP_BITS[CHptr->GDFTYP];
-		if (SZ & 7) {
-			biosigERROR(hdr, B4C_RAWDATA_COLLAPSING_FAILED, "collapse_rawdata: does not support bitfields");
+	// prepare idxlist for copying segments within a single block (i.e. record)
+	size_t *idxList1= malloc(3*hdr->NS*sizeof(size_t));
+	size_t *idxList2= idxList1 + hdr->NS;
+	size_t *sizList = idxList1 + hdr->NS * 2;
+	size_t bi1=0, bi2=0;
+	numSegments = 0;
+	CHptr = hdr->CHANNEL;
+	while (1) {
+		size_t SZ = 0;
+		while (!CHptr->OnOff && (CHptr < hdr->CHANNEL+hdr->NS) ) {
+			SZ += (size_t)CHptr->SPR * GDFTYP_BITS[CHptr->GDFTYP];
+			if (SZ & 7) biosigERROR(hdr, B4C_RAWDATA_COLLAPSING_FAILED, "collapse_rawdata: does not support bitfields");
+			CHptr++;
 		}
-		SZ >>= 3;
+		bi1 += SZ;
 
-		if (CHptr->OnOff)	/* read selected channels only */
-		if (CHptr->SPR > 0) {
-
-			if (VERBOSE_LEVEL>8) fprintf(stdout,"%i: %i %i %i %i \n",(int)k1,(int)bi,CHptr->bi,(int)bpb,hdr->AS.bpb);
-
-			for (k4 = 0; k4 < count; k4++) {
-				size_t off1 = k4*hdr->AS.bpb + CHptr->bi;
-				size_t off2 = k4*bpb + bi;
-
-			if (VERBOSE_LEVEL>8) fprintf(stdout,"%i %i: %i %i \n",(int)k1,(int)k4,(int)off1,(int)off2);
-
-				memcpy(buf + off2, hdr->AS.rawdata + off1, SZ);
-			}
-			bi += SZ;
+		SZ = 0;
+		while (CHptr->OnOff && (CHptr < hdr->CHANNEL+hdr->NS)) {
+			SZ += (size_t)CHptr->SPR * GDFTYP_BITS[CHptr->GDFTYP];
+			if (SZ & 7) biosigERROR(hdr, B4C_RAWDATA_COLLAPSING_FAILED, "collapse_rawdata: does not support bitfields");
+			CHptr++;
 		}
+
+		if (SZ > 0) {
+			SZ >>= 3;
+			idxList1[numSegments] = bi1;
+			idxList2[numSegments] = bi2;
+			sizList[numSegments]  = SZ;
+			numSegments++;
+		}
+	if (CHptr >= hdr->CHANNEL+hdr->NS) break;
+		bi1 += SZ;
+		bi2 += SZ;
 	}
-	free(hdr->AS.rawdata);
-	hdr->AS.rawdata = buf;
-	hdr->AS.flag_collapsed_rawdata = 1;	// rawdata is now "collapsed"
 
-	if (VERBOSE_LEVEL>8) fprintf(stdout,"collapse: finished\n");
+	for (k4 = 0; k4 < count; k4++) {
+		void *src  = buf + k4*hdr->AS.bpb;
+		void *dest = buf + k4*bpb;
+		for (k1=0; k1 < numSegments; k1++)
+			memcpy(dest + idxList2[k1], src + idxList1[k1], sizList[k1]);
+	}
+	free(idxList1);
+
+	if (buf == hdr->AS.rawdata) {
+		hdr->AS.flag_collapsed_rawdata = 1;	// rawdata is now "collapsed"
+	}
 }
 
 /****************************************************************************/
