@@ -12198,9 +12198,10 @@ void collapse_rawdata(HDRTYPE *hdr, void *buf, size_t count) {
 
 	CHANNEL_TYPE *CHptr;
 	size_t bpb, k4;
-	typeof (hdr->NS) numSegments,k1;
+	size_t bi1=0, bi2=0, SZ;
+	int num3Segments=0,k1;
 
-	if (VERBOSE_LEVEL>8) fprintf(stdout,"collapse: started\n");
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): started\n",__func__,__LINE__);
 
 	bpb = bpb8_collapsed_rawdata(hdr);
 	if (bpb == hdr->AS.bpb<<3) return; 	// no collapsing needed
@@ -12210,7 +12211,7 @@ void collapse_rawdata(HDRTYPE *hdr, void *buf, size_t count) {
 	}
 	bpb >>= 3;
 
-	if (VERBOSE_LEVEL>8) fprintf(stdout,"collapse: bpb=%i/%i\n",(int)bpb,hdr->AS.bpb);
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): bpb=%i/%i\n",__func__,__LINE__,(int)bpb,hdr->AS.bpb);
 
 	if (buf == NULL) {
 		buf   = hdr->AS.rawdata;
@@ -12218,14 +12219,10 @@ void collapse_rawdata(HDRTYPE *hdr, void *buf, size_t count) {
 	}
 
 	// prepare idxlist for copying segments within a single block (i.e. record)
-	size_t *idxList1= malloc(3*hdr->NS*sizeof(size_t));
-	size_t *idxList2= idxList1 + hdr->NS;
-	size_t *sizList = idxList1 + hdr->NS * 2;
-	size_t bi1=0, bi2=0;
-	numSegments = 0;
+	size_t *idxList= alloca(3*hdr->NS*sizeof(size_t));
 	CHptr = hdr->CHANNEL;
 	while (1) {
-		size_t SZ = 0;
+		SZ = 0;
 		while (!CHptr->OnOff && (CHptr < hdr->CHANNEL+hdr->NS) ) {
 			SZ += (size_t)CHptr->SPR * GDFTYP_BITS[CHptr->GDFTYP];
 			if (SZ & 7) biosigERROR(hdr, B4C_RAWDATA_COLLAPSING_FAILED, "collapse_rawdata: does not support bitfields");
@@ -12242,11 +12239,13 @@ void collapse_rawdata(HDRTYPE *hdr, void *buf, size_t count) {
 
 		if (SZ > 0) {
 			SZ >>= 3;
-			idxList1[numSegments] = bi1;
-			idxList2[numSegments] = bi2;
-			sizList[numSegments]  = SZ;
-			numSegments++;
+			idxList[num3Segments]   = bi2;	// offset of destination
+			idxList[num3Segments+1] = bi1;	// offset of source
+			idxList[num3Segments+2] = SZ;	// size
+			num3Segments           += 3;
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): #%i  src:%i dest:%i size:%i\n",__func__,__LINE__,num3Segments/3,(int)bi1,(int)bi2,(int)SZ);
 		}
+
 	if (CHptr >= hdr->CHANNEL+hdr->NS) break;
 		bi1 += SZ;
 		bi2 += SZ;
@@ -12255,10 +12254,9 @@ void collapse_rawdata(HDRTYPE *hdr, void *buf, size_t count) {
 	for (k4 = 0; k4 < count; k4++) {
 		void *src  = buf + k4*hdr->AS.bpb;
 		void *dest = buf + k4*bpb;
-		for (k1=0; k1 < numSegments; k1++)
-			memcpy(dest + idxList2[k1], src + idxList1[k1], sizList[k1]);
+		for (k1=0; k1 < num3Segments; k1+=3)
+			memcpy(dest + idxList[k1], src + idxList[k1+1], idxList[k1+2]);
 	}
-	free(idxList1);
 
 	if (buf == hdr->AS.rawdata) {
 		hdr->AS.flag_collapsed_rawdata = 1;	// rawdata is now "collapsed"
