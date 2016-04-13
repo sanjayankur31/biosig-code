@@ -492,7 +492,7 @@ vpath %.cpp ./:./t210:./t230:./XMLParser:./mex
 %.o : win32/%.c
 	$(CC) -c $(DEFINES) $(CFLAGS)  $(INCPATH) -o "$@" "$<"
 
-%.o: %.cpp  biosig.h biosig-dev.h
+%.o: %.cpp  biosig.h biosig2.h biosig-dev.h
 	$(CXX) -c $(DEFINES) $(CXXFLAGS) $(INCPATH) -o "$@" "$<"
 
 sandbox.o: test0/sandbox.c  biosig.h biosig-dev.h
