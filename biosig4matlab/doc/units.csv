@@ -2,18 +2,17 @@
 # prEN ISO 11073-10101 (Nov 2003)
 # ISO/IEEE 11073-10101:2004
 # Health Informatics - Point-of-care medical device communications - Part 10101: Nomenclature
-# p.62-75. Table A.6.3: Vital signs units of measurements 
+# p.62-75. Table A.6.3: Vital signs units of measurements
 #
-# CEN/TC251/PT40 2001	
-# File Exchange Format for Vital Signs - Annex A 
+# CEN/TC251/PT40 2001
+# File Exchange Format for Vital Signs - Annex A
 #
-# $Id$
-# Copyright (C) 2005,2006,2008,2012 Alois Schloegl <alois.schloegl@ist.ac.at>
+# Copyright (C) 2005,2006,2008,2012,2016 Alois Schloegl <alois.schloegl@ist.ac.at>
 # This file is part of the biosig project http://biosig.sf.net/
 #
 # In some cases, there are more than one text representation for a certain code.
 # The text-to-binary conversion should accept all listed representations;
-# the binary-to-text conversion should return the first representation. 
+# the binary-to-text conversion should return the first representation.
 #"Code (base code)","Symbol  (not normative)","Dimension","Unit of Measurement"
 ,,"Unspecified",
 0,"?",,"<Unspecified>"
@@ -74,12 +73,8 @@
 1824,"g-1 [kg-1 , mg-1 ]",,"per  <magnitude> gram"
 ,,"ML",
 1856,"g m [kg m]",,"<magnitude> gram metre"
-#------ Q: Is a new number needed or should the symbol change ? 
-####,"gf m [kg m]",,"<magnitude> gram-force metre"
 ,,"ML-1",
 1888,"g m m-2  [kg m m-2]",,"<magnitude> gram(s) meter per square metre"
-#------ Q: Is a new number needed or should the symbol change ? 
-####,"gf m m-2  [kg m m-2]",,"<magnitude> gram-force meter per square 
 ,,"ML2 (moment of inertia)",
 1920,"kg m2",,"<magnitude> gram metre squared"
 ,,"ML-2",
@@ -171,8 +166,8 @@
 ,,"L-4MT-1 (hydraulic impedance)",
 4064,"Pa s m-3",,"<magnitude> pascal second per cubic meter"
 4096,"Pa s l-1",,"<magnitude> pascal second per litre"
-4128,"dyn s cm-5",,"<magnitude> dyne second per cm5"
-4128,"dyne*s/cm^5",,"<magnitude> dyne second per cm5"
+#4128,"dyn s cm-5",,"<magnitude> dyne second per cm5"
+#4128,"dyne*s/cm^5",,"<magnitude> dyne second per cm5"
 ,,"L4M-1T2 (compliance)",
 5888,"l (cmH2O)-1",,"<magnitude> litre per centimetre of water"
 6272,"l (mmHg)-1",,"<magnitude> litre per millimetre of mercury"
@@ -260,31 +255,184 @@
 6016,"dyne s m-2 cm-5","- Pulmonary/ Systemic Vascular Resistance Index","dyne seconds per square meter per centimetre to the power of 5"
 6176,"mmHg %-1","- ratio of paO2 to FIO2","millimetre(s) of mercury per percent"
 6208,"Pa %-1","- ratio of paO2 to FIO2","<magnitude> pascal per percent"
-6432,"B", "Bel", "relative power decibel"	
+6432,"B", "Bel", "relative power decibel"
 6624,"m s-2", "meter per second squared", "acceleration"
 6624,"m/s²", "meter per second squared", "acceleration"
-6656,"rad s2-2", "radians per second squared", "(angular) acceleration" 
+6656,"rad s2-2", "radians per second squared", "(angular) acceleration"
 6688,"ft min-1",,"Foot per minute"
 6720,"in min-1",,"Inch per minute"
-6752,"step min-1",,"Step per minute"
-6784,"kcal","Energy","Calorie (equal to 4.184 Joule)"
-6816,"rpm","Cadence","Revolution per minute"
+### Amendment 1: 11073-10101a-2015 ###
+7776,"<boolean>","boolean","Boolean"
+7808,"dB(V)","","relative power decibel (<magnitude> Volt)"
+7840,"dB(10V)","","relative power decibel (10 <magnitude> Volt)"
+#7860,"dB(10nV)","","relative power decibel (10 nano Volt)"
+7872,"dB(W)","","relative power decibel (10 nano Volt)"
+7744,"g m-2","","gram per square <magnitude> m"
+8032,"cm2","","square <magnitude> centimeter"
+8064,"s-2","","per <magnitude> second squared"
+8096,"rpm","","revolutions per minute"
+# mass dose rate per body weight
+8128,"drops min-1","","drops per minute"
+6784,"g lb-1 min-1","","gram per pound per minute"
+6752,"g lb-1 h-1","","gram per pound per hour"
+# mass dose rate per body surface area
+6848,"g m-2 min-1","","gram per square meter per minute"
+6816,"g m-2 h-1","","gram per square meter per hour"
+7168,"g m-2 d-1","","gram per square meter per day"
+# Compliance per body weight
+8160,"l cmH2O-1 kg-1","",""
+8192,"Wb m-2",,"<magnitude> Tesla"
+8192,"T",,"<magnitude> Tesla"
+8224,"Vs","","Volt seconds"
+8256,"V s-1","","Volt per second"
+8256,"V/s","","Volt per second"
+8288,"S","","Siemens (1/Ohm)"
+7552,"mol m-2","","mole per square meter"
+7584,"eq kg-1","","equivalents per kilogram"
+7616,"eq m-2","","equivalents per square meter"
+# mole dose rate per body surface area
+7424,"mol m-2 s-1","","mole per square meter per second"
+7456,"mol m-2 min-1","","mole per square meter per minute"
+7488,"mol m-2 h-1","","mole per square meter per hour"
+7520,"mol m-2 d-1","","mole per square meter per day"
+# eq dose rate per body weight
+7040,"eq lb-2 min-1","","equivalent per pound per minute"
+7008,"eq lb-2 h-1","","equivalent per pound per hour"
+# eq dose rate per body surface area
+7104,"eq m-2 min-1","","equivalent per square meter per minute"
+7072,"eq m-2 h-1","","equivalent per square meter per hour"
+7136,"eq m-2 d-1","","equivalent per square meter per day"
+# international units per ...
+7680,"i.u. kg-1","","int. units per kilogram"
+7712,"i.u. m-2","","int. units per square meter"
+6912,"i.u. lb-1 min-1","","int. units per pound per minute"
+10400,"i.u. lb-1 h-1","","int. units per pound per minute"
+6880,"i.u. lb-1 d-1","","int. units per pound per minute"
+7648,"i.u. m-2 s-1","","int. units per square meter per second"
+6976,"i.u. m-2 min-1","","int. units per square meter per minute"
+6944,"i.u. m-2 h-1","","int. units per square meter per hour"
+7200,"i.u. m-2 d-1","","int. units per square meter per day"
+8320,"dyne s m2 cm-5","Vascular Resistance Index","dyne seconds square meter per centimetre to the power of 5"
+8352,"cal","thermal calories","calories (thermal)"
+8384,"nutr cal","nutritional calories","calories (thermal)"
+8416,"cal d-1","thermal calories per day","calories (thermal) per day"
+# flow rate per body weight
+7264,"L kg-1 min-1","","liters per kilogram per minute"
+7232,"L kg-1 h-1","","liters per kilogram per hours"
+7296,"L kg-1 d-1","","liters per kilogram per day"
+# flow rate per surface area
+7328,"L m-2 min-1","","liters per square meter per minute"
+7360,"L m-2 h-1","","liters per square meter per hours"
+7392,"L m-2 d-1","","liters per square meter per day"
+8448,"J/breath","","Joule per breath"
+8480,"J/L","","Joule per liter"
+10528,"J/mL","","Joule per milliliter"
+10496,"J/day","","Joule per day"
+8480,"J/L","","Joule per liter"
+8512,"dyn s cm-5",,"<magnitude> dyne second per cm5"
+8512,"dyne s cm-5",,"<magnitude> dyne second per cm5"
+8544,"PRU","Vascular resistance (peripheral resistance unit)","mmHg per milliliter per second"
+8576,"WU","Vascular resistance (Woods unit, pediatric)","mmHg per liter per minute"
+8608,"b","Bit","bit"
+8640,"B","Byte (8 bits)","byte"
+8672,"drops/L","Volume concentration","drops per liter"
+8704,"breaths/min/L","Shallow breathing index","breaths per minute per liter"
+8736,"breaths^2/min/L","Shallow breathing index (breaths squared)","number of breaths squared per minute per liter"
+8768,"L/min/kg","","number of breaths per minute per body weight"
+8800,"sat-sec","Oxygen saturation seconds","sat % seconds"
+8832,"m/V","millimetes per millivolt (display gain)","meters per Volt"
+8864,"gf m","cardiac stroke work","gramforce meter"
+8896,"gf m L-1","cardiac stroke work per liter","gramforce meter per liter"
+8928,"gf m m-2","cardiac stroke work per square meter","gramforce meter per square meter"
+8960,"cal kg-1","","calories (thermal) per kilogram"
+8992,"cal kg-1 d-1","","calories (thermal) per kilogram per day"
+9024,"cal mL-1","","calories (thermal) per milliliter"
+# arbitrary units
+9056,"arb.u","","arbitrary units"
+9088,"arb.u cm-3","","arbitrary units per cubic centimeter"
+9120,"arb.u m-3","","arbitrary units per cubic meter"
+9152,"arb.u l-1","","arbitrary units per liter"
+9184,"arb.u ml-1","","arbitrary units per milliliter"
+9216,"arb.u s-1","","arbitrary units per second"
+9248,"arb.u min-1","","arbitrary units per minute"
+9280,"arb.u h-1","","arbitrary units per hour"
+9312,"arb.u d-1","","arbitrary units per day"
+9344,"arb.u kg-1","","arbitrary units per kilogram"
+9376,"arb.u m-2","","arbitrary units per square meter
+9408,"arb.u kg-1 s-1","","arbitrary units per kilogram per second"
+9440,"arb.u kg-1 min-1","","arbitrary units per kilogram per minute"
+9472,"arb.u kg-1 h-1","","arbitrary units per kilogram per hour"
+9504,"arb.u kg-1 d-1","","arbitrary units per kilogram per day"
+9536,"arb.u lb-1 min-1","","arbitrary units per pound per minute"
+10432,"arb.u lb-1 h-1","","arbitrary units per pound per hour"
+9568,"arb.u lb-1 d-1","","arbitrary units per pound per day"
+9600,"arb.u m-2 s-1","","arbitrary units per square meter per second"
+9632,"arb.u m-2 min-1","","arbitrary units per square meter per minute"
+9664,"arb.u m-2 h-1","","arbitrary units per square meter per hour"
+9696,"arb.u m-2 d-1","","arbitrary units per square meter per day"
+# USP units
+9728,"USP.u","","USP units"
+9760,"USP.u cm-3","","USP units per cubic centimeter"
+9792,"USP.u m-3","","USP units per cubic meter"
+9824,"USP.u l-1","","USP units per liter"
+9856,"USP.u ml-1","","USP units per milliliter"
+9888,"USP.u s-1","","USP units per second"
+9920,"USP.u min-1","","USP units per minute"
+9952,"USP.u h-1","","USP units per hour"
+9984,"USP.u d-1","","USP units per day"
+10016,"USP.u kg-1","","USP units per kilogram"
+10048,"USP.u m-2","","USP units per square meter
+10080,"USP.u kg-1 s-1","","USP units per kilogram per second"
+10112,"USP.u kg-1 min-1","","USP units per kilogram per minute"
+10144,"USP.u kg-1 h-1","","USP units per kilogram per hour"
+10176,"USP.u kg-1 d-1","","USP units per kilogram per day"
+10208,"USP.u lb-1 min-1","","USP units per pound per minute"
+10464,"USP.u lb-1 h-1","","USP units per pound per hour"
+10240,"USP.u lb-1 d-1","","USP units per pound per day"
+10272,"USP.u m-2 s-1","","USP units per square meter per second"
+10304,"USP.u m-2 min-1","","USP units per square meter per minute"
+10336,"USP.u m-2 h-1","","USP units per square meter per hour"
+10368,"USP.u m-2 d-1","","USP units per square meter per day"
+#
+10560,"vol % L-1","","volume percent per liter"
+10592,"Pa L-1","elastance","Pascal per liter"
+10624,"Pa mL-1","elastance","Pascal per milliliter"
+10656,"bar L-1","elastance","Bar per liter"
+10688,"bar L-1 10-1","elastance","Bar per 10 liter "
+10720,"bar mL-1","elastance","Bar per milliliter"
+10752,"bar s L-1","resistance","Bar second per liter"
+10784,"bar s L-1 10-1","resistance","Bar second per 10 liter "
+10816,"L hPa-1","compliance","Liter per hectoPascal"
+10848,"L bar-1","compliance","Liter per bar"
+10880,"L mbar-1","compliance","Liter per millibar"
+10912,"J/L/s","work of breating per liter per time unit","Joule per liter per second"
+10944,"mmHg min-1","rate of pressure change","millimeter mercury per minute"
+10976,"mmHg s-1","rate of pressure change","millimeter mercury per second"
+11008,"bar s-1","rate of pressure change","bar per second"
+11040,"cmH2O min-1","rate of pressure change","centimeter water per minute"
+11072,"% per 1/2 h","relative rate of change","percent per half hour"
+11104,"L beat-1 m-2","cardiac stroke per body surface area","liter per beat per square meter"
+11136,"V cm-1","electric field strength","Volt per centimeter"
+11168,"W cm-2 mm-1","irradiance","Watt per square centimeter per millimeter"
+11200,"cmH2O uV-1","pressure of voltage calibration","centimeter water per microvolt"
 ### private: units with no standardized code
 #,"kgf m [J]",,Left Stroke Work (LSW)
 #,"kgf m min-1 [W]",,Left Cardiac Work (LCW)
-65152,"V/s",,""
+65088,"mph","velocity","velocity miles per hour"
+65120,"Nm","momentum","newton meter"
+65152,"V/s",,"",,#obsolete#
 65184,"m/m",,""
 65216,"km/h",,"velocity kilometer per hour"
 65248,"g s-2 [J m-2, gf m-1]",,"Left Stroke Work Index (LSWI)"
 65280,"g s-3 [W m-2, gf m-1 s-1]",,"Indexed Left Cardiac Work (LCWI)"
-65312,"mHg s-1",,
+65312,"mHg s-1","","",#obsolete#
 65344,"mol l-1 mm","change in blood chromophore concentration per effective optical path length","milli(Mol/Liter)*millimeter"
-65376,"r.p.m",,"rotations per minute"
-65408,"B", "Bel", "relative power decibel"
-65440,"dyne s m2 cm-5","Vascular Resistance Index","dyne seconds square meter per centimetre to the power of 5"
-65440,"dyne*s*m²/cm^5","Vascular Resistance Index","dyne seconds square meter per centimetre to the power of 5"
+65376,"r.p.m",,"rotations per minute",#obsolete#
+65408,"B", "Bel", "relative power decibel",#obsolete#
+65440,"dyne s m2 cm-5","Vascular Resistance Index","dyne seconds square meter per centimetre to the power of 5",#obsolete#
+65440,"dyne*s*m²/cm^5","Vascular Resistance Index","dyne seconds square meter per centimetre to the power of 5",#obsolete#
 65472,"l m-2","stroke index","litres per square meter"
 65472,"l/m²","stroke index","litres per square meter"
-65504,"T",,"<magnitude> Tesla" 
+65504,"T",,"<magnitude> Tesla",#obsolete#
 #
 #
