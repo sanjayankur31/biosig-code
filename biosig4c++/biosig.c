@@ -13976,7 +13976,7 @@ int fprintf_hdr2json(FILE *fid, HDRTYPE* hdr)
                         NumberOfSweeps++;
         }
 
-        fprintf(fid,"\n{\n");
+        fprintf(fid,"{\n");
         fprintf(fid,"\t\"TYPE\"\t: \"%s\",\n",GetFileTypeString(hdr->TYPE));
         fprintf(fid,"\t\"VERSION\"\t: %4.2f,\n",hdr->VERSION);
 
