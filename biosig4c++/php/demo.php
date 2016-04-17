@@ -17,7 +17,6 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
  */
 
 
@@ -26,7 +25,18 @@
 		makes a fhir_json_binary template
 */
 function biosig_fhir($filename) {
-	$h = popen('/home/as/src/biosig-code/biosig4c++/biosig_fhir "' . $filename.'"', 'rb');
+	$h = popen('biosig_fhir "' . $filename.'"', 'rb');
+	$jsonhdr = stream_get_contents($h);
+	fclose($h);
+	return $jsonhdr;
+}
+
+/*
+	biosig_fhir_xml:
+		makes a fhir_xml_binary template
+*/
+function biosig_fhir_xml($filename) {
+	$h = popen('biosig_fhir -xml "' . $filename.'"', 'rb');
 	$jsonhdr = stream_get_contents($h);
 	fclose($h);
 	return $jsonhdr;

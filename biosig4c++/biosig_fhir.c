@@ -21,6 +21,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include <biosig2.h>
 #include <biosig-dev.h>
 #include <b64/cencode.h>
@@ -86,8 +87,36 @@ int biosig_hdr2gdf_base64(HDRTYPE *hdr, FILE *fid) {
    biosig_fhir_binary_json_template:
       opens a biosig file, and generates binary json template according to fhir
 */
-char* biosig_fhir_binary_json_template(const char *filename, FILE *fid) {
 
+char* biosig_fhir_binary_xml_template(const char *filename, FILE *fid) {
+	/* generate XML template
+	/*
+	<Binary xmlns="http://hl7.org/fhir">
+	 <!-- from Resource: id, meta, implicitRules, and language -->
+	 <contentType value="[code]"/><!-- 1..1 MimeType of the binary content  -->
+	 <content value="[base64Binary]"/><!-- 1..1 The actual content -->
+	</Binary>
+	*/
+
+	HDRTYPE *hdr = NULL;
+	hdr = sopen(filename, "r", hdr);
+
+	fprintf(fid,"<Binary xmlns=\"http://hl7.org/fhir\">\n"
+		"  <!-- from Resource: id, meta, implicitRules, and language -->\n"
+		"  <contentType value=\"X-biosig/gdf\"/>\n"
+		"  <content value=\"");
+
+	biosig_hdr2gdf_base64(hdr, fid);
+
+	fprintf(fid,"\"/>\n"
+		"</Binary>\n");
+
+	destructHDR(hdr);
+	return(0);
+}
+
+
+char* biosig_fhir_binary_json_template(const char *filename, FILE *fid) {
 	/* generate json template
 	{
 	  "resourceType" : "Binary",
@@ -98,7 +127,6 @@ char* biosig_fhir_binary_json_template(const char *filename, FILE *fid) {
 	  "content" : "<base64Binary>" // R!  The actual content
 	}
 	*/
-
 	HDRTYPE *hdr = NULL;
 	hdr = sopen(filename, "r", hdr);
 
@@ -109,12 +137,12 @@ char* biosig_fhir_binary_json_template(const char *filename, FILE *fid) {
 
 	fprintf_hdr2json(fid, hdr);
 		  
-	fprintf(fid, "    \"contentType\" : \"biosig/gdf\",\n"
+	fprintf(fid, "    \"contentType\" : \"X-biosig/gdf\",\n"
 		     "    \"content\" : \"");
 
 	biosig_hdr2gdf_base64(hdr, fid);
 
-	fprintf(fid, "\"\n}");
+	fprintf(fid, "\"\n}\n");
 
 	destructHDR(hdr);
 	return(0);
@@ -125,10 +153,31 @@ char* biosig_fhir_binary_json_template(const char *filename, FILE *fid) {
 extern int VERBOSE_LEVEL; 
 
 int main(int argc, char **argv) {
-    
     	VERBOSE_LEVEL = 0;
-	const char *filename = argv[1]; 
 
-	biosig_fhir_binary_json_template(filename, stdout);
+	int flag_json_format = 1;
+	char **opt = argv+1;
+
+	for (; *opt!=NULL; opt++) {
+		if (!strcasecmp(*opt, "-json")) {
+			flag_json_format = 1;
+		}
+		else if (!strcasecmp(*opt, "-xml")) {
+			flag_json_format = 0;
+		}
+		else if (!strcasecmp(*opt, "-h") || !strcasecmp(*opt, "--help")) {
+			fprintf(stderr,"%s provides fhir binary template for biosignal data\n\n"
+				"    Usage: %s [-json|-xml] <filename>\n\n"
+				"       reads filename and converts it to a fhir-binary-template\n\n",
+				argv[0], argv[0]);
+		}
+		else if (*opt[0] != '-') {
+			const char *filename = *opt;
+			if (flag_json_format)
+				biosig_fhir_binary_json_template(filename, stdout);
+			else
+				biosig_fhir_binary_xml_template(filename, stdout);
+		}
+	}
 }
 

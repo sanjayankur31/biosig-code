@@ -12,6 +12,7 @@
 #             libbiosig is a prerequisite for building all the other tools below.
 #
 ## make save2gdf   - makes converter
+## make biosig_fhir   - makes converter for fhir-binary template
 ## make install_save2gdf   - installs converter
 ## make install_mma 	installs biosig's sload for Mathematica in $PREFIX/share/biosig/mathematica
 ## make install_mex 	installs mexbiosig for Matlab in $PREFIX/share/biosig/mex
@@ -760,6 +761,9 @@ libbiosig2.def: $(OBJECTS) biosig2.o t240/libcnsfef.a
 pu : pu.c physicalunits.o
 	$(CC) -std=gnu11 $^ -o $@
 
+biosig_fhir: biosig_fhir.c
+	$(CC) -std=gnu11 $^ -o $@ -lbiosig -lb64
+
 bscs: biosig_client biosig_server sandbox.o biosig.o
 biosig_client: biosig_client.c libbiosig.$(LIBEXT) biosig-network.o
 	$(CXX) $(DEFINES) $(CXXFLAGS) biosig_client.c biosig-network.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o biosig_client
@@ -1008,13 +1012,14 @@ install: install_libbiosig.$(DLEXT) install_libbiosig.a install_headers
 	ln -sf $(LIB)/libbiosig2${SONAME_POSTFIX}	$(LIB)/libbiosig2.${DLEXT}
 	ln -sf $(LIB)/libbiosig${SONAME_POSTFIX}	$(LIB)/libbiosig.${DLEXT}
 
-install_tools: pu save2gdf doc/save2gdf.1 install
+install_tools: pu save2gdf biosig_fhir doc/save2gdf.1 install
 	install -d 			$(BIN)
 	install save2gdf  		$(BIN)
 	install heka2itx  		$(BIN)
 	install save2aecg 		$(BIN)
 	install save2scp  		$(BIN)
 	install pu  			$(BIN)
+	install biosig_fhir  		$(BIN)
 	mkdir -p  			$(DESTDIR)$(prefix)/share/man/man1
 	install doc/*.1  		$(DESTDIR)$(prefix)/share/man/man1
 	#install libbiosig.man 		$(DESTDIR)$(prefix)/share/
@@ -1027,6 +1032,7 @@ uninstall_tools:
 	${RM} $(BIN)/heka2itx
 	${RM} $(BIN)/save2aecg
 	${RM} $(BIN)/save2scp
+	${RM} $(BIN)/biosig_fhir
 	${RM} $(DESTDIR)$(prefix)/share/man/man1/pu.1
 	${RM} $(DESTDIR)$(prefix)/share/man/man1/save2gdf.1
 	${RM} $(DESTDIR)$(prefix)/share/man/man1/heka2itx.1
