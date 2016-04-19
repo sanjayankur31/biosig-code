@@ -4036,7 +4036,7 @@ else if (!strncmp(MODE,"r",1)) {
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"[222] %i\n",(int)count);
 	hdr->HeadLen = count;
 	getfiletype(hdr);
-	if (VERBOSE_LEVEL>7) fprintf(stdout,"[201] FMT=%s Ver=%4.2f\n",GetFileTypeString(hdr->TYPE),hdr->VERSION);
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) FMT=%s Ver=%4.2f\n",__FILE__,__LINE__,GetFileTypeString(hdr->TYPE),hdr->VERSION);
 
 #ifndef  ONLYGDF
 	if (hdr->TYPE != unknown)
@@ -4051,8 +4051,7 @@ else if (!strncmp(MODE,"r",1)) {
 		return(hdr);
 	}
 
-	if (VERBOSE_LEVEL>7)
-		fprintf(stdout,"[201] FMT=%s Ver=%4.2f\n",GetFileTypeString(hdr->TYPE),hdr->VERSION);
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) FMT=%s Ver=%4.2f\n",__FILE__,__LINE__,GetFileTypeString(hdr->TYPE),hdr->VERSION);
 
     	count = iftell(hdr);
     	hdr->AS.first  =  0;
@@ -5425,8 +5424,7 @@ fprintf(stdout,"ACQ EVENT: %i POS: %i\n",k,POS);
     	}
 
 	else if (hdr->TYPE==BCI2000) {
-		if (VERBOSE_LEVEL>7)
-			fprintf(stdout,"[201] start reading BCI2000 data!\n");
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) FMT=%s Ver=%4.2f\n",__FILE__,__LINE__,GetFileTypeString(hdr->TYPE),hdr->VERSION);
 
 		char *ptr, *t1;
 
@@ -11967,7 +11965,7 @@ else if (!strncmp(MODE,"w",1))	 /* --- WRITE --- */
 	}
 
     	else if (hdr->TYPE==SCP_ECG) {
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"SOPEN_SCP_WRITE -112\n");
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s(line %i) %s -> SOPEN_SCP_WRITE v%f\n",__FILE__,__LINE__,__func__,hdr->VERSION);
     		sopen_SCP_write(hdr);
     		if (hdr->AS.B4C_ERRNUM) return(hdr);
 	}
@@ -12983,7 +12981,7 @@ size_t swrite(const biosig_data_type *data, size_t nelem, HDRTYPE* hdr) {
 	} val;
 
 	if (VERBOSE_LEVEL>6)
-		fprintf(stdout,"SWRITE( %p, %i, %s ) MODE=%i\n",data, (int)nelem, hdr->FileName, hdr->FILE.OPEN);
+		fprintf(stdout,"%s( %p, %i, %s ) MODE=%i\n",__func__, data, (int)nelem, hdr->FileName, hdr->FILE.OPEN);
 
 		// write data
 
@@ -13012,7 +13010,7 @@ size_t swrite(const biosig_data_type *data, size_t nelem, HDRTYPE* hdr) {
 	size_t bpb8 = bpb8_collapsed_rawdata(hdr);
 
 	if (VERBOSE_LEVEL>7)
-		fprintf(stdout,"swrite 307 <%s> sz=%i\n",hdr->FileName,(int)(hdr->NRec*bpb8>>3));
+		fprintf(stdout,"%s (line %i): <%s> sz=%i\n",__func__,__LINE__,hdr->FileName,(int)(hdr->NRec*bpb8>>3));
 
 	if (hdr->TYPE==ATF) {
 		if (VERBOSE_LEVEL>7) fprintf(stdout,"ATF swrite\n");
@@ -13088,7 +13086,7 @@ size_t swrite(const biosig_data_type *data, size_t nelem, HDRTYPE* hdr) {
 
 
 	if (VERBOSE_LEVEL>7)
-		fprintf(stdout,"swrite 311: %i %i\n",(int)hdr->NRec,hdr->NS);
+		fprintf(stdout,"%s (line %i): %i %i\n",__func__,__LINE__,(int)hdr->NRec,hdr->NS);
 
 	size_t bi8 = 0;
 	for (k1=0,k2=0; k1<hdr->NS; k1++) {
@@ -13107,20 +13105,25 @@ size_t swrite(const biosig_data_type *data, size_t nelem, HDRTYPE* hdr) {
 		size_t col = (hdr->data.size[1-hdr->FLAG.ROW_BASED_CHANNELS]<hdr->NS) ? k2 : k1;        // if collapsed data, use k2, otherwise use k1
 
 	if (VERBOSE_LEVEL>7)
-		fprintf(stdout,"swrite 312=#%i gdftyp=%i %i %i %i %f %f %f %f %i\n",(int)k1,GDFTYP,(int)bi8,(int)SZ,(int)CHptr->SPR,CHptr->Cal,CHptr->Off,iCal,iOff,(int)bpb8);
+		fprintf(stdout,"%s (line %i): #%i gdftyp=%i %i %i %i %f %f %f %f %i\n",
+			__func__,__LINE__,(int)k1,GDFTYP,(int)bi8,(int)SZ,(int)CHptr->SPR,CHptr->Cal,CHptr->Off,iCal,iOff,(int)bpb8);
 
 		for (k4 = 0; k4 < (size_t)hdr->NRec; k4++) {
 			if (VERBOSE_LEVEL>8)
-				fprintf(stdout,"swrite 313- #%i: [%i %i] %i %i %i %i %i\n",(int)k1,(int)hdr->data.size[0],(int)hdr->data.size[1],(int)k4,(int)0,(int)hdr->SPR,(int)DIV,(int)nelem);
+				fprintf(stdout,"%s (line %i): #%i: [%i %i] %i %i %i %i %i\n",
+					__func__,__LINE__,(int)k1,(int)hdr->data.size[0],(int)hdr->data.size[1],(int)k4,(int)0,(int)hdr->SPR,(int)DIV,(int)nelem);
 
 		for (k5 = 0; k5 < CHptr->SPR; k5++) {
 
 			if (VERBOSE_LEVEL>8)
-				fprintf(stdout,"swrite 313a #%i: [%i %i] %i %i %i %i %i\n",(int)k1,(int)hdr->data.size[0],(int)hdr->data.size[1],(int)k4,(int)k5,(int)hdr->SPR,(int)DIV,(int)nelem);
+				fprintf(stdout,"%s (line %i): #%i: [%i %i] %i %i %i %i %i\n",
+					__func__,__LINE__,(int)k1,(int)hdr->data.size[0],(int)hdr->data.size[1],(int)k4,(int)k5,(int)hdr->SPR,(int)DIV,(int)nelem);
 
 			size_t k3=0;
 			if (VERBOSE_LEVEL>8)
-				fprintf(stdout,"swrite 313+: [%i %i %i %i %i] %i %i %i %i %i %i\n",(int)k1,(int)k2,(int)k3,(int)k4,(int)k5,(int)col,(int)hdr->data.size[0],(int)hdr->data.size[1],(int)hdr->SPR,(int)nelem,(int)hdr->NRec);
+				fprintf(stdout,"%s (line %i): [%i %i %i %i %i] %i %i %i %i %i %i\n",
+					__func__,__LINE__,(int)k1,(int)k2,(int)k3,(int)k4,(int)k5,(int)col,
+					(int)hdr->data.size[0],(int)hdr->data.size[1],(int)hdr->SPR,(int)nelem,(int)hdr->NRec);
 
         		if (hdr->FLAG.ROW_BASED_CHANNELS) {
             			for (k3=0, sample_value=0.0; k3 < DIV; k3++)
@@ -13132,7 +13135,7 @@ size_t swrite(const biosig_data_type *data, size_t nelem, HDRTYPE* hdr) {
                         }
 
 			if (VERBOSE_LEVEL>8)
-				fprintf(stdout,"swrite 313b: %f/%i\n",sample_value,(int)DIV);
+				fprintf(stdout,"%s (line %i): %f/%i\n",__func__,__LINE__,sample_value,(int)DIV);
 
 			sample_value /= DIV;
 
@@ -13148,7 +13151,8 @@ size_t swrite(const biosig_data_type *data, size_t nelem, HDRTYPE* hdr) {
 			ptr = hdr->AS.rawdata + (off>>3);
 
 			if (VERBOSE_LEVEL>8)
-				fprintf(stdout,"swrite 313e %i %i %i %f\n",(int)k4,(int)k5,(int)(off>>3),sample_value);
+				fprintf(stdout,"%s (line %i): %i %i %i %f %p %p\n",
+					__func__,__LINE__,(int)k4,(int)k5,(int)(off>>3),sample_value, hdr->AS.Header, ptr);
 
 			// mapping of raw data type to (biosig_data_type)
 			switch (GDFTYP) {
