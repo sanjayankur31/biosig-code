@@ -1577,10 +1577,6 @@ HDRTYPE* constructHDR(const unsigned NS, const unsigned N_EVENT)
 	hdr->SCP.Section9Length  = 0;
 	hdr->SCP.Section10Length = 0;
 	hdr->SCP.Section11Length = 0;
-#if (BIOSIG_VERSION >= 10700)
-	hdr->SCP.Section12.NumberOfEntries = 0;
-	hdr->SCP.Section12.annotatedECG = NULL;
-#endif
 #endif
 
 	return(hdr);
@@ -1623,14 +1619,7 @@ void destructHDR(HDRTYPE* hdr) {
     		free(hdr->aECG);
     	}
 #endif
-#if (BIOSIG_VERSION >= 10700)
-	if (hdr->SCP.Section12.annotatedECG != NULL) {
-		free(hdr->SCP.Section12.annotatedECG);
-		hdr->SCP.Section12.annotatedECG = NULL;
-		hdr->SCP.Section12.NumberOfEntries = 0;
-	}
-	hdr->SCP.Section12.NumberOfEntries = 0;
-#endif
+
 	if (hdr->ID.Technician != NULL) free(hdr->ID.Technician);
 	if (hdr->ID.Hospital   != NULL) free(hdr->ID.Hospital);
 
@@ -2566,17 +2555,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 			}
 		}
 #endif
-#ifdef GDF_WITH_SCP_SECTION12
-		// TODO: SCPECGv3 - this is very experimental, do not use it for production !!!
-		tag = 14;
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw tag %i\n",tag);
-		if (hdr->SCP.Section12.NumberOfEntries >0) {
-			TagNLen[tag] = 4 + 4 + sizeof(hdr->SCP.Section12.annotatedECG[0]) * hdr->SCP.Section12.NumberOfEntries;
-			if (TagNLen[tag]) {
-				hdr->HeadLen += 4+TagNLen[tag];
-			}
-		}
-#endif
+
 		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw101 %i %i %i\n",tag, hdr->HeadLen,TagNLen[tag]);
 	     	/* end */
 
@@ -2939,25 +2918,6 @@ void struct2gdfbin(HDRTYPE *hdr)
 		if (TagNLen[tag]>0) {
 			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=13 & Length of Tag 13
 			memcpy((char*)(Header2+4),hdr->SCP.Section11, TagNLen[tag]);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
-			Header2 += 4+TagNLen[tag];
-		}
-#endif
-#ifdef GDF_WITH_SCP_SECTION12
-		// TODO: SCPECGv3 - this is very experimental, do not use it for production !!!
-		tag = 14;
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw tag %i\n",tag);
-		if (TagNLen[tag]>0) {
-			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=14 & Length of Tag 14
-			leu32a(hdr->SCP.Section12.NumberOfEntries, Header2+4);
-			uint32_t m; 
-			uint8_t *off = Header2+8;
-			for (m=0; m < hdr->SCP.Section12.NumberOfEntries; m++) {
-				leu32a(hdr->SCP.Section12.annotatedECG[m].id,            off);
-				leu32a(hdr->SCP.Section12.annotatedECG[m].physicalunits, off+4);
-				leu32a(hdr->SCP.Section12.annotatedECG[m].value,         off+6);
-				off += sizeof(hdr->SCP.Section12.annotatedECG[0]); 
-			}
-			memcpy((char*)(Header2+4),&(hdr->SCP.Section12.NumberOfEntries), TagNLen[tag]);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
 			Header2 += 4+TagNLen[tag];
 		}
 #endif
@@ -3348,20 +3308,6 @@ if (VERBOSE_LEVEL>6) fprintf(stdout,"user-specific events defined\n");
 				else if (tag==13) {
 					hdr->SCP.Section11 = Header2+pos+4;
 					hdr->SCP.Section11Length = len;
-				}
-#endif
-#ifdef GDF_WITH_SCP_SECTION12
-				// TODO: SCPECGv3 - this is very experimental, do not use it for production !!!
-				else if (tag==14) {
-					hdr->SCP.Section12.NumberOfEntries = leu32p(Header2+pos+4);
-					uint32_t m; 
-					uint8_t *off = Header2+pos+8;
-					for (m=0; m < hdr->SCP.Section12.NumberOfEntries; m++) {
-						hdr->SCP.Section12.annotatedECG[m].id            = leu32p(off);
-						hdr->SCP.Section12.annotatedECG[m].physicalunits = leu16p(off+4);
-						hdr->SCP.Section12.annotatedECG[m].value         = leu32p(off+6);
-						off += sizeof(hdr->SCP.Section12.annotatedECG[0]); 
-					}
 				}
 #endif
 
