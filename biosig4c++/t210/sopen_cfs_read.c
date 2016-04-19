@@ -143,8 +143,9 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"%s:%i sopen_cfs_read started [%s]\n",__FILE
 		}
 
 		if (NumberOfDataSections) {
-			hdr->EVENT.TYP = (typeof(hdr->EVENT.TYP)) realloc(hdr->EVENT.TYP, (hdr->EVENT.N + NumberOfDataSections - 1) * sizeof(*hdr->EVENT.TYP));
-			hdr->EVENT.POS = (typeof(hdr->EVENT.POS)) realloc(hdr->EVENT.POS, (hdr->EVENT.N + NumberOfDataSections - 1) * sizeof(*hdr->EVENT.POS));
+			hdr->EVENT.TYP = (typeof(hdr->EVENT.TYP)) realloc(hdr->EVENT.TYP, (hdr->EVENT.N + 2*NumberOfDataSections - 1) * sizeof(*hdr->EVENT.TYP));
+			hdr->EVENT.POS = (typeof(hdr->EVENT.POS)) realloc(hdr->EVENT.POS, (hdr->EVENT.N + 2*NumberOfDataSections - 1) * sizeof(*hdr->EVENT.POS));
+			hdr->EVENT.TimeStamp = (typeof(hdr->EVENT.TimeStamp)) realloc(hdr->EVENT.TimeStamp, (hdr->EVENT.N + 2*NumberOfDataSections - 1) * sizeof(*hdr->EVENT.TimeStamp));
 		}
 
 if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) CFS - %d,%d,%d,0x%x,0x%x,0x%x,%d,0x%x\n",__FILE__,__LINE__,hdr->NS,n,d,FileHeaderSize,DataHeaderSize,LastDataSectionHeaderOffset,NumberOfDataSections,leu32p(hdr->AS.Header+0x86));
@@ -309,14 +310,10 @@ else if (VERBOSE_LEVEL>7)
 		hdr->NRec = NumberOfDataSections;
 		size_t SPR = 0, SZ = 0;
 		for (m = 0; m < NumberOfDataSections; m++) {
-			if (m>0) {
-				hdr->EVENT.TYP[hdr->EVENT.N] = 0x7ffe;
-				hdr->EVENT.POS[hdr->EVENT.N] = SPR;
-				hdr->EVENT.N++;
-			}
+			int32_t tmp_event_typ=0;
+			double  tmp_event_pos=0;
 
 			datapos = DATAPOS[m];
-
 			for (k = 0; k < d; k++) {
 				/***** DS variable k information *****/
 				int i=-1; double f=NAN;
@@ -341,6 +338,12 @@ else if (VERBOSE_LEVEL>7)
 				case 6: f = lef64p(hdr->AS.Header+p3); break;
 				}
 
+				if ((k==1) && (typ==4) && !strcmp(desc,"State")) {
+					tmp_event_typ = i;
+				}
+				else if ((k==3) && (typ==6) && !strcmp(desc,"Start") && !strcmp(unit,"s"))
+					tmp_event_pos = f;
+
 if (VERBOSE_LEVEL>7) 		{
 				fprintf(stdout,"#%2i [%i:%i] <%s>",k,typ,off,desc);
 				if (typ<1) ;
@@ -349,6 +352,20 @@ if (VERBOSE_LEVEL>7) 		{
 				else if (typ==7) fprintf(stdout,"[%s]",hdr->AS.Header+p3+1);
 				fprintf(stdout,"[%s]\n",unit);
 				}
+			}
+
+			typeof (hdr->T0) TS = tmp_event_pos ? (hdr->T0 + ldexp(tmp_event_pos/(24.0*3600.0),32)) : 0;
+			if (m>0) {
+				hdr->EVENT.TYP[hdr->EVENT.N] = 0x7ffe;
+				hdr->EVENT.POS[hdr->EVENT.N] = SPR;
+				hdr->EVENT.TimeStamp[hdr->EVENT.N] = TS;
+				hdr->EVENT.N++;
+			}
+			if (tmp_event_typ > 0) {
+				hdr->EVENT.TYP[hdr->EVENT.N] = tmp_event_typ;
+				hdr->EVENT.POS[hdr->EVENT.N] = SPR;
+				hdr->EVENT.TimeStamp[hdr->EVENT.N] = TS;
+				hdr->EVENT.N++;
 			}
 
 			if (!leu32p(hdr->AS.Header+datapos+8)) continue; 	// empty segment
