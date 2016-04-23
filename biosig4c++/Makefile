@@ -462,7 +462,7 @@ MinGW64OBJECTS  = $(patsubst win32/%.obj, win64/%.obj, $(MinGWOBJECTS))
 LIB_OBJECTS = libbiosig.a libbiosig2.a libgdf.a libgdftime.a libphysicalunits.a libbiosig.$(DLEXT) libbiosig2.$(DLEXT) libgdf.$(DLEXT) libgdftime.$(DLEXT) libphysicalunits.$(DLEXT)
 
 first: $(IO_H_FILE2) lib
-tools: save2gdf pu
+tools: save2gdf pu biosig_fhir
 all:   first mex4o biosig4python sigviewer win32 win64 win32/sigviewer.exe win64/sigviewer.exe #biosig_client biosig_server mma java tcl perl php ruby #sigviewer 
 
 .PHONY : io.h libbiosig lib

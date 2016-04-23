@@ -153,9 +153,20 @@ char* biosig_fhir_binary_json_template(const char *filename, FILE *fid) {
 
 extern int VERBOSE_LEVEL; 
 
+const char *help =	"%s provides fhir binary template for biosignal data\n\n"
+			"    Usage: %s [-json|-xml|-base64] <filename>\n\n"
+			"       reads filename and converts it fhir-(json|xml)-binary-template\n"
+			"       or a media-type X-biosig/gdf (i.e. base64-encoded GDF stream).\n"
+			"   libbiosig version %06x is used to read the file.\n\n";
+
 int main(int argc, char **argv) {
     	VERBOSE_LEVEL = 0;
 	enum {BASE64,JSON,XML} flag_output_format = JSON;
+
+	if (argc<2) {
+		fprintf(stderr,help, argv[0], argv[0], get_biosig_version());
+		exit;
+	}
 
 	char **opt = argv+1;
 
@@ -170,10 +181,7 @@ int main(int argc, char **argv) {
 			flag_output_format = XML;
 		}
 		else if (!strcasecmp(*opt, "-h") || !strcasecmp(*opt, "--help")) {
-			fprintf(stderr,"%s provides fhir binary template for biosignal data\n\n"
-				"    Usage: %s [-json|-xml|-base64] <filename>\n\n"
-				"       reads filename and converts it to a fhir-binary-template\n\n",
-				argv[0], argv[0]);
+			fprintf(stderr,help, argv[0], argv[0], get_biosig_version());
 		}
 		else if (*opt[0] != '-') {
 			HDRTYPE *hdr = NULL;
