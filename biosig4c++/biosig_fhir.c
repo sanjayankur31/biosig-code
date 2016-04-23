@@ -56,6 +56,7 @@ int biosig_hdr2gdf_base64(HDRTYPE *hdr, FILE *fid) {
 
 	base64_encodestate B64STATE;
 	base64_init_encodestate(&B64STATE);
+
 	// write header	
 	int c = base64_encode_block(hdr->AS.Header, (int)hdr->HeadLen, buf, &B64STATE);
 	fwrite(buf,1,c,fid);
@@ -77,8 +78,8 @@ int biosig_hdr2gdf_base64(HDRTYPE *hdr, FILE *fid) {
 	c = base64_encode_blockend(buf, &B64STATE);
 	fwrite(buf,1,c,fid);
 
-	free(buf);
-	free(mem);
+	if (buf) free(buf);
+	if (mem) free(mem);
 	
 	return(0);
 }
@@ -136,8 +137,8 @@ char* biosig_fhir_binary_json_template(const char *filename, FILE *fid) {
 		  "    \"meta\" : ", hdr->FileName);
 
 	fprintf_hdr2json(fid, hdr);
-		  
-	fprintf(fid, "    \"contentType\" : \"X-biosig/gdf\",\n"
+
+	fprintf(fid, ",    \"contentType\" : \"X-biosig/gdf\",\n"
 		     "    \"content\" : \"");
 
 	biosig_hdr2gdf_base64(hdr, fid);
@@ -154,29 +155,42 @@ extern int VERBOSE_LEVEL;
 
 int main(int argc, char **argv) {
     	VERBOSE_LEVEL = 0;
+	enum {BASE64,JSON,XML} flag_output_format = JSON;
 
-	int flag_json_format = 1;
 	char **opt = argv+1;
 
 	for (; *opt!=NULL; opt++) {
+		if (!strcasecmp(*opt, "-base64")) {
+			flag_output_format = BASE64;
+		}
 		if (!strcasecmp(*opt, "-json")) {
-			flag_json_format = 1;
+			flag_output_format = JSON;
 		}
 		else if (!strcasecmp(*opt, "-xml")) {
-			flag_json_format = 0;
+			flag_output_format = XML;
 		}
 		else if (!strcasecmp(*opt, "-h") || !strcasecmp(*opt, "--help")) {
 			fprintf(stderr,"%s provides fhir binary template for biosignal data\n\n"
-				"    Usage: %s [-json|-xml] <filename>\n\n"
+				"    Usage: %s [-json|-xml|-base64] <filename>\n\n"
 				"       reads filename and converts it to a fhir-binary-template\n\n",
 				argv[0], argv[0]);
 		}
 		else if (*opt[0] != '-') {
+			HDRTYPE *hdr = NULL;
 			const char *filename = *opt;
-			if (flag_json_format)
+			switch (flag_output_format) {
+			case BASE64:
+				hdr = sopen(filename, "r", hdr);
+				biosig_hdr2gdf_base64(hdr, stdout);
+				destructHDR(hdr);
+				break;
+			case JSON:
 				biosig_fhir_binary_json_template(filename, stdout);
-			else
+				break;
+			case XML:
 				biosig_fhir_binary_xml_template(filename, stdout);
+				break;
+			}
 		}
 	}
 }
