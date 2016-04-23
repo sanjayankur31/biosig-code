@@ -279,10 +279,15 @@ else if (VERBOSE_LEVEL>7)
 			if (k==0) {
 				// File variable zero
 				flag_FPulse = !strcmp(unit,"FPulse");
+
 				if (typ==2)
 					hdr->VERSION = i/100.0;
 				else
 					fprintf(stderr,"Warning (%s line %i): File variable zeros is not of type INT2\n",__func__,__LINE__);
+
+				char *e = (char*)&(hdr->ID.Equipment);
+				memcpy(e,unit,8);
+				lei16a(i,e+6);
 			}
 		}
 
