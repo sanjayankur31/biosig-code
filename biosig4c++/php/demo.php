@@ -2,6 +2,14 @@
 <?php
 
 /*
+#
+# Demonstrates how the Header information of biosig data can be read through
+#    JSON header export
+#
+# References:
+# [1] https://www.hl7.org/fhir/references.html
+# [2] ÖNorm K2204:2015, GDF - A general data format for biomedical signals
+
    Copyright (C) 2016 Alois Schloegl <alois.schloegl@ist.ac.at>
    This file is part of the BioSig repository at http://biosig.sf.net/
 
@@ -20,12 +28,25 @@
  */
 
 
+
+
 /*
-	biosig_fhir: 
+	biosig_fhir_base64:
+		encodes a biosig file as a base64-encoded GDFv3.0 stream
+*/
+function biosig_fhir_base64($filename) {
+	$h = popen('biosig_fhir',$EXT,' -base64 "' . $filename.'"', 'rb');
+	$jsonhdr = stream_get_contents($h);
+	fclose($h);
+	return $jsonhdr;
+}
+
+/*
+	biosig_fhir:
 		makes a fhir_json_binary template
 */
-function biosig_fhir($filename) {
-	$h = popen('biosig_fhir "' . $filename.'"', 'rb');
+function biosig_fhir_json($filename) {
+	$h = popen('biosig_fhir',$EXT,' -json "' . $filename.'"', 'rb');
 	$jsonhdr = stream_get_contents($h);
 	fclose($h);
 	return $jsonhdr;
@@ -36,7 +57,7 @@ function biosig_fhir($filename) {
 		makes a fhir_xml_binary template
 */
 function biosig_fhir_xml($filename) {
-	$h = popen('biosig_fhir -xml "' . $filename.'"', 'rb');
+	$h = popen('biosig_fhir',$EXT,' -xml "' . $filename.'"', 'rb');
 	$jsonhdr = stream_get_contents($h);
 	fclose($h);
 	return $jsonhdr;
@@ -46,7 +67,7 @@ function biosig_fhir_xml($filename) {
         get header (meta) information
  */
 function biosig_json_header($filename) {
-	$h = popen('save2gdf -JSON "' . $filename.'"', 'rb');
+	$h = popen('save2gdf',$EXT,' -JSON "' . $filename.'"', 'rb');
 	$jsonhdr = stream_get_contents($h);
 	fclose($h);
 	return $jsonhdr;
@@ -59,14 +80,16 @@ function biosig_header($filename) {
 	return json_decode( biosig_json_header($filename) );
 }
 
-
+## example file
 $filename="data/Newtest17-256.bdf";
+
+## extract header information through JSON export
+$HDR = biosig_header($filename);
+var_dump($HDR);
+
+## extract fhir binary template
 $BIN = biosig_fhir($filename);
 echo $BIN;
 print "\n\n";
-$HDR = biosig_header($filename);
-
-var_dump($HDR);
-
 ?>
 
