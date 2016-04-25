@@ -1734,7 +1734,7 @@ HDRTYPE* getfiletype(HDRTYPE* hdr)
 
     	hdr->TYPE = unknown;
 
-	if (VERBOSE_LEVEL>7) fprintf(stdout,"[GETFILETYPE 101]! %i\n", hdr->HeadLen);
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"[%s line %i]! %i\n", __func__,__LINE__, hdr->HeadLen);
 
 #ifndef  ONLYGDF
    	const uint8_t MAGIC_NUMBER_FEF1[] = {67,69,78,13,10,0x1a,4,0x84};
@@ -1791,7 +1791,7 @@ HDRTYPE* getfiletype(HDRTYPE* hdr)
 
 #endif //ONLYGDF
 
-	if (VERBOSE_LEVEL>7) fprintf(stdout,"[GETFILETYPE 200] %x %x!\n",leu16p(hdr->AS.Header),leu16p(hdr->AS.Header+154));
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"(%s line %i: %x %x!  <%8s>\n",__func__,__LINE__, leu16p(hdr->AS.Header),leu16p(hdr->AS.Header+154),hdr->AS.Header);
 
     	if (hdr->TYPE != unknown)
       		return(hdr);
@@ -2205,10 +2205,12 @@ HDRTYPE* getfiletype(HDRTYPE* hdr)
 	}
 	else if (!strncmp(Header1,"Serial number",13))
 		hdr->TYPE = ASCII_IBI;
-	else if (!memcmp(Header1,MAGIC_NUMBER_Z,3))
-		hdr->TYPE = Z;
+	else if (!memcmp(Header1,"VER=9\r\nCTIME=",13))
+		hdr->TYPE = WCP;
 	else if (!memcmp(Header1,"\xAF\xFE\xDA\xDA",4) || !memcmp(Header1,"\xDA\xDA\xFE\xAF",4) || !memcmp(Header1,"\x55\x55\xFE\xAF",4) )
 		hdr->TYPE = WG1;	// Walter Graphtek
+	else if (!memcmp(Header1,MAGIC_NUMBER_Z,3))
+		hdr->TYPE = Z;
 	else if (!strncmp(Header1,"PK\003\004",4))
 		hdr->TYPE = ZIP;
 	else if (!strncmp(Header1,"PK\005\006",4))
@@ -2380,6 +2382,7 @@ const struct FileFormatStringTable_t FileFormatStringTable[] = {
 	{ VRML,    	"VRML" },
 	{ VTK,    	"VTK" },
 	{ WAV,    	"WAV" },
+	{ WCP,    	"WCP" },
 	{ WG1,    	"Walter Graphtek" },
 	{ WMF,    	"WMF" },
 	{ XML,    	"XML" },
@@ -4089,6 +4092,8 @@ else if (!strncmp(MODE,"r",1)) {
     	else
 #endif
 
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) FMT=%s Ver=%4.2f\n",__FILE__,__LINE__,GetFileTypeString(hdr->TYPE),hdr->VERSION);
+
 	if (hdr->TYPE == GDF) {
 
 		struct stat FileBuf;
@@ -4575,6 +4580,8 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"EDF+ event\n\ts1:\t<%s>\n\ts2:\t<%s>\n\ts3:
 		hdr->HeadLen = count;
 		hdr->VERSION = atof((char*)(hdr->AS.Header+4));
 
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) FMT=%s Ver=%4.2f\n",__FILE__,__LINE__,GetFileTypeString(hdr->TYPE),hdr->VERSION);
+
 		if (hdr->FILE.COMPRESSION) {
 			biosigERROR(hdr, B4C_DATATYPE_UNSUPPORTED, "compressed ATF file format not supported");
 			return hdr;
@@ -4660,7 +4667,7 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"EDF+ event\n\ts1:\t<%s>\n\ts2:\t<%s>\n\ts3:
 				}
 				if (!strncasecmp(hc->Label,"time",4)) {
 					TIMECHANNEL = k+1;
-					hc->OnOff   = 2;   // mark channel as containing the time axis
+					hc->OnOff   = 0;   // mark channel as containing the time axis
 					if (k==0) hdr->SampleRate /= PhysDimScale(hc->PhysDimCode);
 				}
 			}
@@ -11074,6 +11081,87 @@ if (VERBOSE_LEVEL>2)
     		if (hdr->AS.B4C_ERRNUM) return(hdr);
     		// hdr->FLAG.SWAP = 0;
 	}
+
+	else if (hdr->TYPE==WCP) {
+
+		fprintf(stderr,"%s (line %i) %s: WARNING WCP support is very (!!!) experimental!\n", __FILE__,__LINE__,__func__);
+
+		const int WCP_HEADER_LENGTH=0x0800;
+		if (hdr->HeadLen < 0x0800) {
+			hdr->AS.Header = realloc(hdr->AS.Header, WCP_HEADER_LENGTH);
+			hdr->HeadLen  += ifread(hdr->AS.Header+hdr->HeadLen, 1, WCP_HEADER_LENGTH - hdr->HeadLen, hdr);
+		}
+		size_t len = strlen(hdr->AS.Header);
+		int ADCMAX=0;
+
+		char  *tok = strtok(hdr->AS.Header,"\r\n");
+		while (tok != NULL) {
+			char *sep = strchr(tok,'=');
+			*sep = 0;
+			char *val = sep+1;
+			char *key = tok;
+			if (!strcmp(key,"VER"))
+				hdr->VERSION=atof(val);
+			else if (!strcmp(key,"NC")) {
+				hdr->NS=atoi(val);
+				hdr->CHANNEL = realloc(hdr->CHANNEL, sizeof(CHANNEL_TYPE)*hdr->NS);
+			}
+			else if (!strcmp(key,"DT"))
+				hdr->SampleRate=1.0/atof(val);
+			else if (!strcmp(key,"ADCMAX")) {
+				ADCMAX=atoi(val);
+			}
+/*
+			else if (!strcmp(key,"NBH"))
+				hdr->SPR=atoi(val);
+*/			else if (!strcmp(key,"NR"))
+				hdr->NRec=atoi(val);
+			else if (key[0]=='Y') {
+				int chan = atoi(key+2);
+				CHANNEL_TYPE *hc = hdr->CHANNEL+chan;
+				switch (key[1]) {
+				case 'U':	// YU
+					hc->PhysDimCode = PhysDimCode(val);
+					break;
+				case 'N':	// YN
+					strncpy(hc->Label, val, MAX_LENGTH_LABEL);
+					break;
+				case 'G':	// YG
+					hc->Cal = atof(val);
+					break;
+
+				}
+			}
+			tok = strtok(NULL,"\r\n");
+		}
+
+		struct stat FileBuf;
+		stat(hdr->FileName,&FileBuf);
+		hdr->NRec = (FileBuf.st_size - WCP_HEADER_LENGTH)/(2*hdr->NS);
+
+		hdr->AS.rawdata = NULL;
+		hdr->SPR  = 1;
+		uint16_t gdftyp=3;
+		typeof (hdr->NS) k;
+		if (ADCMAX==32767) gdftyp = 3;
+		for (k = 0; k < hdr->NS; k++) {
+			CHANNEL_TYPE *hc = hdr->CHANNEL+k;
+			hc->GDFTYP  =  gdftyp;
+			hc->OnOff   =  1;
+			hc->Off     =  0.0;
+			hc->DigMax  =  ADCMAX;
+			hc->DigMin  = -ADCMAX;
+			hc->PhysMax =  ADCMAX*hc->Cal;
+			hc->PhysMin = -ADCMAX*hc->Cal;
+			hc->SPR = 1;
+		}
+
+		if (VERBOSE_LEVEL>6) hdr2ascii(hdr,stdout,8);
+/*
+		fprintf(stdout,"%s (line %i) %s: WCP not supported yet\n",__FILE__,__LINE__,__func__);
+		biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "ERROR BIOSIG SOPEN(READ): WCP format is not supported");
+		return(hdr);
+*/	}
 
 	else if (hdr->TYPE==WG1) {
 		uint32_t VER = leu32p(hdr->AS.Header); 
