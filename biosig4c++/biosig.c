@@ -10565,7 +10565,7 @@ if (VERBOSE_LEVEL>2)
 			however, there are also TDMS data out there, that is based on an XML header 
  			and a separate binary file. This is somewhat confusing. 
 		 */ 
-		fprintf(stderr,"%s: Format TDMS is very experimental",__func__);
+		fprintf(stderr,"%s (line %i): Format TDMS is very experimental\n",__func__,__LINE__);
 
 #define kTocMetaData 		(1L<<1)
 #define kTocRawData 		(1L<<3)
@@ -10574,11 +10574,40 @@ if (VERBOSE_LEVEL>2)
 #define kTocBigEndian 		(1L<<6)
 #define kTocNewObjList 		(1L<<2)
 
-		// char flagBigEndian = (beu32p(hdr->AS.Header+4) & kTocBigEndian) != 0; 
-		// uint32_t ToCmask = leu32p(hdr->AS.Header+4);
-		hdr->VERSION 	 = leu32p(hdr->AS.Header+8);
+		/***** Lead In *****/
+		hdr->FILE.LittleEndian     = (leu32p(hdr->AS.Header+4) & kTocBigEndian) != 0; 	// affects only raw data
+		hdr->VERSION 	           = leu32p(hdr->AS.Header+8);
 		uint64_t nextSegmentOffset = leu64p(hdr->AS.Header+12);
-		uint64_t rawDataOffset = leu64p(hdr->AS.Header+20);
+		uint64_t LengthMetaData    = leu64p(hdr->AS.Header+20);
+
+		/***** Meta data *****/
+		if (LengthMetaData > 0) {
+			uint32_t k;
+			uint32_t numberOfObjects  = leu32p(hdr->AS.Header+28);
+			size_t pos = 32;
+			char *pstr=NULL;
+			for (k=0; k < numberOfObjects; k++) {
+				uint32_t plen = leu32p(hdr->AS.Header+pos);
+				uint32_t idx  = leu32p(hdr->AS.Header+pos+4+plen);
+
+				pstr  = realloc(pstr,plen+1);
+				memcpy(pstr,hdr->AS.Header+pos+4,plen);
+				pstr[plen]=0;
+
+	if (VERBOSE_LEVEL>6) fprintf(stdout,"%s (line %i): object %i path %s rawDataIdx=0x%08x\n",__func__,__LINE__, k, pstr, idx);
+
+				switch (idx) {
+				case 0xffffffff :	// no raw data
+					break;
+				case 0x00001269 :	// DAQmx Format Changing scaler
+					break;
+				case 0x00001369 :	// DAQmx Digital Line scaler
+					break;
+				case 0x00000000 : 	//
+					;
+				}
+			}
+		}
 
 		biosigERROR(hdr,B4C_FORMAT_UNSUPPORTED,"Format TDMS is currently not supported"); 
 	}
