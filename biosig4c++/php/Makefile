@@ -19,5 +19,4 @@ clean:
 	-rm *.h 
 	-rm *.o 
 	-rm *.cpp 
-	-rm *.php 
 	-rm *.so
