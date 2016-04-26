@@ -10565,7 +10565,7 @@ if (VERBOSE_LEVEL>2)
 			however, there are also TDMS data out there, that is based on an XML header 
  			and a separate binary file. This is somewhat confusing. 
 		 */ 
-		fprintf(stderr,"Format TDMS is very experimental");
+		fprintf(stderr,"%s: Format TDMS is very experimental",__func__);
 
 #define kTocMetaData 		(1L<<1)
 #define kTocRawData 		(1L<<3)
@@ -11103,7 +11103,28 @@ if (VERBOSE_LEVEL>2)
 				hdr->VERSION=atof(val);
 			else if (!strcmp(key,"RTIME")) {
 				struct tm T;
+#if !defined(_WIN32)
 				strptime(val,"%d/%m/%Y %T",&T);
+#else
+				char *p=val+strlen(val);
+				do p--; while (isdigit(*p) && (p>val));
+				T.tm_sec = atoi(p+1);
+				*p=0;
+				do p--; while (isdigit(*p) && (p>val));
+				T.tm_min = atoi(p+1);
+				*p=0;
+				do p--; while (isdigit(*p) && (p>val));
+				T.tm_hour = atoi(p+1);
+				*p=0;
+				do p--; while (isdigit(*p) && (p>val));
+				T.tm_year = atoi(p+1);
+				*p=0;
+				do p--; while (isdigit(*p) && (p>val));
+				T.tm_mon = atoi(p+1);
+				*p=0;
+				do p--; while (isdigit(*p) && (p>val));
+				T.tm_mday = atoi(p+1);
+#endif
 				hdr->T0 = tm_time2gdf_time(&T);
 			}
 			else if (!strcmp(key,"NC")) {
