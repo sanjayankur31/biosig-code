@@ -20,7 +20,7 @@
 #MLINKDIR = /usr/local/Wolfram/Mathematica/10.0
 
 ifeq (Darwin,$(shell uname))
-MLINKDIR := /Applications/Mathematica.app/
+MLINKDIR := /Applications/Mathematica.app/Contents
 SYS       = MacOSX-x86-64
 LDFLAGS  += -demangle -dynamic -arch x86_64 -macosx_version_min 10.10.0
 LDFLAGS  += -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration
@@ -86,9 +86,9 @@ sload.exe: sload.o sloadtm.o
 	# static linking
 	#${LD} ${LDFLAGS} sloadtm.o sload.o ../libbiosig2.a $(shell pkg-config --libs libbiosig) -lstdc++ ${LIBDIR} -l${MLLIB} ${EXTRALIBS} -o "$@"
 	# dynamic linking
-	${LD} ${LDFLAGS} sloadtm.o sload.o $(shell pkg-config --libs libbiosig) -lbiosig2 -lstdc++ ${LIBDIR} -l${MLLIB} ${EXTRALIBS} -o "$@"
 	mkdir -p ${SYS}
-	cp "$@" ${SYS}/
+	${LD} ${LDFLAGS} sloadtm.o sload.o $(shell pkg-config --libs libbiosig) -lbiosig2 -lstdc++ ${LIBDIR} -l${MLLIB} ${EXTRALIBS} -o ${SYS}/"$@"
+	ln -sf ${SYS}/"$@"
 	# copy to user directory if available
 	#-cp -r ${SYS} ~/K/Software/MathematicaTools/
 	#-cp "$@" ~/K/Software/MathematicaTools/${SYS}/sload-$(shell date +%Y%m%d)
