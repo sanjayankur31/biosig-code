@@ -90,7 +90,7 @@ PathToSigViewer = ../sigviewer
 PathToSigViewerWIN32 = ../sigviewer4win32
 PathToSigViewerWIN64 = ../sigviewer4win64
 
-##CFLAGS       += -std=gnu99
+CFLAGS       += -std=gnu11
 CFLAGS       += -fstack-protector -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -pipe -fPIC -fno-builtin-memcmp -O2 -Wno-unused-result
 CFLAGS       += -Wno-deprecated
 CFLAGS       += -D_GNU_SOURCE
@@ -122,7 +122,7 @@ else
 	LD      := $(TARGET)-ld
 	AR      := $(TARGET)-ar rcs
 	PKGCONF := $(TARGET)-pkg-config
-	ifeq (mingw, $(findstring mingw, $(TARGET)))
+	ifneq (,$(findstring mingw,$(TARGET)))
 		## add gnulib's getlogin
 		SOURCES += win32/getlogin.c win32/getline.c win32/getdelim.c
 		OBJECTS += getlogin.o getline.o getdelim.o
@@ -131,6 +131,7 @@ else
 		IO_H_FILE2 = io.h
 		LIBS    += -lssp
 		LDLIBS  += -liconv -liberty -lws2_32
+		BINEXT   = .exe
 	endif
 endif
 
@@ -157,7 +158,7 @@ else ifneq (,$(findstring MINGW, $(shell uname)))
 	SOURCES += win32/getlogin.c win32/getline.c win32/getdelim.c
 	OBJECTS += getlogin.o getline.o getdelim.o
 	## exclude conflicting definition of sopen from mingw's io.h
-	CC = gcc
+	CC  = gcc
 	CXX = g++
 	CFLAGS  += -I.
 	CFLAGS  += -pipe -fPIC -D_REENTRANT -D=BUILD_DLL
@@ -462,7 +463,7 @@ MinGW64OBJECTS  = $(patsubst win32/%.obj, win64/%.obj, $(MinGWOBJECTS))
 LIB_OBJECTS = libbiosig.a libbiosig2.a libgdf.a libgdftime.a libphysicalunits.a libbiosig.$(DLEXT) libbiosig2.$(DLEXT) libgdf.$(DLEXT) libgdftime.$(DLEXT) libphysicalunits.$(DLEXT)
 
 first: $(IO_H_FILE2) lib
-tools: save2gdf pu biosig_fhir
+tools: save2gdf${BINEXT} pu${BINEXT} biosig_fhir${BINEXT}
 all:   first mex4o biosig4python sigviewer win32 win64 win32/sigviewer.exe win64/sigviewer.exe #biosig_client biosig_server mma java tcl perl php ruby #sigviewer 
 
 .PHONY : io.h libbiosig lib
@@ -754,22 +755,23 @@ libbiosig2.a: $(OBJECTS) biosig2.o t240/libcnsfef.a
 libbiosig2.def: $(OBJECTS) biosig2.o t240/libcnsfef.a
 	$(LD) -o libbiosig2.dll -s -shared -fPIC  $(OBJECTS) biosig2.o t240/libcnsfef.a $(LIBS) -Wl,--subsystem,windows,--output-def,libbiosig2.def,--out-implib,libbiosig2.dll.a
 
+
 ## save2gdf, pdp2gdf
-%: %.c
+%${BINEXT}: %.c
 	$(CXX) $(DEFINES) $(CXXFLAGS) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
 
-pu : pu.c physicalunits.o
-	$(CC) -std=gnu11 $^ -o $@
+pu${BINEXT} : pu.c physicalunits.o
+	$(CC) $(DEFINES) $(CFLAGS) $^  $(shell $(PKGCONF) --libs libbiosig) -o "$@"
 
-biosig_fhir: biosig_fhir.c
-	$(CC) -std=gnu11 $^ -o $@ -lbiosig -lb64
+biosig_fhir${BINEXT}: biosig_fhir.c
+	$(CC) $(DEFINES) $(CFLAGS) $^ -lb64 $(shell $(PKGCONF) --libs libbiosig) -lstdc++ -o "$@"
 
-bscs: biosig_client biosig_server sandbox.o biosig.o
-biosig_client: biosig_client.c libbiosig.$(LIBEXT) biosig-network.o
-	$(CXX) $(DEFINES) $(CXXFLAGS) biosig_client.c biosig-network.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o biosig_client
+bscs: biosig_client{BINEXT} biosig_server{BINEXT} sandbox.o biosig.o
+biosig_client${BINEXT}: biosig_client.c libbiosig.$(LIBEXT) biosig-network.o
+	$(CXX) $(DEFINES) $(CXXFLAGS) biosig_client.c biosig-network.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o "$@"
 
-biosig_server: biosig_server.c libbiosig.$(LIBEXT) biosig-network.o
-	$(CXX) $(DEFINES) $(CXXFLAGS) biosig_server.c biosig-network.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o biosig_server
+biosig_server${BINEXT}: biosig_server.c libbiosig.$(LIBEXT) biosig-network.o
+	$(CXX) $(DEFINES) $(CXXFLAGS) biosig_server.c biosig-network.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o "$@"
 
 
 #############################################################
@@ -1012,14 +1014,14 @@ install: install_libbiosig.$(DLEXT) install_libbiosig.a install_headers
 	ln -sf $(LIB)/libbiosig2${SONAME_POSTFIX}	$(LIB)/libbiosig2.${DLEXT}
 	ln -sf $(LIB)/libbiosig${SONAME_POSTFIX}	$(LIB)/libbiosig.${DLEXT}
 
-install_tools: pu save2gdf biosig_fhir doc/save2gdf.1 install
+install_tools: pu${BINEXT} save2gdf${BINEXT} biosig_fhir${BINEXT} doc/save2gdf.1 install
 	install -d 			$(BIN)
-	install save2gdf  		$(BIN)
+	install save2gdf${BINEXT}	$(BIN)
 	install heka2itx  		$(BIN)
 	install save2aecg 		$(BIN)
 	install save2scp  		$(BIN)
-	install pu  			$(BIN)
-	install biosig_fhir  		$(BIN)
+	install pu${BINEXT}		$(BIN)
+	install biosig_fhir${BINEXT}	$(BIN)
 	mkdir -p  			$(DESTDIR)$(prefix)/share/man/man1
 	install doc/*.1  		$(DESTDIR)$(prefix)/share/man/man1
 	#install libbiosig.man 		$(DESTDIR)$(prefix)/share/
@@ -1027,12 +1029,12 @@ install_tools: pu save2gdf biosig_fhir doc/save2gdf.1 install
 	#$(MAKE)  install_octave
 
 uninstall_tools:
-	${RM} $(BIN)/save2gdf
-	${RM} $(BIN)/pu
+	${RM} $(BIN)/save2gdf${BINEXT}
+	${RM} $(BIN)/pu${BINEXT}
 	${RM} $(BIN)/heka2itx
 	${RM} $(BIN)/save2aecg
 	${RM} $(BIN)/save2scp
-	${RM} $(BIN)/biosig_fhir
+	${RM} $(BIN)/biosig_fhir${BINEXT}
 	${RM} $(DESTDIR)$(prefix)/share/man/man1/pu.1
 	${RM} $(DESTDIR)$(prefix)/share/man/man1/save2gdf.1
 	${RM} $(DESTDIR)$(prefix)/share/man/man1/heka2itx.1
