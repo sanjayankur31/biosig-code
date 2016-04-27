@@ -39,7 +39,11 @@
 #include <sys/param.h>
 #include <time.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 extern int VERBOSE_LEVEL; 	// used for debugging, variable is always defined
+
 
 #ifdef NDEBUG
 #define VERBOSE_LEVEL 0 	// turn off debugging information, but its only used without NDEBUG
@@ -201,10 +205,6 @@ char *getlogin (void);
 #endif 
 
 
-
-#ifdef __cplusplus
-EXTERN_C {
-#endif 
 
 #if __BYTE_ORDER == __BIG_ENDIAN
 #define l_endian_u16(x) ((uint16_t)bswap_16((uint16_t)(x)))

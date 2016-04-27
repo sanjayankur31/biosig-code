@@ -22,10 +22,12 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <biosig2.h>
-#include <biosig-dev.h>
 #include <b64/cencode.h>
+#include <biosig-dev.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*
   https://www.hl7.org/fhir/binary.html
@@ -51,8 +53,8 @@ int biosig_hdr2gdf_base64(HDRTYPE *hdr, FILE *fid) {
 	size_t len0 = hdr->HeadLen + hdr->NRec*hdr->AS.bpb + len3;
 	
 	size_t buflen = max(max(len3,hdr->HeadLen),hdr->AS.bpb);
-	char *buf     = malloc(buflen*2);
-	char *mem     = malloc(buflen);
+	char *buf     = (char*)malloc(buflen*2);
+	char *mem     = (char*)malloc(buflen);
 
 	base64_encodestate B64STATE;
 	base64_init_encodestate(&B64STATE);
@@ -149,9 +151,14 @@ char* biosig_fhir_binary_json_template(const char *filename, FILE *fid) {
 	return(0);
 }
 
+#ifndef NDEBUG
+extern int VERBOSE_LEVEL;
+#endif
 
+#ifdef __cplusplus
+}
+#endif
 
-extern int VERBOSE_LEVEL; 
 
 const char *help =	"%s provides fhir binary template for biosignal data\n\n"
 			"    Usage: %s [-json|-xml|-base64] <filename>\n\n"
@@ -160,7 +167,11 @@ const char *help =	"%s provides fhir binary template for biosignal data\n\n"
 			"   libbiosig version %06x is used to read the file.\n\n";
 
 int main(int argc, char **argv) {
+
+#ifndef NDEBUG
     	VERBOSE_LEVEL = 0;
+#endif
+
 	enum {BASE64,JSON,XML} flag_output_format = JSON;
 
 	if (argc<2) {
