@@ -2045,7 +2045,7 @@ HDRTYPE* getfiletype(HDRTYPE* hdr)
 	    	hdr->TYPE = NIFTI;
     	else if (!memcmp(Header1,"NEURALEV",8) || !memcmp(Header1,"N.EV.",6) )
 	    	hdr->TYPE = NEV;
-    	else if (!memcmp(Header1,"NEX1",4))
+	else if (!memcmp(Header1,"NEX1",3))
 	    	hdr->TYPE = NEX1;
     	else if ( (hdr->HeadLen > 31) && !memcmp(Header1,"Logging Start\x0aLogger SW Version: ",31))
 	    	hdr->TYPE = NeuroLoggerHEX;
@@ -2352,7 +2352,7 @@ const struct FileFormatStringTable_t FileFormatStringTable[] = {
 	{ NeuroLoggerHEX, "NeuroLoggerHEX"},
 	{ NetCDF,    	"NetCDF" },
 	{ NEV,    	"NEV" },
-	{ NEX1,    	"NEX1" },
+	{ NEX1,    	"NEX" },
 	{ NIFTI,    	"NIFTI" },
 	{ NEURON,    	"NEURON" },
 	{ NUMPY,    	"NUMPY" },
@@ -9793,6 +9793,165 @@ if (VERBOSE_LEVEL>2)
 		return(hdr);
 	}
 #endif
+
+	else if (hdr->TYPE==NEX1) {
+
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i)\n",__func__,__LINE__);
+
+		if (count < 284) {
+			hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header,284);
+			count  += ifread(hdr->AS.Header + count, 1, 284 - count, hdr);
+		}
+
+		uint8_t v = hdr->AS.Header[3]-'0';
+		const int H1LEN = (v==1) ? (4 + 4 + 256 +   8 + 4*4 + 256)
+					 : (4 + 4 + 256 +   8 +   8 +  4 +  8 + 64);
+		const int H2LEN = (v==1) ? (4 + 4 +  64 + 6*4 + 4*8 + 12 + 16 + 52)
+					 : (4 + 4 +  64 + 2*8 + 2*4 +  8 + 32 + 4*8 + 4*4 + 60);
+
+		uint32_t k      = leu32p(hdr->AS.Header + 280);
+
+		if (count < H1LEN + k * H2LEN) {
+			hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header, H1LEN + k * H2LEN);
+			count  += ifread(hdr->AS.Header + count, 1, H1LEN + k * H2LEN - count, hdr);
+		}
+
+		hdr->HeadLen          = count;
+		hdr->VERSION          = leu32p(hdr->AS.Header + 4) / 100.0;
+		hdr->SampleRate       = lef64p(hdr->AS.Header + 264);
+		hdr->SPR              = 1;
+		hdr->EVENT.SampleRate = lef64p(hdr->AS.Header + 264);
+
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i)\n",__func__,__LINE__);
+
+		if (k > 0xffff) {
+			biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "NEX format has more than 65535 channels");
+			return (hdr);
+		}
+
+		while (!ifeof(hdr)) {
+			void *tmpptr = realloc(hdr->AS.Header, count*2);
+			if (tmpptr)
+				hdr->AS.Header = (uint8_t*)tmpptr;
+			else {
+				biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Not enough memory to read NEX file");
+				return(hdr);
+			}
+			count  += ifread(hdr->AS.Header + count, 1, count, hdr);
+		}
+
+
+		hdr->NS = k;
+		hdr->CHANNEL = (CHANNEL_TYPE*)realloc(hdr->CHANNEL, hdr->NS*sizeof(CHANNEL_TYPE));
+
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i)\n",__func__,__LINE__);
+
+		for (k=0; k < hdr->NS; k++) {
+
+			if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): VarHdr # %i\n",__func__,__LINE__, k);
+
+			CHANNEL_TYPE *hc = hdr->CHANNEL+k;
+			uint32_t type = leu32p(hdr->AS.Header + H1LEN + k*H2LEN);
+
+			hc->OnOff = (type==5);
+
+			strncpy(hc->Label, hdr->AS.Header + H1LEN + k*H2LEN + 8, min(64,MAX_LENGTH_LABEL));
+			hc->Label[min(64, MAX_LENGTH_LABEL)] = 0;
+
+			size_t n;
+			if (v==5) {
+				hc->GDFTYP = (leu32p(hdr->AS.Header + H1LEN + k*H2LEN + 92)==1) ? 16 : 3;
+				hc->PhysDimCode = PhysDimCode(hdr->AS.Header + H1LEN + k*H2LEN + 5*8 + 64);
+				n       = leu64p(hdr->AS.Header + 80 + H1LEN + k*H2LEN);
+				hc->Cal = lef64p(hdr->AS.Header + 64+8*5+32 + H1LEN + k*H2LEN);
+				hc->Off = lef64p(hdr->AS.Header + 64+8*5+40 + H1LEN + k*H2LEN);
+				hc->SPR = leu64p(hdr->AS.Header + 64+8*5+48 + H1LEN + k*H2LEN);
+				hc->bufptr = hdr->AS.Header + leu64p(hdr->AS.Header + 64+8 + H1LEN + k*H2LEN);
+			}
+			else {
+				hc->GDFTYP = 3;
+				hc->PhysDimCode = PhysDimCode("mV");
+				n       = leu32p(hdr->AS.Header + 76 + H1LEN + k*H2LEN);
+				hc->Cal = lef64p(hdr->AS.Header + 64+8*4+3*8    + H1LEN + k*H2LEN);
+				hc->Off = lef64p(hdr->AS.Header + 64+8*4+3*8+20 + H1LEN + k*H2LEN);
+				hc->SPR = leu32p(hdr->AS.Header + 64+8*4+4*8    + H1LEN + k*H2LEN);
+				hc->bufptr = hdr->AS.Header+leu32p(hdr->AS.Header + 64+8 + H1LEN + k*H2LEN);
+			}
+
+			if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): VarHdr # %i %i %i %i \n",__func__,__LINE__, k,v,type,(int)n);
+
+			switch (type) {
+			case 2:
+			//case 6:
+			case 0:
+			case 1:
+				hdr->EVENT.N += n;
+			}
+			//if (hc->OnOff) hdr->SPR = lcm(hdr->SPR, hc->SPR);
+		}
+
+		if (hdr->EVENT.N > 0) {
+			size_t N=hdr->EVENT.N;
+			hdr->EVENT.N=0;
+			reallocEventTable(hdr,N);
+
+			N = 0;
+			for (k=0; k < hdr->NS; k++) {
+				if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): VarHdr # %i\n",__func__,__LINE__, k);
+				CHANNEL_TYPE *hc = hdr->CHANNEL+k;
+				uint32_t type = leu32p(hdr->AS.Header + H1LEN + k*H2LEN);
+
+				size_t n,l;
+				uint16_t gdftyp = 5;
+				if (v==5) {
+					n = leu64p(hdr->AS.Header + 80 + H1LEN + k*H2LEN);
+					if (leu32p(hdr->AS.Header + 88 + H1LEN + k*H2LEN))
+						gdftyp=7;
+				}
+				else
+					n = leu32p(hdr->AS.Header + 76 + H1LEN + k*H2LEN);
+
+
+				switch (type) {
+				case 2:
+					if (gdftyp==5) {
+						for (l=0; l<n; l++)
+							hdr->EVENT.DUR[N+l] = leu32p(hc->bufptr+4*(l+n));
+					}
+					else {
+						for (l=0; l<n; l++)
+							hdr->EVENT.DUR[N+l] = leu64p(hc->bufptr+8*(l+n));
+					}
+				case 0:
+				case 1:
+				//case 6:
+					if (gdftyp==5) {
+						for (l=0; l<n; l++)
+							hdr->EVENT.POS[N+l] = leu32p(hc->bufptr+4*l);
+					}
+					else {
+						for (l=0; l<n; l++)
+							hdr->EVENT.POS[N+l] = leu64p(hc->bufptr+8*l);
+					}
+
+					for (l=0; l<n; l++) {
+						hdr->EVENT.TYP[N+l] = type;
+						hdr->EVENT.CHN[N+l] = k;
+						//hdr->EVENT.TimeStamp[N+l] = 0;
+					}
+				}
+				N+=n;
+			}
+			hdr->EVENT.N=N;
+		}
+
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i)\n",__func__,__LINE__);
+
+		hdr2ascii(hdr,stdout,4);
+
+		biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "Support for NEX format is not ready yet");
+		return(hdr);
+	}
 
 	else if (hdr->TYPE==NIFTI) {
 		if (count<352) 
