@@ -64,10 +64,10 @@ LIBEXT        = a
 
 ### User-specified options: its likely you want to change this
 # settings for cross compiler: tested with MXE and mce-w64 with make suitesparse zlib qt ; 
-CROSS   = $(HOME)/src/mxe.master/usr/bin/i686-w64-mingw32.static
+CROSS   = $(HOME)/src/mxe/usr/bin/i686-w64-mingw32.static
 ## local MXE
 ifeq "$(wildcard $(CROSS)-gcc)" ""
-CROSS   = $(HOME)/src/mxe/usr/bin/i686-w64-mingw32.static
+CROSS   = $(HOME)/src/mxe.master/usr/bin/i686-w64-mingw32.static
 endif
 ifeq "$(wildcard $(CROSS)-gcc)" ""
 CROSS         = $(shell pwd)/../mxe/usr/bin/i686-w64-mingw32.static
@@ -76,12 +76,10 @@ ifeq "$(wildcard $(CROSS)-gcc)" ""
 CROSS         = /usr/local/src/mxe/usr/bin/i686-w64-mingw32.static
 endif
 
-CROSS64       = $(HOME)/src/mxe.master/usr/bin/x86_64-w64-mingw32.static
+CROSS64       = $(HOME)/src/mxe/usr/bin/x86_64-w64-mingw32.static
 ifeq "$(wildcard $(CROSS64)-gcc)" ""
-CROSS64       = $(shell pwd)/../mce-w64/usr/bin/x86_64-static-mingw32.static
+CROSS64       = $(HOME)/src/mxe.master/usr/bin/x86_64-w64-mingw32.static
 endif
-IO_H_FILE   := $(subst /bin/,//,$(CROSS))/include/io.h
-IO_H_FILE64 := $(subst /bin/,//,$(CROSS64))/include/io.h
 
 # settings for mex files
 MEX_OPTION    = -largeArrayDims # turn on for 64 bit Matlab, otherwise empty
@@ -126,9 +124,7 @@ else
 		## add gnulib's getlogin
 		SOURCES += win32/getlogin.c win32/getline.c win32/getdelim.c
 		OBJECTS += getlogin.o getline.o getdelim.o
-		## exclude conflicting definition of sopen from mingw's io.h
 		CFLAGS  += -I.
-		IO_H_FILE2 = io.h
 		LIBS    += -lssp
 		LDLIBS  += -liconv -liberty -lws2_32
 		BINEXT   = .exe
@@ -272,7 +268,7 @@ LIBS         += $(LDLIBS)
 DELETE        = rm -f
 COPY          = cp -f
 DATA_DIR      = data/
-DATA_DIR_CFS  = $(HOME)/L/data/test/CFS/
+DATA_DIR_CFS  = $(HOME)/L/data/test/cfs/
 TEMP_DIR      = test/
 SED           = sed
 VERBOSE	     := -V0
@@ -466,7 +462,7 @@ first: $(IO_H_FILE2) lib
 tools: save2gdf${BINEXT} pu${BINEXT} biosig_fhir${BINEXT}
 all:   first mex4o biosig4python sigviewer win32 win64 win32/sigviewer.exe win64/sigviewer.exe #biosig_client biosig_server mma java tcl perl php ruby #sigviewer 
 
-.PHONY : io.h libbiosig lib
+.PHONY : libbiosig lib
 
 libbiosig lib: $(LIB_OBJECTS)
 
@@ -501,23 +497,9 @@ sandbox.o: test0/sandbox.c  biosig.h biosig-dev.h
 	$(CXX) -c $(DEFINES) $(CXXFLAGS) $(INCPATH) -o "$@" "$<"
 
 
-## exclude conflicting definition of sopen from mingw's io.h
-ifeq (MINGW, $(findstring MINGW, $(shell uname)))
-### MXE-OCTAVE
-io.h: /include/io.h
-else
-io.h: $(prefix)$(TARGET)/include/io.h
-endif
-	$(SED) '/ sopen/ s#^#//#' "$<" > "$@"
-
-win32/io.h: $(IO_H_FILE)
-	$(SED) '/ sopen/ s#^#//#' $(IO_H_FILE) > "$@"
-win64/io.h: $(IO_H_FILE64)
-	$(SED) '/ sopen/ s#^#//#' $(IO_H_FILE64) > "$@"
-
 win32/%.obj: t240/%.c  biosig-dev.h biosig.h 
 	$(MinGWCC) -c $(DEFINES) $(MinGWCFLAGS) -I t240 -o "$@" "$<"
-win32/%.obj: %.c win32/io.h
+win32/%.obj: %.c
 	$(MinGWCC) -c $(DEFINES) $(MinGWCFLAGS) -o "$@" "$<"
 win32/%.obj: %.cpp
 	$(MinGWCXX) -c $(DEFINES) $(MinGWCFLAGS) -o "$@" "$<"
@@ -528,7 +510,7 @@ win32/%.obj: win32/%.c
 
 win64/%.obj: t240/%.c  biosig-dev.h biosig.h 
 	$(MinGW64CC) -c $(DEFINES) $(MinGW64CFLAGS) -I t240 -o "$@" "$<"
-win64/%.obj: %.c win64/io.h
+win64/%.obj: %.c
 	$(MinGW64CC) -c $(DEFINES) $(MinGW64CFLAGS) -o "$@" "$<"
 win64/%.obj: %.cpp
 	$(MinGW64CXX) -c $(DEFINES) $(MinGW64CFLAGS) -o "$@" "$<"
@@ -759,6 +741,7 @@ libbiosig2.def: $(OBJECTS) biosig2.o t240/libcnsfef.a
 ## save2gdf, pdp2gdf
 %${BINEXT}: %.c
 	$(CXX) $(DEFINES) $(CXXFLAGS) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
+	#$(CXX) $(DEFINES) $(CXXFLAGS) "$<" -L. libbiosig.a -lz -lcholmod -o "$@"
 
 pu${BINEXT} : pu.c physicalunits.o
 	$(CC) $(DEFINES) $(CFLAGS) $^  $(shell $(PKGCONF) --libs libbiosig) -o "$@"
@@ -938,7 +921,6 @@ distclean: clean
 	-$(DELETE) *.so.*
 	-$(DELETE) mex/mexSOPEN.cpp
 	-$(DELETE) libbiosig.pc
-	-$(DELETE) $(IO_H_FILE64) $(IO_H_FILE) io.h
 	-$(DELETE) t5.scp t6.scp save2gdf gztest test_scp_decode biosig_server biosig_client
 	-$(DELETE) t?.[bge]df* t?.hl7* t?.scp* t?.cfw* t?.gd1* t?.*.gz *.fil $(TEMP_DIR)t1.* $(DATA_DIR)t1.*
 	-$(DELETE) python/swig_wrap.* python/biosig.py* python/_biosig.so python/biosig2.py* python/_biosig2.so
@@ -1343,4 +1325,5 @@ testcfs : $(DATA_DIR_CFS) save2gdf
 	-./save2gdf $(VERBOSE) $(DATA_DIR_CFS)Signal/1_23456.001.cfs
 	-./save2gdf $(VERBOSE) $(DATA_DIR_CFS)Signal/1_23456.002.cfs
 	-./save2gdf $(VERBOSE) $(DATA_DIR_CFS)Signal/1_23456.LAST.cfs
+	-./save2gdf $(VERBOSE) $(DATA_DIR_CFS)/1617K2AA.DAT
 
