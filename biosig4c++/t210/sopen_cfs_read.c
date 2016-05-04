@@ -80,6 +80,10 @@ char *trim_trailing_space(uint8_t *pstr, unsigned maxLength) {
 }
 
 
+const char *Signal6_StateTable[]={
+                        "","State 1","State 2","State 3","State 4","State 5","State 6","State 7","State 8","State 9",
+		"State 10","State 11","State 12","State 13","State 14","State 15","State 16","State 17","State 18","State 19" };
+
 EXTERN_C void sopen_cfs_read(HDRTYPE* hdr) {
 /*
 	this function will be called by the function SOPEN in "biosig.c"
@@ -194,6 +198,9 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"%s(line %i) Channel #%i/%i: %i<%s>/%i<%s>\n
 			hc->LowPass  = NAN;
 			hc->HighPass = NAN;
 			hc->Notch    = NAN;
+			hc->XYZ[0]   = NAN;
+			hc->XYZ[1]   = NAN;
+			hc->XYZ[2]   = NAN;
 
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s(line %i) Channel #%i: [%s](%i/%i) <%s>/<%s> ByteSpace%i,Next#%i\n",
 			__FILE__, __LINE__, k+1, H2 + 1 + k*H2LEN, dataType, dataKind,
@@ -316,6 +323,7 @@ else if (VERBOSE_LEVEL>7)
 //		void *VarChanInfoPos = hdr->AS.Header + datapos + 30;  // unused
 		char flag_ChanInfoChanged = 0;
 		hdr->NRec = NumberOfDataSections;
+		int Signal6_CodeDescLen = 0;
 		size_t SPR = 0, SZ = 0;
 		for (m = 0; m < NumberOfDataSections; m++) {
 			int32_t tmp_event_typ=0;
@@ -348,6 +356,8 @@ else if (VERBOSE_LEVEL>7)
 
 				if ((k==1) && (typ==4) && !strcmp(desc,"State")) {
 					tmp_event_typ = i;
+					if ((Signal6_CodeDescLen < i) && (i < 256))
+						Signal6_CodeDescLen = i;
 				}
 				else if ((k==3) && (typ==6) && !strcmp(desc,"Start") && !strcmp(unit,"s"))
 					tmp_event_pos = f;
@@ -469,6 +479,20 @@ if (VERBOSE_LEVEL>7) 		{
 			SPR += xspr0;
 			SZ  += sz;
 			hdr->AS.bpb = bpb;
+		}
+		if (Signal6_CodeDescLen > 0) {
+
+			if (Signal6_CodeDescLen > 19) {
+				// 19 is sizeof Signal6_StateTable
+				fprintf(stderr, "Warning %s (line %i): Event code description exceed table\n",__func__,__LINE__);
+				Signal6_CodeDescLen = 19;
+			}
+
+			hdr->EVENT.LenCodeDesc = Signal6_CodeDescLen+1; //20 is sizeof(Signal6_StateTable)
+			hdr->EVENT.CodeDesc    = realloc(hdr->EVENT.CodeDesc, sizeof(char*) * (Signal6_CodeDescLen+1));
+			for (int k=0; k <= Signal6_CodeDescLen; k++) {
+				hdr->EVENT.CodeDesc[k] = Signal6_StateTable[k];
+			}
 		}
 
 		/*
