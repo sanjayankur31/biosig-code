@@ -358,6 +358,7 @@ SOURCES      += biosig.c \
 		t210/sopen_heka_read.c \
 		t210/sopen_igor.c \
 		t210/sopen_scp_read.c \
+		t210/sopen_tdms_read.c \
 		t210/sopen_famos_read.c \
 		t210/sopen_abf_read.c \
 		t210/sopen_alpha_read.c \
@@ -435,6 +436,13 @@ ifneq (,$(findstring WITH_FEF, $(DEFINES)))
 endif
 ifneq (,$(findstring WITH_FEF, $(MinGWDEF)))
   MinGWOBJECTS += win32/sopen_fef_read.obj
+endif
+
+ifneq (,$(findstring WITH_FEF, $(DEFINES)))
+  OBJECTS      += sopen_tdms_read.o
+endif
+ifneq (,$(findstring WITH_FEF, $(MinGWDEF)))
+  MinGWOBJECTS += win32/sopen_tdms_read.obj
 endif
 
 ifeq (,$(findstring WITHOUT_SCP_DECODE, $(DEFINES)))

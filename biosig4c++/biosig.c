@@ -127,6 +127,7 @@ int sclose_HL7aECG_write(HDRTYPE* hdr);
 void sopen_ibw_read    (HDRTYPE* hdr);
 void sopen_itx_read    (HDRTYPE* hdr);
 void sopen_smr_read    (HDRTYPE* hdr);
+void sopen_tdms_read   (HDRTYPE* hdr);
 int sopen_trc_read   (HDRTYPE* hdr);
 int sopen_unipro_read   (HDRTYPE* hdr);
 #ifdef WITH_FEF
@@ -2420,7 +2421,6 @@ enum FileFormat GetFileTypeFromString(const char *FileTypeString) {
 }
 
 
-
 /****************************************************************************/
 /**                     struct2gdfbin                                      **/
 /****************************************************************************/
@@ -2441,7 +2441,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 
  	    	hdr->HeadLen = (NS+1)*256;
 
-	     	if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw 101 %i \n", hdr->HeadLen);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i \n", __func__, __LINE__, hdr->HeadLen);
 
 	     	/****** 
 	     	 *	The size of Header 3 is computed by going through all TLV triples, 
@@ -2459,13 +2459,13 @@ void struct2gdfbin(HDRTYPE *hdr)
 	     		TagNLen[tag] += 1; 			// acounts for terminating \0
 	     		hdr->HeadLen += 4+TagNLen[tag];
 	     	}
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw101 %i %i %i\n",tag, hdr->HeadLen,TagNLen[tag]);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 	     	tag = 2;
 	     	if (hdr->AS.bci2000 != NULL) {
 	     		TagNLen[tag] = strlen(hdr->AS.bci2000)+1;
 	     		hdr->HeadLen += 4+TagNLen[tag];
 	     	}
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw101 %i %i %i\n",tag, hdr->HeadLen,TagNLen[tag]);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 	     	tag = 3;
 	     	if ((hdr->ID.Manufacturer.Name != NULL) || (hdr->ID.Manufacturer.Model != NULL) || (hdr->ID.Manufacturer.Version != NULL) || (hdr->ID.Manufacturer.SerialNumber != NULL)) {
 	     		if (hdr->ID.Manufacturer.Name == NULL) hdr->ID.Manufacturer.Name="";
@@ -2476,7 +2476,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 	     		TagNLen[tag] = strlen(hdr->ID.Manufacturer.Name)+strlen(hdr->ID.Manufacturer.Model)+strlen(hdr->ID.Manufacturer.Version)+strlen(hdr->ID.Manufacturer.SerialNumber)+4;
 	     		hdr->HeadLen += 4+TagNLen[tag];
 	     	}
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw101 %i %i %i\n",tag, hdr->HeadLen,TagNLen[tag]);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 	     	tag = 4;
 /* OBSOLETE
 	     	char FLAG_SENSOR_ORIENTATION = 0;
@@ -2490,7 +2490,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 	     		TagNLen[tag] = hdr->NS*sizeof(float)*4;
      		hdr->HeadLen += 4+TagNLen[tag];
 */
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw101 %i %i %i\n",tag, hdr->HeadLen,TagNLen[tag]);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 	     	tag = 5;
 	     	for (k=0; k<16; k++) {
 	     		if (hdr->IPaddr[k]) {
@@ -2499,14 +2499,14 @@ void struct2gdfbin(HDRTYPE *hdr)
 		     	}
 	     		hdr->HeadLen += 4+TagNLen[tag];
 	     	}
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw101 %i %i %i\n",tag, hdr->HeadLen,TagNLen[tag]);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 	     	tag = 6;
      		TagNLen[tag] = hdr->ID.Technician==NULL ? 0 :  strlen(hdr->ID.Technician);
 	     	if (TagNLen[tag]) {
 	     		TagNLen[tag]++;
 	     		hdr->HeadLen += 4+TagNLen[tag];
 	     	}
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw101 %i %i %i\n",tag, hdr->HeadLen,TagNLen[tag]);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 	     	tag = 7;
 		if (hdr->ID.Hospital!=NULL) {
 	     		TagNLen[tag] = strlen(hdr->ID.Hospital);
@@ -2515,7 +2515,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 	     			hdr->HeadLen += 4+TagNLen[tag];
 	     		}
 	     	}
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw101 %i %i %i\n",tag, hdr->HeadLen,TagNLen[tag]);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 
 #if (BIOSIG_VERSION >= 10500)
 		tag = 9;
@@ -2525,7 +2525,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 				hdr->HeadLen += 4+TagNLen[tag];
 			}
 		}
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw101 %i %i %i\n",tag, hdr->HeadLen, TagNLen[tag]);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 		tag = 10;
 		if (hdr->SCP.Section8 != NULL) {
 			TagNLen[tag] = hdr->SCP.Section8Length;  // leu32p(hdr->SCP.Section8+4);
@@ -2533,7 +2533,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 				hdr->HeadLen += 4+TagNLen[tag];
 			}
 		}
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw101 %i %i %i\n",tag, hdr->HeadLen, TagNLen[tag]);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 		tag = 11;
 		if (hdr->SCP.Section9 != NULL) {
 			TagNLen[tag] = hdr->SCP.Section9Length;  // leu32p(hdr->SCP.Section9+4);
@@ -2541,7 +2541,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 				hdr->HeadLen += 4+TagNLen[tag];
 			}
 		}
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw101 %i %i %i\n",tag, hdr->HeadLen, TagNLen[tag]);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 		tag = 12;
 		if (hdr->SCP.Section10 != NULL) {
 			TagNLen[tag] = hdr->SCP.Section10Length;  // leu32p(hdr->SCP.Section10+4);
@@ -2549,7 +2549,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 				hdr->HeadLen += 4+TagNLen[tag];
 			}
 		}
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw101 %i %i %i\n",tag, hdr->HeadLen,TagNLen[tag]);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 		tag = 13;
 		if (hdr->SCP.Section11 != NULL) {
 			TagNLen[tag] = hdr->SCP.Section11Length;  // leu32p(hdr->SCP.Section11+4);
@@ -2559,7 +2559,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 		}
 #endif
 
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw101 %i %i %i\n",tag, hdr->HeadLen,TagNLen[tag]);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 	     	/* end */
 
 		if (hdr->TYPE==GDF) {
@@ -2589,7 +2589,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 		}
 
 
-	     	if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw101 %i %i\n",hdr->HeadLen,TagNLen[1]);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, 1, hdr->HeadLen, TagNLen[1]);
 
 	    	hdr->AS.Header = (uint8_t*) realloc(hdr->AS.Header, hdr->HeadLen);
 	    	if (hdr->AS.Header == NULL) {
@@ -2671,7 +2671,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 			lef32a(hdr->ELEC.GND[2], hdr->AS.Header+232);
 		}
 
-	     	if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw109 %i %x\n",hdr->HeadLen,leu32p(hdr->AS.Header+184));
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %x\n", __func__, __LINE__, hdr->HeadLen,leu32p(hdr->AS.Header+184));
 
 
 		leu64a(hdr->NRec, hdr->AS.Header+236);
@@ -2807,10 +2807,10 @@ void struct2gdfbin(HDRTYPE *hdr)
 		     	Header2[pos]=0; 	// terminating NULL
 	     		Header2 += pos+1;
 	     	}
+		tag = 2;
 
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw tag2\n");
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 
-	     	tag = 2;
 	     	if (TagNLen[tag]>0) {
 			leu32a(tag + (TagNLen[tag]<<8), Header2); // Tag=2 & Length of Tag 2
      			strcpy((char*)(Header2+4),hdr->AS.bci2000);			/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
@@ -2818,7 +2818,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 	     	}
 	     	tag = 3;
 
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw tag3 %i %i\n",tag, TagNLen[tag]);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 
 	     	if (TagNLen[tag]>0) {
 			leu32a(tag + (TagNLen[tag]<<8), Header2); // Tag=3 & Length of Tag 3
@@ -2844,9 +2844,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 			Header2 += 4+TagNLen[tag];
 
 	     	}
-
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw tag4\n");
-
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 /*
 	     	tag = 4;
 	     	if (TagNLen[tag]>0) {
@@ -2862,9 +2860,8 @@ void struct2gdfbin(HDRTYPE *hdr)
      			Header2 += 4*sizeof(float)*hdr->NS;
 	     	}
 */
-
 	     	tag = 5;
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw tag %i\n",tag);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 	     	if (TagNLen[tag]>0) {
 			leu32a(tag + (TagNLen[tag]<<8), Header2); // Tag=5 & Length of Tag 5
      			memcpy(Header2+4,hdr->IPaddr,TagNLen[tag]);
@@ -2872,7 +2869,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 	     	}
 
 	     	tag = 6;
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw tag %i\n",tag);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 	     	if (TagNLen[tag]>0) {
 			leu32a(tag + (TagNLen[tag]<<8), Header2); // Tag=6 & Length of Tag 6
      			strcpy((char*)(Header2+4),hdr->ID.Technician);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
@@ -2880,7 +2877,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 	     	}
 
 	     	tag = 7;
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw tag %i\n",tag);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 	     	if (TagNLen[tag]>0) {
 			leu32a(tag + (TagNLen[tag]<<8), Header2); // Tag=7 & Length of Tag 7
      			strcpy((char*)(Header2+4),hdr->ID.Hospital);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
@@ -2889,35 +2886,35 @@ void struct2gdfbin(HDRTYPE *hdr)
 
 #if (BIOSIG_VERSION >= 10500)
 		tag = 9;
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw tag %i\n",tag);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 		if (TagNLen[tag]>0) {
 			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=9 & Length of Tag 9
 			memcpy((char*)(Header2+4),hdr->SCP.Section7, TagNLen[tag]);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
 			Header2 += 4+TagNLen[tag];
 		}
 		tag = 10;
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw tag %i\n",tag);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 		if (TagNLen[tag]>0) {
 			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=10 & Length of Tag 10
 			memcpy((char*)(Header2+4),hdr->SCP.Section8, TagNLen[tag]);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
 			Header2 += 4+TagNLen[tag];
 		}
 		tag = 11;
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw tag %i\n",tag);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 		if (TagNLen[tag]>0) {
 			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=11 & Length of Tag 11
 			memcpy((char*)(Header2+4),hdr->SCP.Section9, TagNLen[tag]);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
 			Header2 += 4+TagNLen[tag];
 		}
 		tag = 12;
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw tag %i\n",tag);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 		if (TagNLen[tag]>0) {
 			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=12 & Length of Tag 12
 			memcpy((char*)(Header2+4),hdr->SCP.Section10, TagNLen[tag]);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
 			Header2 += 4+TagNLen[tag];
 		}
 		tag = 13;
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"GDFw tag %i\n",tag);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, tag, hdr->HeadLen, TagNLen[tag]);
 		if (TagNLen[tag]>0) {
 			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=13 & Length of Tag 13
 			memcpy((char*)(Header2+4),hdr->SCP.Section11, TagNLen[tag]);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
@@ -10717,60 +10714,13 @@ if (VERBOSE_LEVEL>2)
 		}
 	}
 
-#if defined(WITH_TDMS)
 	else if (hdr->TYPE==TDMS) {
-		/*
-			Specification obtained from http://www.ni.com/white-paper/5696/en
-			however, there are also TDMS data out there, that is based on an XML header 
- 			and a separate binary file. This is somewhat confusing. 
-		 */ 
-		fprintf(stderr,"%s (line %i): Format TDMS is very experimental\n",__func__,__LINE__);
-
-#define kTocMetaData 		(1L<<1)
-#define kTocRawData 		(1L<<3)
-#define kTocDAQmxRawData 	(1L<<7)
-#define kTocInterleavedData 	(1L<<5) 
-#define kTocBigEndian 		(1L<<6)
-#define kTocNewObjList 		(1L<<2)
-
-		/***** Lead In *****/
-		hdr->FILE.LittleEndian     = (leu32p(hdr->AS.Header+4) & kTocBigEndian) != 0; 	// affects only raw data
-		hdr->VERSION 	           = leu32p(hdr->AS.Header+8);
-		uint64_t nextSegmentOffset = leu64p(hdr->AS.Header+12);
-		uint64_t LengthMetaData    = leu64p(hdr->AS.Header+20);
-
-		/***** Meta data *****/
-		if (LengthMetaData > 0) {
-			uint32_t k;
-			uint32_t numberOfObjects  = leu32p(hdr->AS.Header+28);
-			size_t pos = 32;
-			char *pstr=NULL;
-			for (k=0; k < numberOfObjects; k++) {
-				uint32_t plen = leu32p(hdr->AS.Header+pos);
-				uint32_t idx  = leu32p(hdr->AS.Header+pos+4+plen);
-
-				pstr  = realloc(pstr,plen+1);
-				memcpy(pstr,hdr->AS.Header+pos+4,plen);
-				pstr[plen]=0;
-
-	if (VERBOSE_LEVEL>6) fprintf(stdout,"%s (line %i): object %i path %s rawDataIdx=0x%08x\n",__func__,__LINE__, k, pstr, idx);
-
-				switch (idx) {
-				case 0xffffffff :	// no raw data
-					break;
-				case 0x00001269 :	// DAQmx Format Changing scaler
-					break;
-				case 0x00001369 :	// DAQmx Digital Line scaler
-					break;
-				case 0x00000000 : 	//
-					;
-				}
-			}
-		}
-
-		biosigERROR(hdr,B4C_FORMAT_UNSUPPORTED,"Format TDMS is currently not supported"); 
-	}
+#if defined(WITH_TDMS)
+		sopen_tdms_read(hdr);
+#else
+		biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "TDMS (NI): data format is not supported");
 #endif
+	}
 	else if (hdr->TYPE==TMS32) {
 		hdr->VERSION 	= leu16p(hdr->AS.Header+31);
 		hdr->SampleRate = leu16p(hdr->AS.Header+114);
