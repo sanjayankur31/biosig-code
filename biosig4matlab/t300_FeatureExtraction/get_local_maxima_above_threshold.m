@@ -1,36 +1,52 @@
-function pos = get_local_maxima_above_threshold(data,TH)
-% GET_LOCAL_MAXIMA_ABOVE_THRESHOLD is used to identify the events derived from the trigger trace. 
-% Its functionality resamples a function implemented in FBrain, but without looking that source code. 
+function [pos] = get_local_maxima_above_threshold(data, TH, Mode, winlen)
+% GET_LOCAL_MAXIMA_ABOVE_THRESHOLD is used to identify the events
+% derived from the trigger trace. It has been used to identify
+% miniature EPSP and IPSP events. The functionality of Mode=0 resembles a
+% function implemented in FBrain.
 %
 % pos = get_local_maxima_above_threshold(data,TH)
+% pos = get_local_maxima_above_threshold(data,TH,Mode)
 %
 % Input:
 %   data: sample vector of detection trace
-%   TH: threshold 
-% Output: 
-%   pos: time points of local maxima above threshold 
+%   TH: threshold
+%   Mode==0: [default], detects all maxima above threshold [1]
+%         1:  only one maximum above threshold within the
+%               window of size winlen is considered [2].
+%   winlen (Mode=1 only): window length (in number of samples)
+%               in which all detections collapse to one event
+%
+% Output:
+%   pos: time points of local maxima above threshold
 %
 % see also: signal_deconvolution
 %
 % Reference(s): 
-%  [1] A. Pernía-Andrade, S.P. Goswami, Y. Stickler, U. Fröbe, A. Schlögl, and P. Jonas (2012)
+% [1] A. Pernía-Andrade, S.P. Goswami, Y. Stickler, U. Fröbe, A. Schlögl, and P. Jonas (2012)
 %     A deconvolution-based method with high sensitivity and temporal resolution for 
 %     detection of spontaneous synaptic currents in vitro and in vivo.
 %     Biophysical Journal Volume 103 October 2012 1–11.
+% [2] based on requirements of Xiaomin Zhang
 
-% $Id$
-% Copyright 2011,2012 Alois Schloegl, IST Austria <alois.schloegl@ist.ac.at>
+% Copyright 2011,2012,2016 Alois Schloegl, IST Austria <alois.schloegl@ist.ac.at>
 % This is part of the BIOSIG-toolbox http://biosig.sf.net/ 
 
 
-if numel(TH)==1,
+if nargin<3,
+	Mode=0;
+end;
+if nargin<4,
+	winlen=1;
+end;
+
+if (Mode==0) && (numel(TH)==1),
 	%%% InVitro Data from Sarit
 	data = [data;+inf];
 	pos = (data(1:end-1) >= TH) & (data(1:end-1) >  data(2:end) ) & (data(1:end-1) > [+inf;data(1:end-2)]);		%% local maxima above threshold
 
 	ix  = (data(1:end-1) >= TH) & (data(1:end-1) == data(2:end) ) & (data(1:end-1) > [+inf;data(1:end-2)]);		%% local maxima above threshold
 
-elseif numel(TH)==2,
+elseif (Mode==0) && (numel(TH)==2),
 	%%% InVivo data from Alejo
 	th = repmat(NaN,size(data));
 	th(1:end/2) = TH(1);
@@ -40,6 +56,33 @@ elseif numel(TH)==2,
 	pos = (data(1:end-1) >= th) & (data(1:end-1) >  data(2:end) ) & (data(1:end-1) > [+inf;data(1:end-2)]);		%% local maxima above threshold
 
 	ix  = (data(1:end-1) >= th) & (data(1:end-1) == data(2:end) ) & (data(1:end-1) > [+inf;data(1:end-2)]);		%% local maxima above threshold
+else
+	% approach Mode==1
+	% only one maximum above threshold within the window of size winlen is considered.
+	dix    = diff([0; data>TH; 0]);
+	onset  = find(dix>0);
+	offset = find(dix<0);
+
+	pos = [];
+	stop= 0;
+	while 1,
+		k     = find(onset > stop, 1, 'first');
+		if isempty(k) break; end
+		start = onset(k);
+		if ~any(start < onset) break; end
+
+		ix = find((start < offset) & (offset < (start+winlen)));
+		if ~isempty(ix)
+			stop = offset(ix(end))-1;
+		else
+			stop = offset(k);
+		end;
+
+		[tmp,ix]=max(data(start:stop));
+
+		pos(end+1,1)=start+ix;
+	end;
+	return;
 end 
 
 k   = 0; 
