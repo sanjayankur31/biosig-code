@@ -12671,7 +12671,7 @@ size_t sread(biosig_data_type* data, size_t start, size_t length, HDRTYPE* hdr) 
 	if (VERBOSE_LEVEL>6)
 		fprintf(stdout,"%s( %p, %i, %i, %s ) MODE=%i bpb=%i\n",__func__,data, (int)start, (int)length, hdr->FileName, hdr->FILE.OPEN, (int)hdr->AS.bpb);
 
-#ifndef ONLYGDF
+#if !defined(ONLYGDF) && defined(WITH_ATF)
 	if (hdr->TYPE == ATF) {
 		sread_atf(hdr);
 		count = hdr->NRec;

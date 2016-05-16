@@ -41,6 +41,7 @@
 	also HDR.NRec is defined here
 */
 
+#if defined(WITH_ATF)
 EXTERN_C void sread_atf(HDRTYPE* hdr) {
 
 	if (VERBOSE_LEVEL>6) fprintf(stdout,"SREAD ATF [%i,%i]\n",(unsigned)hdr->NRec, (unsigned)hdr->SPR);
@@ -89,6 +90,7 @@ EXTERN_C void sread_atf(HDRTYPE* hdr) {
 	hdr->AS.first  = 0;
 	hdr->AS.length = hdr->NRec;
 }
+#endif
 
 EXTERN_C void sopen_abf_read(HDRTYPE* hdr) {	
 /*
