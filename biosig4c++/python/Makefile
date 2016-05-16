@@ -26,5 +26,7 @@ test:
 	make -C .. fetchdata
 	## need to run from different directory, because
 	(cd .. && PYTHONPATH=/usr/local/lib/python$(PYVER)/dist-packages/ python -c 'print __import__("biosig").header("data/Newtest17-256.bdf")')
+	(cd .. && PYTHONPATH=/usr/local/lib/python$(PYVER)/dist-packages/ python -c 'print __import__("biosig").data("data/Newtest17-256.bdf")')
+	(cd .. && PYTHONPATH=/usr/local/lib/python$(PYVER)/dist-packages/ python$(PYVER) < python/demo2.py)
 
 
