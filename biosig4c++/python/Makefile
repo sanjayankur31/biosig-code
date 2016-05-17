@@ -6,7 +6,8 @@
 ###
 ##############################################################
 
-PYVER:=$(shell python -c 'print __import__("sys").version.split(" ")[0][:3]')
+PYTHON ?= python
+PYVER  := $(shell $(PYTHON) -c "import sys; print(sys.version[:3])")
 
 
 # old style, using swig interface
@@ -16,17 +17,17 @@ biosig4python:
 
 # new interface, using so-called "extension modules", this still experimental
 module:
-	python setup.py build
+	$(PYTHON) setup.py build
 
 install: module
-	python setup.py install
+	$(PYTHON) setup.py install
 
 test:
 	## get ../data/Newtest17-256.bdf
 	make -C .. fetchdata
 	## need to run from different directory, because
-	(cd .. && PYTHONPATH=/usr/local/lib/python$(PYVER)/dist-packages/ python -c 'print __import__("biosig").header("data/Newtest17-256.bdf")')
-	(cd .. && PYTHONPATH=/usr/local/lib/python$(PYVER)/dist-packages/ python -c 'print __import__("biosig").data("data/Newtest17-256.bdf")')
+	(cd .. && PYTHONPATH=/usr/local/lib/python$(PYVER)/dist-packages/ $(PYTHON) -c 'import biosig; print biosig.header("data/Newtest17-256.bdf")')
+	(cd .. && PYTHONPATH=/usr/local/lib/python$(PYVER)/dist-packages/ $(PYTHON) -c 'import biosig; print biosig.data("data/Newtest17-256.bdf")')
 	(cd .. && PYTHONPATH=/usr/local/lib/python$(PYVER)/dist-packages/ python$(PYVER) < python/demo2.py)
 
 

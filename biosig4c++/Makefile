@@ -64,7 +64,7 @@ LIBEXT        = a
 
 ### User-specified options: its likely you want to change this
 # settings for cross compiler: tested with MXE and mce-w64 with make suitesparse zlib qt ; 
-CROSS   = $(HOME)/src/mxe/usr/bin/i686-w64-mingw32.static
+CROSS   = $(HOME)/src/mxe.github.schloegl/usr/bin/i686-w64-mingw32.static
 ## local MXE
 ifeq "$(wildcard $(CROSS)-gcc)" ""
 CROSS   = $(HOME)/src/mxe.master/usr/bin/i686-w64-mingw32.static
@@ -76,7 +76,10 @@ ifeq "$(wildcard $(CROSS)-gcc)" ""
 CROSS         = /usr/local/src/mxe/usr/bin/i686-w64-mingw32.static
 endif
 
-CROSS64       = $(HOME)/src/mxe/usr/bin/x86_64-w64-mingw32.static
+CROSS64       = $(HOME)/src/mxe.github.schloegl/usr/bin/x86_64-w64-mingw32.static
+ifeq "$(wildcard $(CROSS64)-gcc)" ""
+CROSS64       = $(HOME)/src/mxe.master/usr/bin/x86_64-w64-mingw32.static
+endif
 ifeq "$(wildcard $(CROSS64)-gcc)" ""
 CROSS64       = $(HOME)/src/mxe.master/usr/bin/x86_64-w64-mingw32.static
 endif
@@ -211,7 +214,7 @@ DEFINES      += -D=WITH_FEF
 #DEFINES      += -D=WITH_GDCM
 #DEFINES      += -D=WITH_GSL
 #DEFINES      += -D=WITH_EEPROBE
-DEFINES      += -D=WITH_TDMS
+#DEFINES      += -D=WITH_TDMS
 DEFINES      += -D=WITH_ATF
 #DEFINES      += -D=WITH_AVI
 #DEFINES      += -D=WITH_RIFF
@@ -304,7 +307,7 @@ OCT           := mkoctfile$(OCTAVE_VERSION)
 ##########################################################
 ## set variables for Python
 SWIG           := swig
-PYTHON         := python
+PYTHON         ?= python
 PYTHONVER      := $(shell $(PYTHON) -c "import sys; print(sys.version[:3])")
 NUMPY_INC      := $(shell $(PYTHON) -c "import numpy.distutils.misc_util as mu; print(' -I'.join(mu.get_numpy_include_dirs()))")
 PYTHON_INCPATH := /usr/include/python$(PYTHONVER)/
@@ -607,6 +610,8 @@ win64/sigviewer.exe: win64/libbiosig.a win64/libbiosig.dll
 #	other language bindings (on Linux)
 #############################################################
 
+ifdef SWIG_BIOSIG4PYTHON
+## this is the deprecated, swig-based interface definition
 biosig4python : python/_biosig.so python/biosig.py python/_biosig2.so python/biosig2.py
 
 python/biosig.py python/swig_wrap.cxx: python/biosig.i
@@ -620,9 +625,17 @@ python/_biosig2.so : python/biosig2_wrap.cxx  libbiosig2.$(LIBEXT)
 	$(CXX) -c $(DEFINES) $(CXXFLAGS) -I$(PYTHON_INCPATH) -I$(NUMPY_INC) python/biosig2_wrap.cxx -o python/biosig2_wrap.o
 	$(CXX) -shared python/biosig2_wrap.o $(LFLAGS) $(LIBS) -lbiosig2 -l$(PYTHON_LIB) -o python/_biosig2.so
 
-
 python: libbiosig.$(LIBEXT) libbiosig2.$(LIBEXT) python/biosig.i python/biosig2.i
 	$(MAKE) -C python 
+else
+## biosig4python based on module extensions
+python:
+	(cd  python && $(PYTHON) setup.py build)
+
+install_python: libbiosig.$(LIBEXT) libbiosig2.$(LIBEXT)
+	(cd  python && $(PYTHON) setup.py install)
+
+endif
 
 
 java: libbiosig.$(LIBEXT) java/biosig.i
@@ -1300,9 +1313,12 @@ testbdf : $(DATA_DIR)Newtest17-2048.bdf
 	./save2gdf -V4 "$<" | awk '/(NoChannels|NRec|Fs|Events\/Annotations):/ { print $$2 } '
 
 testpybdf : $(DATA_DIR)Newtest17-2048.bdf
-	python python/demo.py $(TEMP_DIR)*-256.bdf
-	python python/example.py $(TEMP_DIR)*-256.bdf 256 && \
-	python python/example.py $(TEMP_DIR)*-2048.bdf 2048
+	$(PYTHON) < python/demo2.py
+ifdef SWIG_BIOSIG4PYTHON
+	$(PYTHON) python/demo.py $(TEMP_DIR)*-256.bdf
+	$(PYTHON) python/example.py $(TEMP_DIR)*-256.bdf 256 && \
+	$(PYTHON) python/example.py $(TEMP_DIR)*-2048.bdf 2048
+endif
 
 $(DATA_DIR)BDFtestfiles.zip :
 	wget -P$(DATA_DIR) http://www.biosemi.com/download/BDFtestfiles.zip
