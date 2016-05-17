@@ -4111,9 +4111,15 @@ else if (!strncmp(MODE,"r",1)) {
 		typeof(hdr->NS)	AnnotationChannel = 0;
 		typeof(hdr->NS)	StatusChannel = 0;
 
-    		strncpy(hdr->Patient.Id,Header1+8,min(MAX_LENGTH_PID,80));
-    		memcpy(hdr->ID.Recording,Header1+88,min(80,MAX_LENGTH_RID));
-		hdr->ID.Recording[MAX_LENGTH_RID]=0;
+		int last = min(MAX_LENGTH_PID, 80);
+		strncpy(hdr->Patient.Id, Header1+8, last);
+		while ((0 <= last) && (isspace(hdr->Patient.Id[--last])));
+		hdr->Patient.Id[last+1]=0;
+
+		last = min(MAX_LENGTH_RID, 80);
+		memcpy(hdr->ID.Recording, Header1+88, last);
+		while ((0 <= last) && (isspace(hdr->ID.Recording[--last])));
+		hdr->ID.Recording[last+1]=0;
 
 		if (VERBOSE_LEVEL>8) fprintf(stdout,"[EDF 211] #=%li\nT0=<%16s>",iftell(hdr),Header1+168);
 
@@ -4268,30 +4274,21 @@ else if (!strncmp(MODE,"r",1)) {
 				fprintf(stdout,"[EDF 213] #%i/%i\n",(int)k,hdr->NS);
 
 			hc->LeadIdCode = 0; 
-			strncpy(hc->Label,Header2 + 16*k,min(MAX_LENGTH_LABEL,16));
-			hc->Label[min(MAX_LENGTH_LABEL,16)]=0;
-			int k1;
-			for (k1=strlen(hc->Label)-1; isspace(hc->Label[k1]) && k1; k1--)
-				hc->Label[k1] = 0;	// deblank
+			last = min(MAX_LENGTH_LABEL, 16);
+			strncpy(hc->Label, Header2 + 16*k, last);
+			while ((0 <= last) && (isspace(hc->Label[--last]))) ;
+			hc->Label[last+1]=0;
 
-			strncpy(hc->Transducer, Header2+80*k+16*hdr->NS, min(80,MAX_LENGTH_TRANSDUCER));
-			for (k1=strlen(hc->Transducer)-1; isspace(hc->Transducer[k1]) && k1; k1--)
-				hc->Transducer[k1]='\0'; 	// deblank
-
-			if (VERBOSE_LEVEL>7)
-				fprintf(stdout,"[EDF 214] #%i/%i\n",(int)k,hdr->NS);
+			last = min(80,MAX_LENGTH_TRANSDUCER);
+			strncpy(hc->Transducer, Header2+80*k+16*hdr->NS, last);
+			while ((0 <= last) && (isspace(hc->Transducer[--last])));
+			hc->Transducer[last+1]=0;
 
 			// PhysDim -> PhysDimCode
-			memcpy(p,Header2 + 8*k + 96*hdr->NS,8);
-
-			if (VERBOSE_LEVEL>7)
-				fprintf(stdout,"[EDF 215-] #%i/%i\n",(int)k,hdr->NS);
-
-			p[8] = 0; // remove trailing blanks
-			for (k1=7; (k1>0) && isspace(p[k1]); p[k1--]=0) {};
-
-			if (VERBOSE_LEVEL>7)
-				fprintf(stdout,"[EDF 215] #%i/%i\n",(int)k,hdr->NS);
+			last = 8;
+			memcpy(p,Header2 + 8*k + 96*hdr->NS, last);
+			while ((0 <= last) && (isspace(p[--last])));
+			p[last+1]=0;
 
 			hc->PhysDimCode = PhysDimCode(p);
 			tmp[8] = 0;
@@ -4331,6 +4328,8 @@ else if (!strncmp(MODE,"r",1)) {
 			hc->LowPass  = NAN;
 			hc->HighPass = NAN;
 			hc->Notch    = NAN;
+			hc->TOffset  = NAN;
+			hc->Impedance = NAN;
 
 			// decode filter information into hdr->Filter.{Lowpass, Highpass, Notch}
 			uint8_t kk; 			
