@@ -81,5 +81,6 @@ print Dumper($HDR);
 
 ## generate JSON_BINARY_TEMPLATE
 my $FHIR_JSON_BINARY_TEMPLATE = biosig_fhir_json($filename);
+print $FHIR_JSON_BINARY_TEMPLATE;
 
 

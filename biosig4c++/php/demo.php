@@ -29,13 +29,18 @@
 
 
 
+function ext() {
+	if (preg_match("/windows/i",php_uname())) return ".exe";
+
+	return;
+}
 
 /*
 	biosig_fhir_base64:
 		encodes a biosig file as a base64-encoded GDFv3.0 stream
 */
 function biosig_fhir_base64($filename) {
-	$h = popen('biosig_fhir',$EXT,' -base64 "' . $filename.'"', 'rb');
+	$h = popen('biosig_fhir' . ext() . ' -base64 "' . $filename.'"', 'rb');
 	$jsonhdr = stream_get_contents($h);
 	fclose($h);
 	return $jsonhdr;
@@ -46,7 +51,7 @@ function biosig_fhir_base64($filename) {
 		makes a fhir_json_binary template
 */
 function biosig_fhir_json($filename) {
-	$h = popen('biosig_fhir',$EXT,' -json "' . $filename.'"', 'rb');
+	$h = popen('biosig_fhir' . ext() . ' -json "' . $filename.'"', 'rb');
 	$jsonhdr = stream_get_contents($h);
 	fclose($h);
 	return $jsonhdr;
@@ -57,7 +62,7 @@ function biosig_fhir_json($filename) {
 		makes a fhir_xml_binary template
 */
 function biosig_fhir_xml($filename) {
-	$h = popen('biosig_fhir',$EXT,' -xml "' . $filename.'"', 'rb');
+	$h = popen('biosig_fhir' . ext() . ' -xml "' . $filename.'"', 'rb');
 	$jsonhdr = stream_get_contents($h);
 	fclose($h);
 	return $jsonhdr;
@@ -67,7 +72,7 @@ function biosig_fhir_xml($filename) {
         get header (meta) information
  */
 function biosig_json_header($filename) {
-	$h = popen('save2gdf',$EXT,' -JSON "' . $filename.'"', 'rb');
+	$h = popen('save2gdf' . ext() . ' -JSON "' . $filename.'"', 'rb');
 	$jsonhdr = stream_get_contents($h);
 	fclose($h);
 	return $jsonhdr;
@@ -88,7 +93,12 @@ $HDR = biosig_header($filename);
 var_dump($HDR);
 
 ## extract fhir binary template
-$BIN = biosig_fhir($filename);
+$BIN = biosig_fhir_base64($filename);
+echo $BIN;
+print "\n\n";
+
+## extract fhir binary template
+$BIN = biosig_fhir_json($filename);
 echo $BIN;
 print "\n\n";
 ?>
