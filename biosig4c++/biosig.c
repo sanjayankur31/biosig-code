@@ -12456,7 +12456,8 @@ void collapse_rawdata(HDRTYPE *hdr, void *buf, size_t count) {
 		void *src  = buf + k4*hdr->AS.bpb;
 		void *dest = buf + k4*bpb;
 		for (k1=0; k1 < num3Segments; k1+=3)
-			memcpy(dest + idxList[k1], src + idxList[k1+1], idxList[k1+2]);
+			if ((dest + idxList[k1]) != (src + idxList[k1+1]))
+				memcpy(dest + idxList[k1], src + idxList[k1+1], idxList[k1+2]);
 	}
 
 	if (buf == hdr->AS.rawdata) {

@@ -65,8 +65,8 @@ int biosig_hdr2gdf_base64(HDRTYPE *hdr, FILE *fid) {
 
 	// write data block	
 	size_t count = 0;
-	size_t bpb = bpb8_collapsed_rawdata(hdr);
-	size_t blks= buflen/bpb;
+	size_t bpb = bpb8_collapsed_rawdata(hdr)>>3;
+	size_t blks= buflen/hdr->AS.bpb;
 	for (size_t nrec=0; nrec < hdr->NRec; nrec+=blks) {
 		count = sread_raw(nrec, min(blks, hdr->NRec-nrec), hdr, 1, mem, blks*hdr->AS.bpb);
 		c = base64_encode_block(mem, bpb, buf, &B64STATE);
