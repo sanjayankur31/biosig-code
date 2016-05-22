@@ -19,6 +19,11 @@ you might need to recompile your applications afterwards.
    MATLABDIR=/usr/local/MATLAB/R20##x/bin make mex4m
    make mex4o
 
+# Compiling save2gdf and biosig_fhir
+   make tools
+   sudo make install_tools
+
+
 
 General remarks:
 ----------------
