@@ -4,7 +4,7 @@ function HDR = edfannot2evt(HDR)
 %  
 % see also: SLOAD, SOPEN
 
-%	Copyright (C) 2012,2014 by Alois Schloegl <alois.schloegl@gmail.com>
+%	Copyright (C) 2012,2014,2016 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 %
 % This program is free software; you can redistribute it and/or
@@ -23,9 +23,7 @@ function HDR = edfannot2evt(HDR)
 
 if isfield(HDR,'EDFplus') && isfield(HDR.EDFplus,'ANNONS'),
 
-
-	warning('EDFANNOT2EVT.M is broken - use mexSLOAD/mexSOPEN to read the EDF annotation channel or convert the data with save2gdf from biosig4c++/libbiosig into GDF');
-	return;
+	warning('EDFANNOT2EVT.M is under construction and not well tested - You really should check the content of the event table!');
 
 	sz = size(HDR.EDFplus.ANNONS);
 	N = 0; 
@@ -61,9 +59,9 @@ if isfield(HDR,'EDFplus') && isfield(HDR.EDFplus,'ANNONS'),
 				else
 					DUR(N,1)  = 0;
 				end;
-				POS(N,1)  = HDR.SPR * (k-1) + 1 + (t0(1)-tt0) * HDR.EVENT.SampleRate;  
-				TimeStamp(N,1) = datenum(HDR.T0) + t0(1)/(24*60); 	
-			end;  
+				POS(N,1)  = 1 + round((t0(1)-tt0) * HDR.EVENT.SampleRate);
+				TimeStamp(N,1) = datenum(HDR.T0) + (t0(1)-tt0)/(24*60*60);
+			end;
 		end; 
 	end; 
 	ix = find(TYP < 256);

@@ -4443,7 +4443,7 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"%s(line %i): EDF+ line<%s>\n",__FILE__,__LI
 						case 0:
 							// EDF+C
 							FreeTextEvent(hdr, hdr->EVENT.N, s2);   // set hdr->EVENT.TYP
-							hdr->EVENT.POS[hdr->EVENT.N] = t * hdr->EVENT.SampleRate;
+							hdr->EVENT.POS[hdr->EVENT.N] = round(t * hdr->EVENT.SampleRate);
 							break;
 						case 1:
 							// EDF+D: marker for beginning of segment
@@ -4455,7 +4455,7 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"%s(line %i): EDF+ line<%s>\n",__FILE__,__LI
 						default:
 							// EDF+D: real annotation
 							FreeTextEvent(hdr, hdr->EVENT.N, s2);   // set hdr->EVENT.TYP
-							hdr->EVENT.POS[hdr->EVENT.N] = k3 * hdr->SPR + (t-timeKeeping) * hdr->EVENT.SampleRate;
+							hdr->EVENT.POS[hdr->EVENT.N] = k3 * hdr->SPR + round((t-timeKeeping) * hdr->EVENT.SampleRate);
 							break;
 						}
 
