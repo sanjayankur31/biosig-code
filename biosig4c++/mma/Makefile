@@ -1,6 +1,6 @@
 ####### Makefile to compile sload.exe for loading data supported by libbiosig into Mathematica
 ###
-###  Copyright (C) 2010,2011,2012,2013,2015 Alois Schloegl, IST Austria <alois.schloegl@ist.ac.at>
+###  Copyright (C) 2010,2011,2012,2013,2015,2016 Alois Schloegl <alois.schloegl@gmail.com>
 ###  This file is part of the "BioSig for C/C++" repository
 ###  (biosig4c++) at http://biosig.sf.net/
 ###
@@ -25,10 +25,11 @@ SYS       = MacOSX-x86-64
 LDFLAGS  += -demangle -dynamic -arch x86_64 -macosx_version_min 10.10.0
 LDFLAGS  += -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration
 else
-ifeq ($(wildcard $(MLINKDIR)/Executables/mathematica),)
-    MLINKDIR := $(dir $(shell readlink -f $(shell which mathematica) ) )..
-endif
+MLINKDIR := $(dir $(shell readlink -f $(shell which mathematica) ) )..
+SYS 	  = $(notdir $(shell ls -1d $(MLINKDIR)/SystemFiles/Links/MathLink/DeveloperKit/*))
+ifneq (1,$(words ${SYS}))
 SYS       = Linux-x86-64# Set this value with the result of evaluating $SystemID
+endif
 endif
 
 # automated detection of most recent MLINTERFACE, without starting mathematica
@@ -44,21 +45,17 @@ SYSwin64     = Windows-x86-64# Set this value with the result of evaluating $Sys
 MLLIBwin64   = ml64i3m# Set this to ML64i3 if using a 64-bit system
 ###########################################
 
-ifneq ($(wildcard ${MLINKDIR}/SystemFiles/Libraries/${SYS}/libuuid*),)
-LIBDIR   += -L${MLINKDIR}/SystemFiles/Libraries/$(SYS)
-EXTRALIBS += -luuid
-endif
 CADDSDIR  = ${MLINKDIR}/SystemFiles/Links/MathLink/DeveloperKit/${SYS}/CompilerAdditions
 INCDIR    = -I${CADDSDIR} -I${MLINKDIR}/SystemFiles/IncludeFiles/C/
 LIBDIR   += -L${CADDSDIR}
 
-EXTRALIBS += -lm -ldl # Set these with appropriate libs for your system.
+EXTRALIBS += -lm -ldl -luuid # Set these with appropriate libs for your system.
 
 ifeq (Darwin,$(shell uname))
 MLLIB   = MLi${MLIVER} # ML32i3 # Set this to ML64i3 if using a 64-bit system
 SED	= gsed
 else
-MLLIB   = ML64i${MLIVER} # ML32i3 # Set this to ML64i3 if using a 64-bit system
+MLLIB   = ML$(shell getconf LONG_BIT)i${MLIVER} # ML32i3 # Set this to ML64i3 if using a 64-bit system
 EXTRALIBS += -lrt
 LD 	= ${CC}
 SED	= sed
