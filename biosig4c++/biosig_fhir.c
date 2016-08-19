@@ -191,6 +191,9 @@ int main(int argc, char **argv) {
 		else if (!strcasecmp(*opt, "-xml")) {
 			flag_output_format = XML;
 		}
+		else if (!strncmp(*opt, "-V", 2)) {
+			VERBOSE_LEVEL = (*opt)[2]-'0';
+		}
 		else if (!strcasecmp(*opt, "-h") || !strcasecmp(*opt, "--help")) {
 			fprintf(stderr,help, argv[0], argv[0], get_biosig_version());
 		}

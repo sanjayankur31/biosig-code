@@ -583,7 +583,7 @@ size_t	sread_raw(size_t START, size_t LEN, HDRTYPE* hdr, char flag, void *buf, s
 	hdr->AS.rawdata and the data is copied into  hdr->AS.rawdata, and LEN*hdr->AS.bpb bytes
 	are read and stored.
 
-	If buf is points to some memory location of size bufsize, the data is stored
+	If buf points to some memory location of size bufsize, the data is stored
 	in buf, no reallocation of memory is possible, and only the
 	minimum(bufsize, LEN*hdr->AS.bpb) is stored.
 
