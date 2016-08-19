@@ -57,8 +57,10 @@ if ~BIOSIG_GLOBAL.ISLOADED;
                		DecimalFactor.Cal(N1,1) = n(1);
                		s = s(~~v);
                		if any(v)
-                      		DecimalFactor.Name(N1,1) = s(1);
-                      		DecimalFactor.Prefix(N1,1) = s(2);
+				DecimalFactor.Name(N1,1) = s(1);
+				DecimalFactor.Prefix(N1,1) = s(2);
+			else
+				DecimalFactor.Prefix(N1,1) = {''};
                        	end;
                 end;	
                 line = fgetl(fid);

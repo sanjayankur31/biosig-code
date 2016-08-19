@@ -560,7 +560,7 @@ end;
                         if (HDR.NS<1),	% hack for a problem with Matlab 7.1.0.183 (R14) Service Pack 3
 
 			elseif (HDR.VERSION < 1.9),
-	                        HDR.PhysDim    =  char(fread(HDR.FILE.FID,[ 8,HDR.NS],'uint8')');
+	                        HDR.PhysDim    =       fread(HDR.FILE.FID,[ 8,HDR.NS],'uint8=>char')';
 	                        HDR.PhysMin    =       fread(HDR.FILE.FID,[1,HDR.NS],'float64');	
 	                        HDR.PhysMax    =       fread(HDR.FILE.FID,[1,HDR.NS],'float64');	
 	                        tmp            =       fread(HDR.FILE.FID,[1,2*HDR.NS],'int32');
@@ -568,7 +568,7 @@ end;
 	                        tmp            =       fread(HDR.FILE.FID,[1,2*HDR.NS],'int32');
 	                        HDR.DigMax     =  tmp((1:HDR.NS)*2-1);
 
-                                HDR.PreFilt    =  char(fread(HDR.FILE.FID,[80,HDR.NS],'uint8')');	%	
+                                HDR.PreFilt    =       fread(HDR.FILE.FID,[80,HDR.NS],'uint8=>char')';	%
                                 HDR.AS.SPR     =       fread(HDR.FILE.FID,[ 1,HDR.NS],'uint32')';	%	samples per data record
                                 HDR.GDFTYP     =       fread(HDR.FILE.FID,[ 1,HDR.NS],'uint32');	%	datatype
 
@@ -1403,7 +1403,7 @@ end;
                                 end;
                         end;
                         if ~isfield(HDR,'PreFilt')
-                                HDR.PreFilt = char(32+zeros(HDR.NS,80));
+                                HDR.PreFilt = repmat(' ',HDR.NS,80);
                                 if isfield(HDR,'Filter'),
                                         if isfield(HDR.Filter,'LowPass') && isfield(HDR.Filter,'HighPass') && isfield(HDR.Filter,'Notch'),
                                                 if any(length(HDR.Filter.LowPass) == [1,HDR.NS]) && any(length(HDR.Filter.HighPass) == [1,HDR.NS]) && any(length(HDR.Filter.Notch) == [1,HDR.NS])
@@ -1422,7 +1422,7 @@ end;
                                 HDR.PreFilt = repmat(HDR.PreFilt,HDR.NS,1);
                         end;
                         tmp = min(80,size(HDR.PreFilt,2));
-                        HDR.PreFilt = [HDR.PreFilt(1:HDR.NS,1:tmp), char(32+zeros(HDR.NS,80-tmp))];
+                        HDR.PreFilt = [HDR.PreFilt(1:HDR.NS,1:tmp), repmat(' ',HDR.NS,80-tmp)];
 
                         if isfield(HDR,'PhysDimCode')
 				HDR.PhysDimCode = HDR.PhysDimCode(1:HDR.NS);
