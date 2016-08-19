@@ -67,8 +67,8 @@ FLAG_SEASON2_ARTERAWDATA = 0;
 if (HDR.NS==128)
 	tmp = strvcat(HDR.Label);
 	tmp(55:56,4) = 'f';
-	FLAG_SEASON2_ARTERAWDATA = isequal(tmp(1:64,1:end-1),tmp(65:128,2:end)) & all(tmp(65:128,1)=='x');
-	FLAG_SEASON2_ARTERAWDATA = FLAG_SEASON2_ARTERAWDATA & strncmp(HDR.FILE.Name,'arte',4);
+	FLAG_SEASON2_ARTERAWDATA = isequal(tmp(1:64,1:end-1),tmp(65:128,2:end)) && all(tmp(65:128,1)=='x');
+	FLAG_SEASON2_ARTERAWDATA = FLAG_SEASON2_ARTERAWDATA && strncmp(HDR.FILE.Name,'arte',4);
 end;
 FLAG_ARTERAWDATA = strncmp(HDR.FILE.Name,'arte',4);
 
@@ -193,7 +193,7 @@ for k1 = 1:length(HDR.EVENT.POS)
 
         elseif ~isempty(tmp)
         	[n,v,s] = str2double(tmp(2:end));
-        	if (length(n)==1) & (~v)
+		if (length(n)==1) && (~v)
         		HDR.EVENT.TYP(k1) = n; 
        		end; 
         end; 	
@@ -226,7 +226,7 @@ if isfield(HDR.EVENT,'POS');
        	if ~isempty(ix2),
 		HDR.EVENT.TYP(ix2,1) = HDR.EVENT.TYP(ix2-1) + hex2dec('8000'); 
 	end; 	
-	ix0 = find((HDR.EVENT.TYP>0)&(HDR.EVENT.TYP<10));
+	ix0 = find((HDR.EVENT.TYP>0) && (HDR.EVENT.TYP<10));
 
 	HDR.TRIG = HDR.EVENT.POS(ix0); 
 	HDR.Classlabel = HDR.EVENT.TYP(ix0); 
@@ -237,7 +237,7 @@ if any(HDR.EVENT.DUR~=1)
 end; 
 
 % convert from Type1 into Type3 table.
-if 1, % ~isfield(HDR.EVENT,'CHN') & ~isfield(HDR.EVENT,'DUR'),  
+if 1, % ~isfield(HDR.EVENT,'CHN') && ~isfield(HDR.EVENT,'DUR'),
 	% HDR.EVENT.CHN = zeros(size(HDR.EVENT.POS)); 
 	HDR.EVENT.DUR = zeros(size(HDR.EVENT.POS)); 
 
