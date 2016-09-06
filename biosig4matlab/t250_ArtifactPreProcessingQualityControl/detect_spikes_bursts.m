@@ -160,10 +160,10 @@ Fs = 20000; 	% assumed samplerate
 %	load data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	if ischar(fn) && exist(fn,'file') && any(size(chan)==1)
-		winlen = Fs*.1;
+		winlen = ceil(Fs*.1);
 		[s, HDR] = sload(fn, 0, 'NUMBER_OF_NAN_IN_BREAK', winlen);
 		if Fs < HDR.SampleRate,
-			winlen   = HDR.SampleRate * .1;
+			winlen   = ceil(HDR.SampleRate * .1);
 			[s, HDR] = sload(fn, 0, 'NUMBER_OF_NAN_IN_BREAK', winlen);
 		end;
 		if chan==0, chan = 1:HDR.NS; end;
