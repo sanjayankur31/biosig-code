@@ -47,10 +47,9 @@ function [o,count,SSQ] = sumskipnan(x, DIM, W)
 %    You should have received a copy of the GNU General Public License
 %    along with this program; If not, see <http://www.gnu.org/licenses/>.
 
-%	$Id: sumskipnan.m 5927 2009-06-10 12:27:10Z schloegl $
-%    	Copyright (C) 2000-2005,2009 by Alois Schloegl <a.schloegl@ieee.org>	
-%       This function is part of the NaN-toolbox
-%       http://www.dpmi.tu-graz.ac.at/~schloegl/matlab/NaN/
+%   Copyright (C) 2000-2005,2009,2011 by Alois Schloegl <alois.schloegl@gmail.com>
+%   This function is part of the NaN-toolbox
+%   http://pub.ist.ac.at/~schloegl/matlab/NaN/
 
 
 global FLAG_NANS_OCCURED;
@@ -78,15 +77,15 @@ end;
 %       }; 
 
 if isempty(DIM),
-        DIM = min(find(size(x) > 1));
+        DIM = find(size(x)>1,1);
         if isempty(DIM), DIM = 1; end;
 end
-if (DIM<1) DIM = 1; end; %% Hack, because min([])=0 for FreeMat v3.5
+if (DIM<1), DIM = 1; end; %% Hack, because min([])=0 for FreeMat v3.5
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % non-float data 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if  (isempty(W) && (~(isa(x,'float') || isa(x,'double'))))  % || ~flag_implicit_skip_nan(), %%% skip always NaN's
+if  (isempty(W) && (~(isa(x,'float') || isa(x,'double')))) || ~flag_implicit_skip_nan(), %%% skip always NaN's
 	if ~isempty(W)
 		error('SUMSKIPNAN: weighted sum of integers not supported, yet');
 	end; 
@@ -105,9 +104,7 @@ if  (isempty(W) && (~(isa(x,'float') || isa(x,'double'))))  % || ~flag_implicit_
 	return; 
 end; 	
 
-if (length(size(x))<DIM)
-	error('SUMSKIPNAN: DIM argument larger than number of dimensions of x');
-elseif ~isempty(W) && (size(x,DIM)~=numel(W))
+if ~isempty(W) && (size(x,DIM)~=numel(W))
 	error('SUMSKIPNAN: size of weight vector does not match size(x,DIM)');
 end; 
 
@@ -121,6 +118,10 @@ x = double(x);
 try
 	
 	%% using sumskipnan_mex.mex
+	if issparse(x),
+		fprintf(2,'sumskipnan: sparse matrix converted to full matrix\n');
+		x = full(x);
+	end;
 
 	%% !!! hack: FLAG_NANS_OCCURED is an output argument, reserve memory !!!
 	if isempty(FLAG_NANS_OCCURED),
@@ -183,3 +184,8 @@ if nargout>2,
         SSQ = sum(x,DIM);
 end;
 
+%!assert(sumskipnan([1,2],1),[1,2])
+%!assert(sumskipnan([1,NaN],2),1)
+%!assert(sumskipnan([1,NaN],2),1)
+%!assert(sumskipnan([nan,1,4,5]),10)
+%!assert(sumskipnan([nan,1,4,5]',1,[3;2;1;0]),6)

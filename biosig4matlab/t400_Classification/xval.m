@@ -84,7 +84,7 @@ function [R,CC]=xval(D,classlabel,MODE,arg4)
 % 
 % You should have received a copy of the GNU General Public License
 % along with this program; if not, write to the Free Software
-% Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+% Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 if (nargin<3) || isempty(MODE),
 	MODE = 'LDA';
@@ -102,7 +102,11 @@ NG = [];
 W = [];
 
 if iscell(classlabel)
-        [b,i,C] = unique(classlabel{:,1});
+        % hack to handle NaN's in unique(...)
+        c  = classlabel{:,1};
+        ix = find(~isnan(c));
+        C  = c;
+        [b,i,C(ix)] = unique(c(ix));
         if size(classlabel,2)>1,
                 W = [classlabel{:,2}]; 
         end; 
@@ -126,8 +130,6 @@ if sz(1)~=size(C,1),
         error('length of data and classlabel does not fit');
 end;
 
-% use only valid samples
-ix0 = find(~any(isnan(C),2));
 
 if isempty(NG)
 if (nargin<4) || strcmpi(arg4,'LOOM')
@@ -153,23 +155,27 @@ if ~isfield(MODE,'hyperparameter')
         MODE.hyperparameter = [];
 end
 
-cl = repmat(NaN,size(classlabel,1),1);
+cl     = repmat(NaN,size(classlabel,1),1);
+output = repmat(NaN,size(classlabel,1),max(C));
 for k = 1:max(NG),
- 	ix = ix0(NG(ix0)~=k);
+	ix = find(~any(isnan(C),2) & (NG~=k));
 	if isempty(W),	
 		CC = train_sc(D(ix,:), C(ix), MODE);
 	else
 		CC = train_sc(D(ix,:), C(ix), MODE, W(ix));
 	end;
- 	ix = ix0(NG(ix0)==k);
+	ix = find(NG==k);
 	r  = test_sc(CC, D(ix,:));
-	cl(ix,1) = r.classlabel;
+	cl(ix,1)     = r.classlabel;
+	output(ix,:) = r.output;
 end; 
 
 %R = kappa(C,cl,'notIgnoreNAN',W);
 R = kappa(C,cl,[],W);
 %R2 = kappa(R.H);
 
+R.OUTPUT=output;
+R.CL=cl;
 R.ERR = 1-R.ACC; 
 if isnumeric(R.Label)
 	R.Label = cellstr(int2str(R.Label)); 
@@ -177,10 +183,11 @@ end;
 
 if nargout>1,
 	% final classifier 
+	ix = find(~any(isnan(C),2));
 	if isempty(W), 
-		CC = train_sc(D,C,MODE);
+		CC = train_sc(D(ix,:), C(ix), MODE);
 	else	
-		CC = train_sc(D,C,MODE,W);
+		CC = train_sc(D(ix,:), C(ix), MODE,W);
 	end; 	
 	CC.Labels = 1:max(C);
 	%CC.Labels = unique(C);

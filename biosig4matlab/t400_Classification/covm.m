@@ -33,7 +33,6 @@ function [CC,NN] = covm(X,Y,Mode,W)
 %
 % see also: DECOVM, XCOVF
 
-%	$Id: covm.m 8223 2011-04-20 09:16:06Z schloegl $
 %	Copyright (C) 2000-2005,2009 by Alois Schloegl <alois.schloegl@gmail.com>	
 %       This function is part of the NaN-toolbox
 %       http://pub.ist.ac.at/~schloegl/matlab/NaN/
@@ -143,6 +142,12 @@ if mexFLAG2 && mexFLAG && ~isempty(W),
                 end;
 	end;
 
+	if issparse(X) || issparse(Y),
+		fprintf(2,'sumskipnan: sparse matrix converted to full matrix\n');
+		X=full(X);
+		Y=full(Y);
+	end;
+
 	[CC,NN] = covm_mex(real(X), real(Y), FLAG_NANS_OCCURED, W);
 	%% complex matrices 
 	if ~isreal(X) && ~isreal(Y)
@@ -243,4 +248,6 @@ if nargout<2
         CC = CC./NN; % unbiased
 end;
 
-return; 
+%!assert(covm([1;NaN;2],'D'),0.5)
+%!assert(covm([1;NaN;2],'M'),2.5)
+%!assert(covm([1;NaN;2],'E'),[1,1.5;1.5,2.5])

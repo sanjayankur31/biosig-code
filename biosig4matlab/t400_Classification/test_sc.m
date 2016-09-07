@@ -30,8 +30,7 @@ function [R]=test_sc(CC,D,mode,classlabel)
 % [1] R. Duda, P. Hart, and D. Stork, Pattern Classification, second ed. 
 %       John Wiley & Sons, 2001.
 
-%	$Id$
-%	Copyright (C) 2005,2006,2008,2009,2010 by Alois Schloegl <alois.schloegl@gmail.com>
+%	Copyright (C) 2005,2006,2008,2009,2010,2016 by Alois Schloegl <alois.schloegl@gmail.com>
 %       This function is part of the NaN-toolbox
 %       http://pub.ist.ac.at/~schloegl/matlab/NaN/
 
@@ -47,7 +46,7 @@ function [R]=test_sc(CC,D,mode,classlabel)
 % 
 % You should have received a copy of the GNU General Public License
 % along with this program; if not, write to the Free Software
-% Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+% Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 if nargin<3,
         mode = [];
@@ -107,7 +106,7 @@ elseif strcmp(CC.datatype,'classifier:statistical:rda')
 		D = [ones(size(D,1),1),D];  % add 1-column
 		lambda = CC.hyperparameter.lambda;
 		gamma  = CC.hyperparameter.gamma;
-		d = repmat(NaN,size(D,1),size(CC.MD,1));
+		d = repmat(NaN,size(D,1),size(CC.MD,3));
                 ECM = CC.MD./CC.NN; 
                 NC = size(ECM); 
                 ECM0 = squeeze(sum(ECM,3));  %decompose ECM
