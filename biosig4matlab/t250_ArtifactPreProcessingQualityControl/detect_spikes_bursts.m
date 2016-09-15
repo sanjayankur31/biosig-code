@@ -69,7 +69,7 @@ function [HDR, s] = detect_spikes_bursts(fn, chan, varargin)
 % References:
 %
 
-%    Copyright (C) 2011,2014 by Alois Schloegl <alois.schloegl@ist.ac.at>
+%    Copyright (C) 2011,2014,2016 by Alois Schloegl <alois.schloegl@ist.ac.at>
 %    This is part of the BIOSIG-toolbox http://biosig.sf.net/
 %
 %    BioSig is free software: you can redistribute it and/or modify
@@ -226,6 +226,7 @@ Fs = 20000; 	% assumed samplerate
 			for k=1:length(OnsetSpike),
 				% find peak time within interval of [-winlen ms, 0.001 ms]
 				tix = OnsetSpike(k) + [0 : 0.001*HDR.SampleRate];
+				tix = tix(tix<=size(s,1));
 				%[peak,pix]=max(s(tix,ch)); pix=pix(1);
 				stmp= s(tix,ch);
 				pix = tix(find(stmp == max(stmp)));
@@ -233,7 +234,8 @@ Fs = 20000; 	% assumed samplerate
 				TYP(2*k-1) = hex2dec('204');
 
 				% find max slope time
-				tix = OnsetSpike(k) + [-ceil(HDR.SampleRate*dT) : 0.001*HDR.SampleRate ];
+				tix = OnsetSpike(k) + [-round(HDR.SampleRate*dT) : 0.001*HDR.SampleRate];
+				tix = tix(0<tix & tix<=size(tmp,1));
 				stmp= tmp(tix);
 				pix = tix(find(stmp == max(stmp)))-round(HDR.SampleRate*dT)/2;
 				POS(2*k) = round(mean(pix));
