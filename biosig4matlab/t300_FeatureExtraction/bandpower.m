@@ -9,11 +9,13 @@ function bp = bandpower(s,arg2,arg3,arg4,mode)
 %               default value is [10,12;16,24] indicating two bands of
 %               10-12 and 16-24 Hz.
 %    smoothing  length of smoothing window in seconds. The default value is 1 [s]
+% 		for mode==6 (Hilbert transform) this parameter is ignored.
 %    mode       mode == 1 uses FIR filter and log10
 %               mode == 2 uses Butterworth IIR filter and log10
 %               mode == 3 udes FIR filter and ln
 %               mode == 4 uses Butterworth IIR filter and ln
 %               mode == 5 uses FFT filter and ln
+%               mode == 6 uses Hilbert transform, and returns log(envelope^2)
 %               the default value is mode == 4 (Butterworth filter and ln)
 %
 % OUTPUT:
@@ -25,7 +27,7 @@ function bp = bandpower(s,arg2,arg3,arg4,mode)
 %       last f-band of all channels
 %
 
-%	Copyright (C) 2007,2014 by Alois Schloegl <alois.schloegl@ist.ac.at>
+%	Copyright (C) 2007,2014,2016 by Alois Schloegl <alois.schloegl@ist.ac.at>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This program is free software; you can redistribute it and/or
@@ -97,4 +99,13 @@ elseif mode == 5  % FFT
 	SS(ix) = S(ix);
 	bp = [bp, log(abs(ifft(SS)).^2) ];
     end;
+elseif mode == 6  % Hilbert
+    fts = fft(tmp,[],1);        % Fourier Transform
+    f = HDR.SampleRate * [0:size(tmp,1)-1]'/size(tmp,1);
+    for k=1:size(F,1),
+	FTS = fts;
+	FTS(f < F(k,1) | F(k,2) < f, :) = 0;
+	HTS = 2*ifft(FTS,[],1);		% factor of 2 because only half of the spectrum is considered
+	bp  = [bp, 2*log(abs(HTS))];	% factor of 2 because power (not amplitude) is returned
+    end
 end;
