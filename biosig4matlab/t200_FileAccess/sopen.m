@@ -8744,7 +8744,7 @@ elseif strncmp(HDR.TYPE,'BrainVision',11),
                         for k=length(ix2):-1:1,  % replace '\1' with comma
                                 tmp = [tmp(1:ix2(k)-1),',',tmp(ix2(k)+2:end)]; 
                         end;                                 
-                        HDR.Label{chan,1} = tmp;
+                        HDR.Label{chan,1} = strtrim(tmp);
                         HDR.BV.reference{chan,1} = t2(ix(1)+1:ix(2)-1);
                         [v, stat] = str2double(t2(ix(2)+1:ix(3)-1));          % in microvolt
                         if (prod(size(v))==1) && ~any(stat)
