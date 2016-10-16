@@ -98,6 +98,7 @@ CFLAGS       += -D_GNU_SOURCE
 CFLAGS       += -D_XOPEN_SOURCE=700
 CFLAGS       += -D_DEFAULT_SOURCE
 CXXFLAGS      = $(CFLAGS)
+CXXFLAGS     += -std=gnu++11
 
 ## TARGET dependencies
 ifeq (,$(TARGET))
