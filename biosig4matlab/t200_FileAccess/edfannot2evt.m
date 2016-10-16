@@ -26,9 +26,10 @@ if isfield(HDR,'EDFplus') && isfield(HDR.EDFplus,'ANNONS'),
 	warning('EDFANNOT2EVT.M is under construction and not well tested - You really should check the content of the event table!');
 
 	sz = size(HDR.EDFplus.ANNONS);
-	N = 0; 
+	N  = 0;
 	Desc = {};
-	for k = 1:sz(2); 
+	TYP  = [];
+	for k = 1:sz(2);
 		t     = HDR.EDFplus.ANNONS(:,k)';
 
 		tt0   = 0;
@@ -66,19 +67,16 @@ if isfield(HDR,'EDFplus') && isfield(HDR.EDFplus,'ANNONS'),
 	end; 
 	ix = find(TYP < 256);
 
-        [HDR.EVENT.CodeDesc, CodeIndex, TYP(ix)] = unique(Desc(ix)');
-	HDR.EVENT.POS = POS(:);	
-	HDR.EVENT.DUR = DUR(:);	
-	HDR.EVENT.TYP = TYP(:);	
-	HDR.EVENT.CHN = zeros(N,1);
-	HDR.EVENT.TimeStamp = TimeStamp;
+	if any(ix),
+		[HDR.EVENT.CodeDesc, CodeIndex, TYP(ix)] = unique(Desc(ix)');
+		HDR.EVENT.POS = POS(:);
+		HDR.EVENT.DUR = DUR(:);
+		HDR.EVENT.TYP = TYP(:);
+		HDR.EVENT.CHN = zeros(N,1);
+		HDR.EVENT.TimeStamp = TimeStamp;
+	end;
 
         %% TODO: use eventcodes.txt for predefined event types e.g. QRS->0x501
 
 end
-
-
-
-
-
 
