@@ -1758,16 +1758,22 @@ HDRTYPE* getfiletype(HDRTYPE* hdr)
   	uint32_t U32 = leu32p(hdr->AS.Header+2);
 	uint32_t MAGIC_EN1064_Section0Length  = leu32p(hdr->AS.Header+10);
 
-    	if ((U32>=30) & (U32<=42)) {
+	if ((U32>=30) & (U32<=45)) {
     		hdr->VERSION = (float)U32;
     		U32 = leu32p(hdr->AS.Header+6);
-    		if      ((hdr->VERSION <34.0) & (U32 == 150)) hdr->TYPE = ACQ;
-    		else if ((hdr->VERSION <35.0) & (U32 == 164)) hdr->TYPE = ACQ;
-    		else if ((hdr->VERSION <36.0) & (U32 == 326)) hdr->TYPE = ACQ;
-    		else if ((hdr->VERSION <37.0) & (U32 == 886)) hdr->TYPE = ACQ;
-    		else if ((hdr->VERSION <38.0) & (U32 ==1894)) hdr->TYPE = ACQ;
-    		else if ((hdr->VERSION <41.0) & (U32 ==1896)) hdr->TYPE = ACQ;
-    		else if ((hdr->VERSION>=41.0) & (U32 ==1944)) hdr->TYPE = ACQ;
+		if      ((hdr->VERSION <34.0) && (U32 == 150)) hdr->TYPE = ACQ;
+		else if ((hdr->VERSION <35.0) && (U32 == 164)) hdr->TYPE = ACQ;
+		else if ((hdr->VERSION <36.0) && (U32 == 326)) hdr->TYPE = ACQ;
+		else if ((hdr->VERSION <37.0) && (U32 == 886)) hdr->TYPE = ACQ;
+		else if ((hdr->VERSION <38.0) && (U32 ==1894)) hdr->TYPE = ACQ;
+		else if ((hdr->VERSION <41.0) && (U32 ==1896)) hdr->TYPE = ACQ;
+		else if ((hdr->VERSION <43.0) && (U32 ==1944)) hdr->TYPE = ACQ;
+		//else if ((hdr->VERSION <45.0) && (U32 ==2976)) hdr->TYPE = ACQ;
+		else if ((hdr->VERSION <45.0) && (U32 >=2220)) hdr->TYPE = ACQ;
+		else if ((hdr->VERSION>=45.0) && (U32 ==(12944+160))) hdr->TYPE = ACQ;
+
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s ACQ %f %i\n", __FILE__, __LINE__, __func__, hdr->VERSION, U32);
+
 	    	if (hdr->TYPE == ACQ) {
     			hdr->HeadLen = U32; // length of fixed header
 			hdr->FILE.LittleEndian = 1;
@@ -4590,15 +4596,20 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"EDF+ event\n\ts1:\t<%s>\n\ts2:\t<%s>\n\ts3:
 
 	else if (hdr->TYPE==ACQ) {
 
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s: try loading ACQ header \n", __FILE__, __LINE__, __func__);
+
 		if ( !hdr->FILE.LittleEndian ) {
 			hdr->NS = bei16p(hdr->AS.Header + 10);
 			hdr->HeadLen += hdr->NS*1714;
 
-			if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s (..): v%g noChan=%u HeadLen=%u\n", __FILE__, __LINE__, __func__, hdr->VERSION, hdr->NS, hdr->HeadLen);
+			if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s (..): v%g noChan=%u HeadLen=%u\n", \
+				__FILE__, __LINE__, __func__, hdr->VERSION, hdr->NS, hdr->HeadLen);
 
 			biosigERROR(hdr, B4C_DATATYPE_UNSUPPORTED, "BigEndian ACQ file format is currently not supported");
 			return(hdr);
 		}
+
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s \n", __FILE__, __LINE__, __func__);
 
 		/* defined in http://biopac.com/AppNotes/app156FileFormat/FileFormat.htm */
 		hdr->NS   = lei16p(hdr->AS.Header+10);
@@ -4606,25 +4617,43 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"EDF+ event\n\ts1:\t<%s>\n\ts2:\t<%s>\n\ts3:
 		hdr->NRec = 1;
 		hdr->SPR  = 1;
 
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s \n", __FILE__, __LINE__, __func__);
+
 		// add "per channel data section"
 		if (hdr->VERSION<38.0)		// Version 3.0+
 			hdr->HeadLen += hdr->NS*122;
 		else if (hdr->VERSION<39.0)	// Version 3.7.0+
 			hdr->HeadLen += hdr->NS*252;
-		else 				// Version 3.7.3+
+		else if (hdr->VERSION<42.0)	// Version 3.7.3+
 			hdr->HeadLen += hdr->NS*254;
+		else if (hdr->VERSION<43.0)	// Version 3.7.3+
+			hdr->HeadLen += hdr->NS*256;
+		else 				// Version 3.8.2+
+			hdr->HeadLen += hdr->NS*262;
 
-		hdr->HeadLen += 4;
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s \n", __FILE__, __LINE__, __func__);
+
+		hdr->HeadLen  += 4;
 		// read header up to nLenght and nID of foreign data section
-	    	hdr->AS.Header = (uint8_t*) realloc(hdr->AS.Header,hdr->HeadLen);
-	    	count  += ifread(Header1+count, 1, hdr->HeadLen-count, hdr);
-		uint32_t POS = hdr->HeadLen;
+		hdr->AS.Header = (uint8_t*) realloc(hdr->AS.Header, hdr->HeadLen);
+		count         += ifread(Header1+count, 1, hdr->HeadLen-count, hdr);
+		uint32_t POS   = hdr->HeadLen;
+		// read "foreign data section" and "per channel data types section"
+		hdr->HeadLen  += leu16p(hdr->AS.Header + hdr->HeadLen-4) - 4;
 
 		// read "foreign data section" and "per channel data types section"
-		hdr->HeadLen += leu16p(hdr->AS.Header+hdr->HeadLen-4);
-		hdr->HeadLen += 4*hdr->NS;
-	    	hdr->AS.Header = (uint8_t*)realloc(Header1,hdr->HeadLen+8);
-	    	count  += ifread(Header1+POS, 1, hdr->HeadLen-POS, hdr);
+		hdr->HeadLen  += 4*hdr->NS;
+		hdr->AS.Header = (uint8_t*)realloc(Header1, hdr->HeadLen+8);
+		count         += ifread(Header1+POS, 1, hdr->HeadLen-POS, hdr);
+
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s %i/%i %i/%i %i/%i %i/%i %i/%i \n", \
+			__FILE__, __LINE__, __func__, \
+			leu16p(hdr->AS.Header+hdr->HeadLen-20), leu16p(hdr->AS.Header+hdr->HeadLen-18), \
+			leu16p(hdr->AS.Header+hdr->HeadLen-16), leu16p(hdr->AS.Header+hdr->HeadLen-14), \
+			leu16p(hdr->AS.Header+hdr->HeadLen-12), leu16p(hdr->AS.Header+hdr->HeadLen-10), \
+			leu16p(hdr->AS.Header+hdr->HeadLen-8),  leu16p(hdr->AS.Header+hdr->HeadLen-6), \
+			leu16p(hdr->AS.Header+hdr->HeadLen-4),  leu16p(hdr->AS.Header+hdr->HeadLen-2) \
+			);
 
 		// define channel specific header information
 		hdr->CHANNEL = (CHANNEL_TYPE*) realloc(hdr->CHANNEL, hdr->NS * sizeof(CHANNEL_TYPE));
@@ -4638,8 +4667,15 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"EDF+ event\n\ts1:\t<%s>\n\ts2:\t<%s>\n\ts3:
 	    		uint8_t* Header2 = hdr->AS.Header+POS;
 			hc->LeadIdCode = 0; 
 			hc->Transducer[0] = '\0';
+
 			//CHAN = leu16p(Header2+4);
-			strncpy(hc->Label,(char*)Header2+6,min(MAX_LENGTH_LABEL,40));
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s: #%i %i %i %i %i\n", \
+			__FILE__, __LINE__, __func__, (int)k, (int)leu32p(Header2), (int)leu16p(Header2+4), (int)leu32p(Header2+88), (int)leu16p(Header2+250));
+
+			int len=min(MAX_LENGTH_LABEL,40);
+			strncpy(hc->Label,(char*)Header2+6,len);
+			hc->Label[len]=0;
+
 			char tmp[21];
 			strncpy(tmp,(char*)Header2+68,20); tmp[20]=0;
 			if (!strcmp(tmp,"Volts"))
@@ -4654,7 +4690,13 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"EDF+ event\n\ts1:\t<%s>\n\ts2:\t<%s>\n\ts3:
 			hc->SPR     = 1;
 			if (hdr->VERSION >= 38.0) {
 				hc->SPR  = leu16p(Header2+250);  // used here as Divider
-				hdr->SPR = lcm(hdr->SPR, hc->SPR);
+
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s: %i:%i\n", __FILE__, __LINE__, __func__, (int)hdr->SPR, (int)hc->SPR);
+
+				if (hc->SPR > 1)
+					hdr->SPR = lcm(hdr->SPR, hc->SPR);
+				else
+					hc->SPR  = 1;
 			}
 
 			ACQ_NoSamples[k] = leu32p(Header2+88);
@@ -4665,29 +4707,43 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"EDF+ event\n\ts1:\t<%s>\n\ts2:\t<%s>\n\ts3:
 		}
 		hdr->NRec = minBufLenXVarDiv;
 
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s: POS=%i\n", __FILE__, __LINE__, __func__, POS);
 		/// foreign data section - skip
 		POS += leu16p(hdr->AS.Header+POS);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s: POS=%i,%i\n", __FILE__, __LINE__, __func__, (int)POS, (int)count);
+		if (POS+2 > count) {
+			if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s: POS=%i,%i\n", __FILE__, __LINE__, __func__, (int)POS, (int)count);
+
+			hdr->AS.Header = (uint8_t*) realloc(hdr->AS.Header, POS+2);
+			count  += ifread(Header1+count, 1, POS+2-count, hdr);
+		}
+
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s: POS=%i\n", __FILE__, __LINE__, __func__, POS);
 
 		size_t DataLen=0;
 		for (k=0, hdr->AS.bpb=0; k<hdr->NS; k++) {
 			CHANNEL_TYPE *hc = hdr->CHANNEL+k;
-			if (hdr->VERSION>=38.0)
+			if ((hdr->VERSION>=38.0) && (hc->SPR > 1))
 				hc->SPR = hdr->SPR/hc->SPR;  // convert DIVIDER into SPR
 
-			switch ((leu16p(hdr->AS.Header+POS+2)))	{
+			uint16_t u16 = leu16p(hdr->AS.Header+POS+2);
+			switch (u16)	{
 			case 1:
 				hc->GDFTYP = 17;  // double
-				DataLen += ACQ_NoSamples[k]<<3;
+				DataLen   += ACQ_NoSamples[k]<<3;
 				hc->DigMax =  1e9;
 				hc->DigMin = -1e9;
 				break;
 			case 2:
 				hc->GDFTYP = 3;   // int
-				DataLen += ACQ_NoSamples[k]<<1;
+				DataLen   += ACQ_NoSamples[k]<<1;
 				hc->DigMax =  32767;
 				hc->DigMin = -32678;
 				break;
 			default:
+
+				if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s: #%i type=%i \n", __FILE__, __LINE__, __func__, (int)k, (int)u16);
+
 				biosigERROR(hdr, B4C_UNSPECIFIC_ERROR, "SOPEN(ACQ-READ): invalid channel type.");
 			};
 			hc->PhysMax = hc->DigMax * hc->Cal + hc->Off;
@@ -4697,6 +4753,29 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"EDF+ event\n\ts1:\t<%s>\n\ts2:\t<%s>\n\ts3:
 			POS +=4;
 		}
 		free(ACQ_NoSamples);
+
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s: POS=%i,%i\n", __FILE__, __LINE__, __func__, (int)POS, (int)count);
+		/// Markers header section - skip
+		POS += leu16p(hdr->AS.Header+POS);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s: POS=%i,%i\n", __FILE__, __LINE__, __func__, (int)POS, (int)count);
+		if (POS+2 > count) {
+			if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s: POS=%i,%i\n", __FILE__, __LINE__, __func__, (int)POS, (int)count);
+			hdr->AS.Header = (uint8_t*) realloc(hdr->AS.Header, POS+2);
+			count  += ifread(Header1+count, 1, POS+2-count, hdr);
+		}
+
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s: POS=%i,%i\n", __FILE__, __LINE__, __func__, (int)POS, (int)count);
+		/// Markers header section - skip
+		POS += leu16p(hdr->AS.Header+POS);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s: POS=%i,%i\n", __FILE__, __LINE__, __func__, (int)POS, (int)count);
+		if (POS+2 > count) {
+			if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s: POS=%i,%i\n", __FILE__, __LINE__, __func__, (int)POS, (int)count);
+			hdr->AS.Header = (uint8_t*) realloc(hdr->AS.Header, POS+2);
+			count  += ifread(Header1+count, 1, POS+2-count, hdr);
+		}
+//		hdr->HeadLen = count + 1;
+
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %s: POS=%i HeadLen=%i\n", __FILE__, __LINE__, __func__, POS, (int)hdr->HeadLen);
 
 /*  ### FIXME ###
 	reading Marker section
