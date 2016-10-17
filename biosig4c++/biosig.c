@@ -4678,8 +4678,16 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"EDF+ event\n\ts1:\t<%s>\n\ts2:\t<%s>\n\ts3:
 
 			char tmp[21];
 			strncpy(tmp,(char*)Header2+68,20); tmp[20]=0;
+			/* ACQ uses none-standard way of encoding physical units
+			   Convert to ISO/IEEE 11073-10101 */
 			if (!strcmp(tmp,"Volts"))
 				hc->PhysDimCode = 4256;
+			else if (!strcmp(tmp,"Seconds"))
+				hc->PhysDimCode = 2176;
+			else if (!strcmp(tmp,"deg C"))
+				hc->PhysDimCode = 6048;
+			else if (!strcmp(tmp,"microsiemen"))
+				hc->PhysDimCode = 8307;
 			else
 				hc->PhysDimCode = PhysDimCode(tmp);
 
