@@ -6,6 +6,7 @@ function [pos] = get_local_maxima_above_threshold(data, TH, Mode, winlen)
 %
 % pos = get_local_maxima_above_threshold(data,TH)
 % pos = get_local_maxima_above_threshold(data,TH,Mode)
+% pos = get_local_maxima_above_threshold(data,TH,Mode,winlen)
 %
 % Input:
 %   data: sample vector of detection trace
@@ -13,6 +14,10 @@ function [pos] = get_local_maxima_above_threshold(data, TH, Mode, winlen)
 %   Mode==0: [default], detects all maxima above threshold [1]
 %         1:  only one maximum above threshold within the
 %               window of size winlen is considered [2].
+%         2:  only single detections are considered.
+%               if two detections with a distance smaller the
+%               winlen occur, both are omitted. That might be
+%               useful for optain clean candiate templates.
 %   winlen (Mode=1 only): window length (in number of samples)
 %               in which all detections collapse to one event
 %
@@ -39,7 +44,7 @@ if nargin<4,
 	winlen=1;
 end;
 
-if (Mode==0) && (numel(TH)==1),
+if any(Mode==[0,2]) && (numel(TH)==1),
 	%%% InVitro Data from Sarit
 	data = [data;+inf];
 	pos = (data(1:end-1) >= TH) & (data(1:end-1) >  data(2:end) ) & (data(1:end-1) > [+inf;data(1:end-2)]);		%% local maxima above threshold
@@ -56,7 +61,7 @@ elseif (Mode==0) && (numel(TH)==2),
 	pos = (data(1:end-1) >= th) & (data(1:end-1) >  data(2:end) ) & (data(1:end-1) > [+inf;data(1:end-2)]);		%% local maxima above threshold
 
 	ix  = (data(1:end-1) >= th) & (data(1:end-1) == data(2:end) ) & (data(1:end-1) > [+inf;data(1:end-2)]);		%% local maxima above threshold
-else
+elseif (Mode==1)
 	% approach Mode==1
 	% only one maximum above threshold within the window of size winlen is considered.
 	dix    = diff([0; data>TH; 0]);
@@ -83,6 +88,8 @@ else
 		pos(end+1,1)=start+ix;
 	end;
 	return;
+else
+	error('invalid input argument')
 end 
 
 k   = 0; 
@@ -95,6 +102,15 @@ while (1)
 	if (isempty(ix) || ~any(data(ix)==data(ix2))) break; end; 
 end
 pos = sort([find(pos); ix]);
+
+if (Mode==2)
+	% remove those events that are to close together
+	tmp = find(diff(pos)<winlen);
+	pos(tmp)=NaN;
+	pos(tmp+1)=NaN;
+	pos = pos(~isnan(pos));
+end
+
 return
 
 %!assert(get_local_maxima_above_threshold([0,0,0,1,0]',0),4)
