@@ -1,6 +1,6 @@
 /*
 
-% Copyright (C) 2005,2006,2007,2008,2009,2011,2013 Alois Schloegl <alois.schloegl@gmail.com>
+% Copyright (C) 2005,2006,2007,2008,2009,2011,2013,2106 Alois Schloegl <alois.schloegl@gmail.com>
 % This file is part of the "BioSig for C/C++" repository 
 % (biosig4c++) at http://biosig.sf.net/ 
 
@@ -239,77 +239,43 @@ char *getlogin (void);
 #endif /* __BYTE_ORDER */
 
 
-#if !defined(__sparc__) && !defined(__ia64__)
-// if misaligned data words can be handled 
-#define leu16p(i) l_endian_u16(*(uint16_t*)(i))
-#define lei16p(i) l_endian_i16(*( int16_t*)(i))
-#define leu32p(i) l_endian_u32(*(uint32_t*)(i))
-#define lei32p(i) l_endian_i32(*( int32_t*)(i))
-#define leu64p(i) l_endian_u64(*(uint64_t*)(i))
-#define lei64p(i) l_endian_i64(*( int64_t*)(i))
+static inline uint16_t leu16p(const uint8_t* i);
+static inline int16_t  lei16p(const uint8_t* i);
+static inline uint32_t leu32p(const uint8_t* i);
+static inline int32_t  lei32p(const uint8_t* i);
+static inline uint64_t leu64p(const uint8_t* i);
+static inline int64_t  lei64p(const uint8_t* i);
 
-#define beu16p(i) b_endian_u16(*(uint16_t*)(i))
-#define bei16p(i) b_endian_i16(*( int16_t*)(i))
-#define beu32p(i) b_endian_u32(*(uint32_t*)(i))
-#define bei32p(i) b_endian_i32(*( int32_t*)(i))
-#define beu64p(i) b_endian_u64(*(uint64_t*)(i))
-#define bei64p(i) b_endian_i64(*( int64_t*)(i))
+static inline uint16_t beu16p(const uint8_t* i);
+static inline int16_t  bei16p(const uint8_t* i);
+static inline uint32_t beu32p(const uint8_t* i);
+static inline int32_t  bei32p(const uint8_t* i);
+static inline uint64_t beu64p(const uint8_t* i);
+static inline int64_t  bei64p(const uint8_t* i);
 
-#define leu16a(i,r) (*(uint16_t*)(r) = l_endian_u16(i))
-#define lei16a(i,r) (*( int16_t*)(r) = l_endian_i16(i))
-#define leu32a(i,r) (*(uint32_t*)(r) = l_endian_u32(i))
-#define lei32a(i,r) (*( int32_t*)(r) = l_endian_i32(i))
-#define leu64a(i,r) (*(uint64_t*)(r) = l_endian_u64(i))
-#define lei64a(i,r) (*( int64_t*)(r) = l_endian_i64(i))
+static inline void leu16a(uint16_t i, uint8_t* r);
+static inline void lei16a( int16_t i, uint8_t* r);
+static inline void leu32a(uint32_t i, uint8_t* r);
+static inline void lei32a( int32_t i, uint8_t* r);
+static inline void leu64a(uint64_t i, uint8_t* r);
+static inline void lei64a( int64_t i, uint8_t* r);
 
-#define beu16a(i,r) (*(uint16_t*)(r) = b_endian_u16(i))
-#define bei16a(i,r) (*( int16_t*)(r) = b_endian_i16(i))
-#define beu32a(i,r) (*(uint32_t*)(r) = b_endian_u32(i))
-#define bei32a(i,r) (*( int32_t*)(r) = b_endian_i32(i))
-#define beu64a(i,r) (*(uint64_t*)(r) = b_endian_u64(i))
-#define bei64a(i,r) (*( int64_t*)(r) = b_endian_i64(i))
+static inline void beu16a(uint16_t i, uint8_t* r);
+static inline void bei16a( int16_t i, uint8_t* r);
+static inline void beu32a(uint32_t i, uint8_t* r);
+static inline void bei32a( int32_t i, uint8_t* r);
+static inline void beu64a(uint64_t i, uint8_t* r);
+static inline void bei64a( int64_t i, uint8_t* r);
 
-#else
-/*    SPARC,IA64: missing alignment must be explicitly handled     */ 
-uint16_t leu16p(const uint8_t* i);
-int16_t  lei16p(const uint8_t* i);
-uint32_t leu32p(const uint8_t* i);
-int32_t  lei32p(const uint8_t* i);
-uint64_t leu64p(const uint8_t* i);
-int64_t  lei64p(const uint8_t* i);
+static inline float    lef32p(const uint8_t* i);
+static inline double   lef64p(const uint8_t* i);
+static inline float    bef32p(const uint8_t* i);
+static inline double   bef64p(const uint8_t* i);
 
-uint16_t beu16p(const uint8_t* i);
-int16_t  bei16p(const uint8_t* i);
-uint32_t beu32p(const uint8_t* i);
-int32_t  bei32p(const uint8_t* i);
-uint64_t beu64p(const uint8_t* i);
-int64_t  bei64p(const uint8_t* i);
-
-void leu16a(uint16_t i, uint8_t* r);
-void lei16a( int16_t i, uint8_t* r);
-void leu32a(uint32_t i, uint8_t* r);
-void lei32a( int32_t i, uint8_t* r);
-void leu64a(uint64_t i, uint8_t* r);
-void lei64a( int64_t i, uint8_t* r);
-
-void beu16a(uint16_t i, uint8_t* r);
-void bei16a( int16_t i, uint8_t* r);
-void beu32a(uint32_t i, uint8_t* r);
-void bei32a( int32_t i, uint8_t* r);
-void beu64a(uint64_t i, uint8_t* r);
-void bei64a( int64_t i, uint8_t* r);
-
-#endif
-
-float    lef32p(const uint8_t* i);
-double   lef64p(const uint8_t* i);
-float    bef32p(const uint8_t* i);
-double   bef64p(const uint8_t* i);
-
-void lef32a(   float i, uint8_t* r);
-void lef64a(  double i, uint8_t* r);
-void bef32a(   float i, uint8_t* r);
-void bef64a(  double i, uint8_t* r);
+static inline void lef32a(   float i, uint8_t* r);
+static inline void lef64a(  double i, uint8_t* r);
+static inline void bef32a(   float i, uint8_t* r);
+static inline void bef64a(  double i, uint8_t* r);
 
 #ifdef __cplusplus
 }

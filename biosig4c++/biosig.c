@@ -1,6 +1,6 @@
 /*
 
-    Copyright (C) 2005-2016 Alois Schloegl <alois.schloegl@ist.ac.at>
+    Copyright (C) 2005-2016 Alois Schloegl <alois.schloegl@gmail.com>
     Copyright (C) 2011 Stoyan Mihaylov
     This file is part of the "BioSig for C/C++" repository
     (biosig4c++) at http://biosig.sf.net/
@@ -363,128 +363,119 @@ uint32_t lcm(uint32_t A, uint32_t B)
 };
 
 
-#ifndef leu16p
-/*    SPARC, ia64: missing alignment must be explicitly handled     */
-uint16_t leu16p(const uint8_t* i) {
-	// decode little endian uint16 pointer
-	return ((*i) + ((uint16_t)*(i+1) << 8));
+static inline uint16_t leu16p(const uint8_t* i) {
+	uint16_t a;
+	memcpy(&a, i, sizeof(a));
+	return (le16toh(a));
 }
-int16_t lei16p(const uint8_t* i) {
-	// decode little endian int16 pointer
-	uint16_t o = ((*i) + ((uint16_t)*(i+1) << 8));
-	return(*(int16_t*)(&o));
+static inline int16_t lei16p(const uint8_t* i) {
+	uint16_t a;
+	memcpy(&a, i, sizeof(a));
+	return ((int16_t)le16toh(a));
 }
-uint32_t leu32p(const uint8_t* i) {
-	// decode little endian uint32 pointer
-	uint32_t o=0;
-	memcpy(&o,i,4);
-	return (le32toh(o));
+static inline uint32_t leu32p(const uint8_t* i) {
+	uint32_t a;
+	memcpy(&a, i, sizeof(a));
+	return (le32toh(a));
 }
-int32_t lei32p(const uint8_t* i) {
-	// decode little endian int32 pointer
-	uint32_t o=0;
-	memcpy(&o,i,4);
-	return (le32toh(o));
+static inline int32_t lei32p(const uint8_t* i) {
+	uint32_t a;
+	memcpy(&a, i, sizeof(a));
+	return ((int32_t)le32toh(a));
 }
-uint64_t leu64p(const uint8_t* i) {
-	// decode little endian uint64 pointer
-	uint64_t o=0;
-	memcpy(&o,i,8);
-	return (le64toh(o));
+static inline uint64_t leu64p(const uint8_t* i) {
+	uint64_t a;
+	memcpy(&a, i, sizeof(a));
+	return (le64toh(a));
 }
-int64_t lei64p(const uint8_t* i) {
-	// decode little endian int64 pointer
-	uint64_t o=0;
-	memcpy(&o,i,8);
-	return (le64toh(o));
+static inline int64_t lei64p(const uint8_t* i) {
+	uint64_t a;
+	memcpy(&a, i, sizeof(a));
+	return ((int64_t)le64toh(a));
 }
 
-uint16_t beu16p(const uint8_t* i) {
-	// decode big endian uint16 pointer
-	return (((uint16_t)*i<<8) + (*(i+1)));
+static inline uint16_t beu16p(const uint8_t* i) {
+	uint16_t a;
+	memcpy(&a, i, sizeof(a));
+	return ((int16_t)be16toh(a));
 }
-int16_t bei16p(const uint8_t* i) {
-	// decode big endian int16 pointer
-	uint16_t o = (((uint16_t)*i << 8) + (*(i+1)));
-	return(*(int16_t*)(&o));
+static inline int16_t bei16p(const uint8_t* i) {
+	uint16_t a;
+	memcpy(&a, i, sizeof(a));
+	return ((int16_t)be16toh(a));
 }
-uint32_t beu32p(const uint8_t* i) {
-	// decode big endian uint32 pointer
-	uint32_t o=0;
-	memcpy(&o,i,4);
-	return (be32toh(o));
+static inline uint32_t beu32p(const uint8_t* i) {
+	uint32_t a;
+	memcpy(&a, i, sizeof(a));
+	return (be32toh(a));
 }
-int32_t bei32p(const uint8_t* i) {
-	// decode big endian int32 pointer
-	uint32_t o=0;
-	memcpy(&o,i,4);
-	return (be32toh(o));
+static inline int32_t bei32p(const uint8_t* i) {
+	uint32_t a;
+	memcpy(&a, i, sizeof(a));
+	return ((int32_t)be32toh(a));
 }
-uint64_t beu64p(const uint8_t* i) {
-	// decode big endian uint64 pointer
-	uint64_t o=0;
-	memcpy(&o,i,8);
-	return (be64toh(o));
+static inline uint64_t beu64p(const uint8_t* i) {
+	uint64_t a;
+	memcpy(&a, i, sizeof(a));
+	return ((int64_t)be64toh(a));
 }
-int64_t bei64p(const uint8_t* i) {
-	// decode big endian int64 pointer
-	uint64_t o=0;
-	memcpy(&o,i,8);
-	return (be64toh(o));
+static inline int64_t bei64p(const uint8_t* i) {
+	uint64_t a;
+	memcpy(&a, i, sizeof(a));
+	return ((int64_t)be64toh(a));
 }
 
-void leu16a(uint16_t i, uint8_t* r) {
-	i = l_endian_u16(i);
+static inline void leu16a(uint16_t i, uint8_t* r) {
+	i = htole16(i);
 	memcpy(r, &i, sizeof(i));
 }
-void lei16a( int16_t i, uint8_t* r) {
-	i = l_endian_i16(i);
+static inline void lei16a( int16_t i, uint8_t* r) {
+	i = htole16(i);
 	memcpy(r, &i, sizeof(i));
 }
-void leu32a(uint32_t i, uint8_t* r) {
-	i = l_endian_u32(i);
+static inline void leu32a(uint32_t i, uint8_t* r) {
+	i = htole32(i);
 	memcpy(r, &i, sizeof(i));
 }
-void lei32a( int32_t i, uint8_t* r) {
-	i = l_endian_i32(i);
+static inline void lei32a( int32_t i, uint8_t* r) {
+	i = htole32(i);
 	memcpy(r, &i, sizeof(i));
 }
-void leu64a(uint64_t i, uint8_t* r) {
-	i = l_endian_u64(i);
+static inline void leu64a(uint64_t i, uint8_t* r) {
+	i = htole64(i);
 	memcpy(r, &i, sizeof(i));
 }
-void lei64a( int64_t i, uint8_t* r) {
-	i = l_endian_i64(i);
+static inline void lei64a( int64_t i, uint8_t* r) {
+	i = htole64(i);
 	memcpy(r, &i, sizeof(i));
 }
 
-void beu16a(uint16_t i, uint8_t* r) {
-	i = b_endian_u16(i);
+static inline void beu16a(uint16_t i, uint8_t* r) {
+	i = htobe16(i);
 	memcpy(r, &i, sizeof(i));
 };
-void bei16a( int16_t i, uint8_t* r) {
-	i = b_endian_i16(i);
+static inline void bei16a( int16_t i, uint8_t* r) {
+	i = htobe16(i);
 	memcpy(r, &i, sizeof(i));
 }
-void beu32a(uint32_t i, uint8_t* r) {
-	i = b_endian_u32(i);
+static inline void beu32a(uint32_t i, uint8_t* r) {
+	i = htobe32(i);
 	memcpy(r, &i, sizeof(i));
 }
-void bei32a( int32_t i, uint8_t* r) {
-	i = b_endian_i32(i);
+static inline void bei32a( int32_t i, uint8_t* r) {
+	i = htobe32(i);
 	memcpy(r, &i, sizeof(i));
 }
-void beu64a(uint64_t i, uint8_t* r) {
-	i = b_endian_u64(i);
+static inline void beu64a(uint64_t i, uint8_t* r) {
+	i = htobe64(i);
 	memcpy(r, &i, sizeof(i));
 }
-void bei64a( int64_t i, uint8_t* r) {
-	i = b_endian_i64(i);
+static inline void bei64a( int64_t i, uint8_t* r) {
+	i = htobe64(i);
 	memcpy(r, &i, sizeof(i));
 }
-#endif
 
-float lef32p(const uint8_t* i) {
+static inline float lef32p(const uint8_t* i) {
 	// decode little endian float pointer
 	uint32_t o;
 	union {
@@ -495,7 +486,7 @@ float lef32p(const uint8_t* i) {
 	c.i = le32toh(o);
 	return(c.r);
 }
-double lef64p(const uint8_t* i) {
+static inline double lef64p(const uint8_t* i) {
 	// decode little endian double pointer
 	uint64_t o=0;
 	union {
@@ -506,7 +497,7 @@ double lef64p(const uint8_t* i) {
 	c.i = le64toh(o);
 	return(c.r);
 }
-float bef32p(const uint8_t* i) {
+static inline float bef32p(const uint8_t* i) {
 	// decode little endian float pointer
 	uint32_t o;
 	union {
@@ -517,7 +508,7 @@ float bef32p(const uint8_t* i) {
 	c.i = be32toh(o);
 	return(c.r);
 }
-double bef64p(const uint8_t* i) {
+static inline double bef64p(const uint8_t* i) {
 	// decode little endian double pointer
 	uint64_t o=0;
 	union {
@@ -529,25 +520,25 @@ double bef64p(const uint8_t* i) {
 	return(c.r);
 }
 
-void lef32a( float i, uint8_t* r) {
+static inline void lef32a( float i, uint8_t* r) {
 	uint32_t i32;
 	memcpy(&i32, &i, sizeof(i));
 	i32 = le32toh(i32);
 	memcpy(r, &i32, sizeof(i32));
 }
-void lef64a(  double i, uint8_t* r) {
+static inline void lef64a(  double i, uint8_t* r) {
 	uint64_t i64;
 	memcpy(&i64, &i, sizeof(i));
 	i64 = le64toh(i64);
 	memcpy(r, &i64, sizeof(i64));
 }
-void bef32a(   float i, uint8_t* r) {
+static inline void bef32a(   float i, uint8_t* r) {
 	uint32_t i32;
 	memcpy(&i32, &i, sizeof(i));
 	i32 = be32toh(i32);
 	memcpy(r, &i32, sizeof(i32));
 }
-void bef64a(  double i, uint8_t* r) {
+static inline void bef64a(  double i, uint8_t* r) {
 	uint64_t i64;
 	memcpy(&i64, &i, sizeof(i));
 	i64 = be64toh(i64);
@@ -1082,16 +1073,16 @@ fprintf(stdout,"write_gdf_eventtable is obsolete - use hdrEVT2rawEVT instead;\n"
 		lef32a(hdr->EVENT.SampleRate, buf+4);
 	};
 	for (k32u=0; k32u<hdr->EVENT.N; k32u++) {
-		hdr->EVENT.POS[k32u] = l_endian_u32(hdr->EVENT.POS[k32u]);
-		hdr->EVENT.TYP[k32u] = l_endian_u16(hdr->EVENT.TYP[k32u]);
+		hdr->EVENT.POS[k32u] = htole32(hdr->EVENT.POS[k32u]);
+		hdr->EVENT.TYP[k32u] = htole16(hdr->EVENT.TYP[k32u]);
 	}
 	ifwrite(buf, 8, 1, hdr);
 	ifwrite(hdr->EVENT.POS, sizeof(*hdr->EVENT.POS), hdr->EVENT.N, hdr);
 	ifwrite(hdr->EVENT.TYP, sizeof(*hdr->EVENT.TYP), hdr->EVENT.N, hdr);
 	if (flag) {
 		for (k32u=0; k32u<hdr->EVENT.N; k32u++) {
-			hdr->EVENT.DUR[k32u] = l_endian_u32(hdr->EVENT.DUR[k32u]);
-			hdr->EVENT.CHN[k32u] = l_endian_u16(hdr->EVENT.CHN[k32u]);
+			hdr->EVENT.DUR[k32u] = le32toh(hdr->EVENT.DUR[k32u]);
+			hdr->EVENT.CHN[k32u] = le16toh(hdr->EVENT.CHN[k32u]);
 		}
 		ifwrite(hdr->EVENT.CHN, sizeof(*hdr->EVENT.CHN), hdr->EVENT.N,hdr);
 		ifwrite(hdr->EVENT.DUR, sizeof(*hdr->EVENT.DUR), hdr->EVENT.N,hdr);
@@ -1220,16 +1211,16 @@ double dur2val(uint32_t DUR, uint16_t gdftyp) {
 		make sure u32 is always little endian like in the GDF file
 		and only then extract the sample value
 	*/
-	u.t32 = l_endian_u32(DUR);
+	u.t32 = htole32(DUR);
 
 	if (gdftyp==1)
 		return (double)(int8_t)(u.t8[0]);
 	if (gdftyp==2)
 		return (double)(uint8_t)(u.t8[0]);
 	if (gdftyp==3)
-		return (double)(int16_t)l_endian_u16(u.t16[0]);
+		return (double)(int16_t)le16toh(u.t16[0]);
 	if (gdftyp==4)
-		return (double)(uint16_t)l_endian_u16(u.t16[0]);
+		return (double)(uint16_t)le16toh(u.t16[0]);
 
 	return NAN;
 }
@@ -1900,7 +1891,7 @@ HDRTYPE* getfiletype(HDRTYPE* hdr)
 	    	hdr->TYPE = EGI;
 	    	hdr->VERSION = hdr->AS.Header[3];
     	}
-    	else if (*(uint32_t*)(Header1) == b_endian_u32(0x7f454c46))
+	else if (*(uint32_t*)(Header1) == htobe32(0x7f454c46))
 	    	hdr->TYPE = ELF;
     	else if ( (hdr->HeadLen > 14) && !memcmp(Header1,"Embla data file",15))
 	    	hdr->TYPE = EMBLA;
@@ -2606,10 +2597,10 @@ void struct2gdfbin(HDRTYPE *hdr)
 		if (hdr->VERSION>1.90) {
 			memcpy(Header1+152, &hdr->LOC, 16);
 #if __BYTE_ORDER == __BIG_ENDIAN
-			*(uint32_t*) (Header1+152) = l_endian_u32( *(uint32_t*) (Header1+152) );
-			*(uint32_t*) (Header1+156) = l_endian_u32( *(uint32_t*) (Header1+156) );
-			*(uint32_t*) (Header1+160) = l_endian_u32( *(uint32_t*) (Header1+160) );
-			*(uint32_t*) (Header1+164) = l_endian_u32( *(uint32_t*) (Header1+164) );
+			*(uint32_t*) (Header1+152) = htole32( *(uint32_t*) (Header1+152) );
+			*(uint32_t*) (Header1+156) = htole32( *(uint32_t*) (Header1+156) );
+			*(uint32_t*) (Header1+160) = htole32( *(uint32_t*) (Header1+160) );
+			*(uint32_t*) (Header1+164) = htole32( *(uint32_t*) (Header1+164) );
 #endif
 		}
 
@@ -2820,7 +2811,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 	     	tag = 4;
 	     	if (TagNLen[tag]>0) {
 
-	     		*(uint32_t*)(Header2) = l_endian_u32(tag + (TagNLen[tag]<<8)); // Tag=4 & Length of Tag 4
+			*(uint32_t*)(Header2) = htole32(tag + (TagNLen[tag]<<8)); // Tag=4 & Length of Tag 4
 	     		Header2 += 4;
 	     		for (k=0; k<hdr->NS; k++) {
 				*(uint32_t*)(Header2 + 4*k)             = le32toh(*(uint32_t*)(hdr->CHANNEL[k].Orientation+0));
@@ -3349,22 +3340,22 @@ size_t hdrEVT2rawEVT(HDRTYPE *hdr) {
 	uint8_t *buf1=hdr->AS.rawEventData+8;
 	uint8_t *buf2=hdr->AS.rawEventData+8+hdr->EVENT.N*4;
 	for (k32u=0; k32u<hdr->EVENT.N; k32u++) {
-		*(uint32_t*)(buf1+k32u*4) = l_endian_u32(hdr->EVENT.POS[k32u]+1); // convert from 0-based (biosig4c++) to 1-based (GDF) indexing
-		*(uint16_t*)(buf2+k32u*2) = l_endian_u16(hdr->EVENT.TYP[k32u]);
+		*(uint32_t*)(buf1+k32u*4) = htole32(hdr->EVENT.POS[k32u]+1); // convert from 0-based (biosig4c++) to 1-based (GDF) indexing
+		*(uint16_t*)(buf2+k32u*2) = htole16(hdr->EVENT.TYP[k32u]);
 	}
 	if (flag & 2) {
 		buf1 = hdr->AS.rawEventData+8+hdr->EVENT.N*6;
 		buf2 = hdr->AS.rawEventData+8+hdr->EVENT.N*8;
 		for (k32u=0; k32u<hdr->EVENT.N; k32u++) {
-			*(uint16_t*)(buf1+k32u*2) = l_endian_u16(hdr->EVENT.CHN[k32u]);
-			*(uint32_t*)(buf2+k32u*4) = l_endian_u32(hdr->EVENT.DUR[k32u]);
+			*(uint16_t*)(buf1+k32u*2) = htole16(hdr->EVENT.CHN[k32u]);
+			*(uint32_t*)(buf2+k32u*4) = htole32(hdr->EVENT.DUR[k32u]);
 		}
 	}
 #if (BIOSIG_VERSION >= 10500)
 	if (flag & 4) {
 		buf1 = hdr->AS.rawEventData+8+hdr->EVENT.N*(sze-8);
 		for (k32u=0; k32u<hdr->EVENT.N; k32u++) {
-			*(uint64_t*)(buf1+k32u*8) = l_endian_u64(hdr->EVENT.TimeStamp[k32u]);
+			*(uint64_t*)(buf1+k32u*8) = htole64(hdr->EVENT.TimeStamp[k32u]);
 		}
 	}
 #endif
@@ -13741,7 +13732,7 @@ int sclose(HDRTYPE* hdr)
 			if (pos>0) 	hdr->NRec = pos/hdr->AS.bpb;
 			else		hdr->NRec = 0;
 			if (hdr->TYPE==GDF) {
-				t.i64 = l_endian_i64(hdr->NRec);
+				t.i64 = htole64(hdr->NRec);
 				len = sizeof(hdr->NRec);
 			}
 			else {
