@@ -36,6 +36,7 @@
 #include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/param.h>
 #include <time.h>
 
@@ -239,43 +240,188 @@ char *getlogin (void);
 #endif /* __BYTE_ORDER */
 
 
-static inline uint16_t leu16p(const uint8_t* i);
-static inline int16_t  lei16p(const uint8_t* i);
-static inline uint32_t leu32p(const uint8_t* i);
-static inline int32_t  lei32p(const uint8_t* i);
-static inline uint64_t leu64p(const uint8_t* i);
-static inline int64_t  lei64p(const uint8_t* i);
+static inline uint16_t leu16p(const uint8_t* i) {
+	uint16_t a;
+	memcpy(&a, i, sizeof(a));
+	return (le16toh(a));
+}
+static inline int16_t lei16p(const uint8_t* i) {
+	uint16_t a;
+	memcpy(&a, i, sizeof(a));
+	return ((int16_t)le16toh(a));
+}
+static inline uint32_t leu32p(const uint8_t* i) {
+	uint32_t a;
+	memcpy(&a, i, sizeof(a));
+	return (le32toh(a));
+}
+static inline int32_t lei32p(const uint8_t* i) {
+	uint32_t a;
+	memcpy(&a, i, sizeof(a));
+	return ((int32_t)le32toh(a));
+}
+static inline uint64_t leu64p(const uint8_t* i) {
+	uint64_t a;
+	memcpy(&a, i, sizeof(a));
+	return (le64toh(a));
+}
+static inline int64_t lei64p(const uint8_t* i) {
+	uint64_t a;
+	memcpy(&a, i, sizeof(a));
+	return ((int64_t)le64toh(a));
+}
 
-static inline uint16_t beu16p(const uint8_t* i);
-static inline int16_t  bei16p(const uint8_t* i);
-static inline uint32_t beu32p(const uint8_t* i);
-static inline int32_t  bei32p(const uint8_t* i);
-static inline uint64_t beu64p(const uint8_t* i);
-static inline int64_t  bei64p(const uint8_t* i);
+static inline uint16_t beu16p(const uint8_t* i) {
+	uint16_t a;
+	memcpy(&a, i, sizeof(a));
+	return ((int16_t)be16toh(a));
+}
+static inline int16_t bei16p(const uint8_t* i) {
+	uint16_t a;
+	memcpy(&a, i, sizeof(a));
+	return ((int16_t)be16toh(a));
+}
+static inline uint32_t beu32p(const uint8_t* i) {
+	uint32_t a;
+	memcpy(&a, i, sizeof(a));
+	return (be32toh(a));
+}
+static inline int32_t bei32p(const uint8_t* i) {
+	uint32_t a;
+	memcpy(&a, i, sizeof(a));
+	return ((int32_t)be32toh(a));
+}
+static inline uint64_t beu64p(const uint8_t* i) {
+	uint64_t a;
+	memcpy(&a, i, sizeof(a));
+	return ((int64_t)be64toh(a));
+}
+static inline int64_t bei64p(const uint8_t* i) {
+	uint64_t a;
+	memcpy(&a, i, sizeof(a));
+	return ((int64_t)be64toh(a));
+}
 
-static inline void leu16a(uint16_t i, uint8_t* r);
-static inline void lei16a( int16_t i, uint8_t* r);
-static inline void leu32a(uint32_t i, uint8_t* r);
-static inline void lei32a( int32_t i, uint8_t* r);
-static inline void leu64a(uint64_t i, uint8_t* r);
-static inline void lei64a( int64_t i, uint8_t* r);
+static inline void leu16a(uint16_t i, uint8_t* r) {
+	i = htole16(i);
+	memcpy(r, &i, sizeof(i));
+}
+static inline void lei16a( int16_t i, uint8_t* r) {
+	i = htole16(i);
+	memcpy(r, &i, sizeof(i));
+}
+static inline void leu32a(uint32_t i, uint8_t* r) {
+	i = htole32(i);
+	memcpy(r, &i, sizeof(i));
+}
+static inline void lei32a( int32_t i, uint8_t* r) {
+	i = htole32(i);
+	memcpy(r, &i, sizeof(i));
+}
+static inline void leu64a(uint64_t i, uint8_t* r) {
+	i = htole64(i);
+	memcpy(r, &i, sizeof(i));
+}
+static inline void lei64a( int64_t i, uint8_t* r) {
+	i = htole64(i);
+	memcpy(r, &i, sizeof(i));
+}
 
-static inline void beu16a(uint16_t i, uint8_t* r);
-static inline void bei16a( int16_t i, uint8_t* r);
-static inline void beu32a(uint32_t i, uint8_t* r);
-static inline void bei32a( int32_t i, uint8_t* r);
-static inline void beu64a(uint64_t i, uint8_t* r);
-static inline void bei64a( int64_t i, uint8_t* r);
+static inline void beu16a(uint16_t i, uint8_t* r) {
+	i = htobe16(i);
+	memcpy(r, &i, sizeof(i));
+};
+static inline void bei16a( int16_t i, uint8_t* r) {
+	i = htobe16(i);
+	memcpy(r, &i, sizeof(i));
+}
+static inline void beu32a(uint32_t i, uint8_t* r) {
+	i = htobe32(i);
+	memcpy(r, &i, sizeof(i));
+}
+static inline void bei32a( int32_t i, uint8_t* r) {
+	i = htobe32(i);
+	memcpy(r, &i, sizeof(i));
+}
+static inline void beu64a(uint64_t i, uint8_t* r) {
+	i = htobe64(i);
+	memcpy(r, &i, sizeof(i));
+}
+static inline void bei64a( int64_t i, uint8_t* r) {
+	i = htobe64(i);
+	memcpy(r, &i, sizeof(i));
+}
 
-static inline float    lef32p(const uint8_t* i);
-static inline double   lef64p(const uint8_t* i);
-static inline float    bef32p(const uint8_t* i);
-static inline double   bef64p(const uint8_t* i);
+static inline float lef32p(const uint8_t* i) {
+	// decode little endian float pointer
+	uint32_t o;
+	union {
+		uint32_t i;
+		double   r;
+	} c;
+	memcpy(&o,i,4);
+	c.i = le32toh(o);
+	return(c.r);
+}
+static inline double lef64p(const uint8_t* i) {
+	// decode little endian double pointer
+	uint64_t o=0;
+	union {
+		uint64_t i;
+		double   r;
+	} c;
+	memcpy(&o,i,8);
+	c.i = le64toh(o);
+	return(c.r);
+}
+static inline float bef32p(const uint8_t* i) {
+	// decode little endian float pointer
+	uint32_t o;
+	union {
+		uint32_t i;
+		double   r;
+	} c;
+	memcpy(&o,i,4);
+	c.i = be32toh(o);
+	return(c.r);
+}
+static inline double bef64p(const uint8_t* i) {
+	// decode little endian double pointer
+	uint64_t o=0;
+	union {
+		uint64_t i;
+		double   r;
+	} c;
+	memcpy(&o,i,8);
+	c.i = be64toh(o);
+	return(c.r);
+}
 
-static inline void lef32a(   float i, uint8_t* r);
-static inline void lef64a(  double i, uint8_t* r);
-static inline void bef32a(   float i, uint8_t* r);
-static inline void bef64a(  double i, uint8_t* r);
+static inline void lef32a( float i, uint8_t* r) {
+	uint32_t i32;
+	memcpy(&i32, &i, sizeof(i));
+	i32 = le32toh(i32);
+	memcpy(r, &i32, sizeof(i32));
+}
+static inline void lef64a(  double i, uint8_t* r) {
+	uint64_t i64;
+	memcpy(&i64, &i, sizeof(i));
+	i64 = le64toh(i64);
+	memcpy(r, &i64, sizeof(i64));
+}
+static inline void bef32a(   float i, uint8_t* r) {
+	uint32_t i32;
+	memcpy(&i32, &i, sizeof(i));
+	i32 = be32toh(i32);
+	memcpy(r, &i32, sizeof(i32));
+}
+static inline void bef64a(  double i, uint8_t* r) {
+	uint64_t i64;
+	memcpy(&i64, &i, sizeof(i));
+	i64 = be64toh(i64);
+	memcpy(r, &i64, sizeof(i64));
+}
+
 
 #ifdef __cplusplus
 }
