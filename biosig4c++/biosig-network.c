@@ -1,6 +1,6 @@
 /*
 
-    Copyright (C) 2009,2015 Alois Schloegl <alois.schloegl@ist.ac.at>
+    Copyright (C) 2009,2015,2016 Alois Schloegl <alois.schloegl@gmail.com>
     This file is part of the "BioSig for C/C++" repository 
     (biosig4c++) at http://biosig.sf.net/ 
 
@@ -229,7 +229,7 @@ int bscs_connect(const char* hostname) {
 	/* identification */	
 	mesg_t msg; 
 	recv(sd,TC&msg,8,0);
-	int len = b_endian_u32(msg.LEN); 	
+	int len = be32toh(msg.LEN);
 	if ((msg.STATE & (VER_MASK|CMD_MASK)) != (BSCS_VERSION_01 | BSCS_SEND_MSG))	// currently only V0.1 is supported 
 	{
 		close(sd);
@@ -260,7 +260,7 @@ int bscs_disconnect(int sd) {
 int send_packet(int sd, uint32_t state, uint32_t len, void* load) {
 	mesg_t msg; 
 	msg.STATE = state; 
-	msg.LEN = b_endian_u32(len); 
+	msg.LEN = htobe32(len);
 	send(sd, TC &msg, 8, 0);
 	if (len>0) send(sd, TC load, len, 0);
 }
@@ -332,23 +332,23 @@ int bscs_open(int sd, uint64_t* ID) {
 
 	if (VERBOSE_LEVEL>8) fprintf(stdout,"open: %16"PRIx64" %016"PRIx64"\n",*ID,*(uint64_t*)&(msg.LOAD));
 
-	msg.LEN   = b_endian_u32(LEN);
+	msg.LEN   = htobe32(LEN);
 	int s = send(sd, TC &msg, LEN+8, 0);	
 
 	// wait for reply 
 	ssize_t count = 0; 
 	count = recv(sd, TC &msg, 8, 0);
-	LEN = b_endian_u32(msg.LEN);
+	LEN = be32toh(msg.LEN);
 	SERVER_STATE = msg.STATE & STATE_MASK;
 
-	if (VERBOSE_LEVEL>8) fprintf(stdout,"BSCS_OPEN %i:%"PRIiPTR": ID=%16"PRIx64" LEN=%"PRIx32" STATE=0x%08"PRIx32"\n",s,count,*ID,msg.LEN,b_endian_u32(msg.STATE));
+	if (VERBOSE_LEVEL>8) fprintf(stdout,"BSCS_OPEN %i:%"PRIiPTR": ID=%16"PRIx64" LEN=%"PRIx32" STATE=0x%08"PRIx32"\n",s,count,*ID,msg.LEN,be32toh(msg.STATE));
 
 	if ((*ID==0) && (LEN==8) && (msg.STATE==(BSCS_VERSION_01 | BSCS_OPEN_W | BSCS_REPLY | STATE_OPEN_WRITE_HDR | BSCS_NO_ERROR)) ) 
 	{
 		// write access: get new ID
 		count += recv(sd, TC ID, LEN, 0);
 		
-		*ID = l_endian_u64(*ID);
+		*ID = htole64(*ID);
 		B4C_ID = *ID;	
 		return(0);
 	}
@@ -366,7 +366,7 @@ int bscs_open(int sd, uint64_t* ID) {
 	 	// invalid packet or error opening file 
 	}
 	
-	if (VERBOSE_LEVEL>7) 	fprintf(stdout,"ERR: state= %08"PRIx32" %08"PRIx32" len=%"PRIiPTR"\n",b_endian_u32(msg.STATE),BSCS_VERSION_01 | BSCS_OPEN_R | BSCS_REPLY | STATE_OPEN_READ | BSCS_NO_ERROR,LEN);
+	if (VERBOSE_LEVEL>7) 	fprintf(stdout,"ERR: state= %08"PRIx32" %08"PRIx32" len=%"PRIiPTR"\n",htobe32(msg.STATE),BSCS_VERSION_01 | BSCS_OPEN_R | BSCS_REPLY | STATE_OPEN_READ | BSCS_NO_ERROR,LEN);
 	
 	return(msg.STATE);
 }
@@ -381,7 +381,7 @@ int bscs_close(int sd) {
 	
 	msg.STATE = BSCS_VERSION_01 | BSCS_CLOSE | BSCS_NO_ERROR | SERVER_STATE;
 if (VERBOSE_LEVEL>8) fprintf(stdout,"close1: %08"PRIx32" \n",msg.STATE);
-	msg.LEN   = b_endian_u32(0);
+	msg.LEN   = htobe32(0);
 if (VERBOSE_LEVEL>8) fprintf(stdout,"close2: %08"PRIx32" %"PRIiPTR" %"PRIi32"\n",msg.STATE,sizeof(msg),msg.LEN);
 
 	s = send(sd, TC &msg, 8, 0);	
@@ -390,7 +390,7 @@ if (VERBOSE_LEVEL>8) fprintf(stdout,"close3: %08"PRIx32" %i\n",msg.STATE,s);
 
 	// wait for reply 
 	s = recv(sd, TC &msg, 8, 0);
-	LEN = b_endian_u32(msg.LEN);
+	LEN = be32toh(msg.LEN);
 	SERVER_STATE = msg.STATE & STATE_MASK;
 
 if (VERBOSE_LEVEL>8) fprintf(stdout,"s=%i state= %08"PRIx32" len=%"PRIiPTR" %i  %08"PRIx32"\n",s,msg.STATE & ~STATE_MASK,LEN,s,(BSCS_VERSION_01 | BSCS_CLOSE | BSCS_REPLY));
@@ -426,7 +426,7 @@ int bscs_send_hdr(int sd, HDRTYPE *hdr) {
 	struct2gdfbin(hdr); 
 
 	msg.STATE = BSCS_VERSION_01 | BSCS_SEND_HDR | STATE_OPEN_WRITE_HDR | BSCS_NO_ERROR;
-	msg.LEN   = b_endian_u32(hdr->HeadLen);
+	msg.LEN   = htobe32(hdr->HeadLen);
 	int s = send(sd, TC &msg, 8, 0);	
 if (VERBOSE_LEVEL>8) fprintf(stdout,"SND HDR  %i %i\n",hdr->HeadLen,s); 
 	s = send(sd, TC hdr->AS.Header, hdr->HeadLen, 0);	
@@ -438,7 +438,7 @@ if (VERBOSE_LEVEL>8) fprintf(stdout,"SND HDR %i %i\n",hdr->HeadLen,s);
 
 if (VERBOSE_LEVEL>8) fprintf(stdout,"SND HDR %i %i %"PRIiPTR" %08"PRIx32"\n",hdr->HeadLen,s,count,msg.STATE);
 
-	size_t LEN = b_endian_u32(msg.LEN);
+	size_t LEN = be32toh(msg.LEN);
 	SERVER_STATE = msg.STATE & STATE_MASK;
 
 	if ((LEN==0) && (msg.STATE==(BSCS_VERSION_01 | BSCS_SEND_HDR | BSCS_REPLY | STATE_OPEN_WRITE | BSCS_NO_ERROR)) ) 
@@ -462,7 +462,7 @@ int bscs_send_dat(int sd, void* buf, size_t len ) {
 	size_t LEN;
 	mesg_t msg; 
 	msg.STATE = BSCS_VERSION_01 | BSCS_SEND_DAT | STATE_OPEN_WRITE | BSCS_NO_ERROR;
-	msg.LEN   = b_endian_u32(len);
+	msg.LEN   = htobe32(len);
 
 if (VERBOSE_LEVEL>8) fprintf(stdout,"SND DAT %"PRIiPTR" %08"PRIx32"\n",len,msg.STATE);
 
@@ -475,7 +475,7 @@ if (VERBOSE_LEVEL>8) fprintf(stdout,"SND DAT %"PRIiPTR" %08"PRIx32" %"PRIiPTR" \
 
 	// wait for reply 
 	s = recv(sd, TC &msg, 8, 0);
-	LEN = b_endian_u32(msg.LEN);
+	LEN = be32toh(msg.LEN);
 	SERVER_STATE = msg.STATE & STATE_MASK;
 
 if (VERBOSE_LEVEL>8) fprintf(stdout,"SND DAT RPLY %"PRIiPTR" %08"PRIx32" \n",s,msg.STATE);
@@ -521,7 +521,7 @@ int bscs_send_evt(int sd, HDRTYPE *hdr) {
 if (VERBOSE_LEVEL>8) fprintf(stdout,"write evt: len=%"PRIiPTR"\n",len);
 
 	msg.STATE = BSCS_VERSION_01 | BSCS_SEND_EVT | STATE_OPEN_WRITE | BSCS_NO_ERROR;
-	msg.LEN   = b_endian_u32(len);
+	msg.LEN   = htobe32(len);
 	int s1 = send(sd, TC &msg, 8, 0);	
 	int s2 = send(sd, TC hdr->AS.rawEventData, len, 0);	
 
@@ -529,7 +529,7 @@ if (VERBOSE_LEVEL>8) fprintf(stdout,"write evt2: %08"PRIx32" len=%"PRIiPTR"\n",m
 	
 	// wait for reply 
 	ssize_t count = recv(sd, TC &msg, 8, 0);
-	LEN = b_endian_u32(msg.LEN);
+	LEN = be32toh(msg.LEN);
 	SERVER_STATE = msg.STATE & STATE_MASK;
 
 if (VERBOSE_LEVEL>8) fprintf(stdout,"write evt2: %08"PRIx32" len=%"PRIiPTR" count=%"PRIiPTR"\n",msg.STATE,LEN,count);
@@ -564,7 +564,7 @@ int bscs_requ_hdr(int sd, HDRTYPE *hdr) {
 	count = send(sd, TC &msg, 8, 0);	
 
    	count = recv(sd, TC &msg, 8, 0);
-	hdr->HeadLen   = b_endian_u32(msg.LEN);
+	hdr->HeadLen   = be32toh(msg.LEN);
     	hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header,hdr->HeadLen);
     	hdr->TYPE      = GDF; 
 	count = 0; 
@@ -594,15 +594,15 @@ ssize_t bscs_requ_dat(int sd, size_t start, size_t length, HDRTYPE *hdr) {
 	if (SERVER_STATE != STATE_OPEN_READ) return(BSCS_ERROR);
 	
 	msg.STATE = BSCS_VERSION_01 | BSCS_REQU_DAT | BSCS_NO_ERROR | (SERVER_STATE & STATE_MASK);
-	msg.LEN   = b_endian_u32(8);
+	msg.LEN   = htobe32(8);
 
 
-	*(uint32_t*)(msg.LOAD+4) = l_endian_u32(start);	
-	*(uint32_t*)(msg.LOAD+0) = l_endian_u32(length);	
+	leu32a(length,msg.LOAD+0);
+	leu32a(start, msg.LOAD+4);
 	int s = send(sd, TC &msg, 16, 0);	
 	
 	ssize_t count = recv(sd, TC &msg, 8, 0);
-	LEN = b_endian_u32(msg.LEN);
+	LEN = be32toh(msg.LEN);
 	
 	hdr->AS.rawdata = (uint8_t*) realloc(hdr->AS.rawdata,LEN);
 	count = 0; 
@@ -631,12 +631,12 @@ if (VERBOSE_LEVEL>8) fprintf(stdout,"REQ EVT %08x %08x\n",SERVER_STATE, STATE_OP
 	if (SERVER_STATE != STATE_OPEN_READ) return(BSCS_ERROR);
 
 	msg.STATE = BSCS_VERSION_01 | BSCS_REQU_EVT | BSCS_NO_ERROR | (SERVER_STATE & STATE_MASK);
-	msg.LEN   = b_endian_u32(0);
-	int s = send(sd, TC &msg, 8, 0);	
+	msg.LEN   = htobe32(0);
+	int s = send(sd, TC &msg, 8, 0);
 
 	// wait for reply 
 	s = recv(sd, TC &msg, 8, 0);
-	LEN = b_endian_u32(msg.LEN); 	 
+	LEN = be32toh(msg.LEN);
 
 if (VERBOSE_LEVEL>8) fprintf(stdout,"REQ EVT: %i %"PRIiPTR" \n",s,LEN);
 
@@ -700,7 +700,7 @@ if (VERBOSE_LEVEL>8) fprintf(stdout,"PUT FILE(1) %s\n",filename);
 
 
 	msg.STATE = BSCS_VERSION_01 | BSCS_PUT_FILE | STATE_OPEN_WRITE_HDR | BSCS_NO_ERROR;
-	msg.LEN   = b_endian_u32(LEN);
+	msg.LEN   = htobe32(LEN);
 	int s1 = send(sd, TC &msg, 8, 0);	
 
 //if (VERBOSE_LEVEL>8) fprintf(stdout,"PUT FILE(2) %i %i\n",LEN,sdi);
@@ -721,7 +721,7 @@ if (VERBOSE_LEVEL>8) fprintf(stdout,"PUT FILE(1) %s\n",filename);
 
 	// wait for reply 
 	count = recv(sd, TC &msg, 8, 0);
-	LEN = b_endian_u32(msg.LEN);
+	LEN = be32toh(msg.LEN);
 	SERVER_STATE = msg.STATE & STATE_MASK;
 
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"%"PRIiPTR" LEN=%"PRIiPTR" %08x %08x %08x %08x\n",count,LEN,msg.STATE, BSCS_PUT_FILE | BSCS_REPLY , STATE_INIT, (BSCS_VERSION_01 | BSCS_PUT_FILE | BSCS_REPLY | STATE_INIT | BSCS_NO_ERROR));
@@ -756,16 +756,16 @@ int bscs_get_file(int sd, uint64_t ID, char *filename) {
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"get file (1) %i\n",sdo);
 
 	msg.STATE = BSCS_VERSION_01 | BSCS_GET_FILE | STATE_INIT | BSCS_NO_ERROR;
-	*(uint64_t*)&msg.LOAD  = l_endian_u64(ID);
+	leu64a(ID, &msg.LOAD);
 	LEN = BSCS_ID_BITLEN>>3;
-	msg.LEN   = b_endian_u32(LEN);
+	msg.LEN   = htobe32(LEN);
 	int s = send(sd, TC &msg, LEN+8, 0);	
 	
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"get file (1)\n");
 
 	// wait for reply 
 	ssize_t count = recv(sd, TC &msg, 8, 0);
-	LEN = b_endian_u32(msg.LEN);
+	LEN = be32toh(msg.LEN);
 	SERVER_STATE = msg.STATE & STATE_MASK;
 
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"get file (3) %"PRIiPTR"\n",LEN);
@@ -798,8 +798,8 @@ int bscs_nop(int sd) {
 	mesg_t msg;
 	
 	msg.STATE = BSCS_NOP | SERVER_STATE;
-	msg.LEN = b_endian_u32(0); 
-	int s = send(sd, TC &msg, 8, 0);	
+	msg.LEN = htobe32(0);
+	int s = send(sd, TC &msg, 8, 0);
 	
 
 }

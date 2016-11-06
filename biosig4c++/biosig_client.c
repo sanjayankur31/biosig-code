@@ -1,6 +1,6 @@
 /*
 
-    Copyright (C) 2009,2015 Alois Schloegl <alois.schloegl@ist.ac.at>
+    Copyright (C) 2009,2015,2016 Alois Schloegl <alois.schloegl@gmail.com>
     This file is part of the "BioSig for C/C++" repository 
     (biosig4c++) at http://biosig.sf.net/ 
 
@@ -103,7 +103,7 @@ int main (int argc, char *argv[]) {
 			fprintf(stdout,"c ID=%016"PRIx64" s=%i %08x\n",ID,s,s);
 		}
 		else if (!strncasecmp(cmd,"or+c",4)) {
-			ID = l_endian_u64(0x233ab6dfc96f664fLL); 
+			ID = htole64(0x233ab6dfc96f664fLL);
 			s=bscs_open(sd, &ID);
 			fprintf(stdout,"or ID=%016"PRIx64" s=%i %08x\n",ID,s,s);
 //		   	hdr->TYPE = unknown; 
@@ -115,9 +115,9 @@ int main (int argc, char *argv[]) {
 			fprintf(stdout,"c ID=%016"PRIx64" s=%i %08x\n",ID,s,s);
 		}
 		else if (!strncasecmp(cmd,"openr",5)) {
-			ID = l_endian_u64(0x233ab6dfc96f664fLL); 
+			ID = htole64(0x233ab6dfc96f664fLL);
 
-			ID = l_endian_u64(0x233ab6dfc96f664fLL); 
+			ID = htole64(0x233ab6dfc96f664fLL);
 			fprintf(stdout,"or ID=%016"PRIx64" s=%i %08x\n",ID,s,s);
 			s=bscs_open(sd, &ID);
 		}

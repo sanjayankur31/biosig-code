@@ -1,7 +1,6 @@
 /*
 
-    $Id: biosig_server.c,v 1.7 2009-04-08 15:55:56 schloegl Exp $
-    Copyright (C) 2009 Alois Schloegl <a.schloegl@ieee.org>
+    Copyright (C) 2009,2016 Alois Schloegl <alois.schloegl@gmail.com>
     This file is part of the "BioSig for C/C++" repository 
     (biosig4c++) at http://biosig.sf.net/ 
 
@@ -173,7 +172,7 @@ void DoJob(int ns)
 		/*server identification */
 		const char *greeting="Hi there,\n this is your experimental BSCS server. \n It is useful for testing the BioSig client-server architecture.\n";
 		msg.STATE = BSCS_VERSION_01 | BSCS_SEND_MSG | STATE_INIT | BSCS_NO_ERROR;
-		msg.LEN = b_endian_u32(strlen(greeting)); 
+		msg.LEN = htobe32(strlen(greeting));
 		int s;
 		s = send(ns,&msg,8,0);
 		s = send(ns, greeting, strlen(greeting), 0);
@@ -182,11 +181,11 @@ void DoJob(int ns)
 		{
 			fprintf(stdout,":> ");
 	   		ssize_t count = recv(ns, &msg, 8, 0);
-			fprintf(stdout,"STATUS=%08x c=%i MSG=%08x len=%i,errno=%i %s\n",STATUS,count,b_endian_u32(msg.STATE),b_endian_u32(msg.LEN),errno,strerror(errno)); 
-			size_t  LEN = b_endian_u32(msg.LEN);  
+			fprintf(stdout,"STATUS=%08x c=%i MSG=%08x len=%i,errno=%i %s\n",STATUS,count,be32toh(msg.STATE),be32toh(msg.LEN),errno,strerror(errno));
+			size_t  LEN = be32toh(msg.LEN);
 
 			FILE *fid = fopen(LOGFILE,"a");
-			fprintf(stdout,"STATUS=%08x c=%i MSG=%08x len=%i,errno=%i %s\n",STATUS,count,b_endian_u32(msg.STATE),b_endian_u32(msg.LEN),errno,strerror(errno)); 
+			fprintf(stdout,"STATUS=%08x c=%i MSG=%08x len=%i,errno=%i %s\n",STATUS,count,be32toh(msg.STATE),be32toh(msg.LEN),errno,strerror(errno));
 			fclose(fid); 
 			errno = 0; 
 
@@ -210,7 +209,7 @@ void DoJob(int ns)
 				msg.STATE = BSCS_VERSION_01 | BSCS_NOP | BSCS_REPLY | (msg.STATE & STATE_MASK) | BSCS_NO_ERROR;
 
 				// send reply 
-				msg.LEN = b_endian_u32(0);
+				msg.LEN = htobe32(0);
 				s = send(ns, &msg, 8, 0);	
 			}
 
@@ -231,8 +230,8 @@ void DoJob(int ns)
 					hdr->FLAG.ANONYMOUS = 1; 	// do not store name 
 					STATUS = STATE_OPEN_WRITE_HDR; 
 					msg.STATE = BSCS_VERSION_01 | BSCS_OPEN_W | BSCS_REPLY | STATE_OPEN_WRITE_HDR;
-					msg.LEN = b_endian_u32(8);
-					*(uint64_t*)&msg.LOAD  = l_endian_u64(ID); 
+					msg.LEN = htobe32(8);
+					leu64a(ID, &msg.LOAD);
 					s = send(ns, &msg, 16, 0);
 
 		FILE *fid = fopen(LOGFILE,"a");
@@ -250,7 +249,7 @@ void DoJob(int ns)
 					hdr->FLAG.ANONYMOUS = 1; 	// do not store name 
 					hdr->FileName = fullfilename;
 					hdr = sopen(fullfilename,"r",hdr);
-					msg.LEN = b_endian_u32(0);
+					msg.LEN = htobe32(0);
 					if (hdr->FILE.OPEN==0) {
 						msg.STATE = BSCS_VERSION_01 | BSCS_OPEN_R | BSCS_REPLY | STATE_INIT | BSCS_ERROR_CANNOT_OPEN_FILE;
 						STATUS = STATE_INIT; 
@@ -271,7 +270,7 @@ void DoJob(int ns)
 				{ 
 					STATUS = STATE_INIT; 
 					msg.STATE = BSCS_VERSION_01 | BSCS_OPEN_W | BSCS_REPLY | STATE_INIT | BSCS_ERROR_INCORRECT_PACKET_LENGTH;
-					msg.LEN = b_endian_u32(0);
+					msg.LEN = htobe32(0);
 					s = send(ns, &msg, 8, 0);	
 				}
 			}	
@@ -287,7 +286,7 @@ void DoJob(int ns)
 				if (STATUS != (msg.STATE & STATE_MASK)) fprintf(stdout,"Close: status does not fit\n");
 	
 				msg.STATE = BSCS_VERSION_01 | BSCS_CLOSE | BSCS_REPLY | STATE_INIT;
-				msg.LEN = b_endian_u32(0);
+				msg.LEN = htobe32(0);
 
 				if (LEN != 0) 
 					msg.STATE = BSCS_VERSION_01 | BSCS_CLOSE | BSCS_REPLY | STATE_INIT | BSCS_ERROR_INCORRECT_PACKET_LENGTH;
@@ -361,7 +360,7 @@ if (VERBOSE_LEVEL>8) fprintf(stdout,"SND HDR: count=%i\n",count);
 					STATUS = STATE_OPEN_WRITE; 
 					msg.STATE = BSCS_VERSION_01 | BSCS_SEND_HDR | BSCS_REPLY | STATE_OPEN_WRITE;
 				}	
-				msg.LEN = b_endian_u32(0);
+				msg.LEN = htobe32(0);
 if (VERBOSE_LEVEL>8) fprintf(stdout,"SND HDR RPLY: %08x\n",msg.STATE);				
 				s = send(ns, &msg, 8, 0);	
 			}
@@ -392,7 +391,7 @@ if (VERBOSE_LEVEL>8) fprintf(stdout,"SND HDR RPLY: %08x\n",msg.STATE);
 				else {
 					msg.STATE = BSCS_VERSION_01 | BSCS_SEND_DAT | BSCS_REPLY | STATE_OPEN_WRITE;
 				}	
-				msg.LEN = b_endian_u32(0);
+				msg.LEN = htobe32(0);
 				s = send(ns, &msg, 8, 0);	
 			}
 
@@ -459,19 +458,19 @@ if (VERBOSE_LEVEL>8) fprintf(stdout,"SND HDR RPLY: %08x\n",msg.STATE);
 #if __BYTE_ORDER == __BIG_ENDIAN
 					// do byte swapping if needed 
 					for (size_t k=n; k<hdr->EVENT.N; k++) {
-						hdr->EVENT.POS[k] = l_endian_u32(hdr->EVENT.POS[k]); 
-						hdr->EVENT.TYP[k] = l_endian_u16(hdr->EVENT.TYP[k]); 
+						hdr->EVENT.POS[k] = htole32(hdr->EVENT.POS[k]);
+						hdr->EVENT.TYP[k] = htole16(hdr->EVENT.TYP[k]);
 					}
 					if (flag==3) {	
 						for (size_t k=n; k<hdr->EVENT.N; k++) {
-							hdr->EVENT.DUR[k] = l_endian_u32(hdr->EVENT.DUR[k]); 
-							hdr->EVENT.CHN[k] = l_endian_u16(hdr->EVENT.CHN[k]); 
+							hdr->EVENT.DUR[k] = htole32(hdr->EVENT.DUR[k]);
+							hdr->EVENT.CHN[k] = htole16(hdr->EVENT.CHN[k]);
 						}
 					} 
 #endif
 					msg.STATE = BSCS_VERSION_01 | BSCS_SEND_EVT | BSCS_REPLY | STATE_OPEN_WRITE;
 				}
-				msg.LEN = b_endian_u32(0);
+				msg.LEN = htobe32(0);
 				s = send(ns, &msg, 8, 0);	
 			}
 
@@ -498,7 +497,7 @@ if (VERBOSE_LEVEL>8) fprintf(stdout,"SND HDR RPLY: %08x\n",msg.STATE);
 	REQUEST HEADER
  ****************************************************************************************/
 				msg.STATE = BSCS_VERSION_01 | BSCS_REQU_HDR | BSCS_REPLY | STATE_OPEN_READ;
-				msg.LEN = b_endian_u32(hdr->HeadLen);
+				msg.LEN = htobe32(hdr->HeadLen);
 				s = send(ns, &msg, 8, 0);	
 				s = send(ns, hdr->AS.Header, hdr->HeadLen, 0);	
 
@@ -517,7 +516,7 @@ if (VERBOSE_LEVEL>8) fprintf(stdout,"SND HDR RPLY: %08x\n",msg.STATE);
 
 				length = min(length, hdr->AS.first + hdr->AS.length - start);
 				msg.STATE = BSCS_VERSION_01 | BSCS_REQU_DAT | BSCS_REPLY | STATE_OPEN_READ;
-				msg.LEN = b_endian_u32(hdr->AS.bpb*length);
+				msg.LEN = htobe32(hdr->AS.bpb*length);
 				s = send(ns, &msg, 8, 0);	
 				s = send(ns, hdr->AS.rawdata + hdr->AS.bpb*(start-hdr->AS.first), hdr->AS.bpb*length, 0);	
 				//send(ns, hdr->AS.rawdata, (hdr->AS.length-hdr->AS.first)*hdr->AS.bpb,0);
@@ -573,10 +572,10 @@ if (VERBOSE_LEVEL>8) fprintf(stdout,"SND HDR RPLY: %08x\n",msg.STATE);
 
 				msg.STATE = BSCS_VERSION_01 | BSCS_REQU_HDR | BSCS_REPLY | STATE_OPEN_READ;
 				if (len <= 8) {
-					msg.LEN = b_endian_u32(0);
+					msg.LEN = htobe32(0);
 					s = send(ns, &msg, 8, 0);
 				} else {
-					msg.LEN = b_endian_u32(len);
+					msg.LEN = htobe32(len);
 					s = send(ns, &msg, 8, 0);
 					s = send(ns, hdr->AS.rawEventData, len, 0);
 				}
@@ -685,8 +684,8 @@ if (VERBOSE_LEVEL>8) fprintf(stdout,"SND HDR RPLY: %08x\n",msg.STATE);
 				free(f2);
 
 				STATUS = STATE_INIT;
-				msg.STATE = BSCS_VERSION_01 | BSCS_PUT_FILE | BSCS_REPLY | STATE_INIT | b_endian_u32(errcode);
-				msg.LEN = b_endian_u32(0);
+				msg.STATE = BSCS_VERSION_01 | BSCS_PUT_FILE | BSCS_REPLY | STATE_INIT | htobe32(errcode);
+				msg.LEN = htobe32(0);
 				s = send(ns, &msg, 8, 0);
 			}
 
@@ -711,7 +710,7 @@ fprintf(stdout,"get file: %016lx %i\n",ID,sdi);
 
 				if (sdi<0) {
 					msg.STATE = BSCS_VERSION_01 | BSCS_GET_FILE | BSCS_REPLY | STATUS | BSCS_ERROR_CANNOT_OPEN_FILE;
-					msg.LEN = b_endian_u32(0);
+					msg.LEN = htobe32(0);
 					s = send(ns, &msg, 8, 0);	
 				} 
 				else {		
@@ -720,7 +719,7 @@ fprintf(stdout,"get file: %016lx %i\n",ID,sdi);
 					uint32_t LEN = FileBuf.st_size;
 
 					msg.STATE = BSCS_VERSION_01 | BSCS_GET_FILE | BSCS_REPLY | STATUS | BSCS_NO_ERROR;
-					msg.LEN = b_endian_u32(LEN);
+					msg.LEN = htobe32(LEN);
 					s = send(ns, &msg, 8, 0);	
 
 					const int BUFLEN = 1024;
@@ -751,9 +750,9 @@ fprintf(stdout,"get file: %016lx %i\n",ID,sdi);
 	   		} 
 			else 
 			{
-				fprintf(stdout,"unknown packet: state=%08x len=%i\n",b_endian_u32(msg.STATE),b_endian_i32(msg.LEN)); 
+				fprintf(stdout,"unknown packet: state=%08x len=%i\n",be32toh(msg.STATE),(int32_t)be32toh(msg.LEN));
 				msg.STATE = BSCS_VERSION_01 | BSCS_ERROR;
-				msg.LEN = b_endian_u32(0);
+				msg.LEN = htobe32(0);
 				s = send(ns, &msg, 8, 0);	
 			}
 		}
