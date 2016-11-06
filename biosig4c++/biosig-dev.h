@@ -213,8 +213,6 @@ char *getlogin (void);
 #define l_endian_i16(x) ((int16_t)bswap_16((int16_t)(x)))
 #define l_endian_i32(x) ((int32_t)bswap_32((int32_t)(x)))
 #define l_endian_i64(x) ((int64_t)bswap_64((int64_t)(x)))
-float   l_endian_f32(float x); 
-double  l_endian_f64(double x); 
 
 #define b_endian_u16(x) ((uint16_t)(x))
 #define b_endian_u32(x) ((uint32_t)(x))
@@ -222,8 +220,6 @@ double  l_endian_f64(double x);
 #define b_endian_i16(x) ((int16_t)(x))
 #define b_endian_i32(x) ((int32_t)(x))
 #define b_endian_i64(x) ((int64_t)(x))
-#define b_endian_f32(x) ((float)(x))
-#define b_endian_f64(x) ((double)(x))
 
 #elif __BYTE_ORDER==__LITTLE_ENDIAN
 #define l_endian_u16(x) ((uint16_t)(x))
@@ -232,8 +228,6 @@ double  l_endian_f64(double x);
 #define l_endian_i16(x) ((int16_t)(x))
 #define l_endian_i32(x) ((int32_t)(x))
 #define l_endian_i64(x) ((int64_t)(x))
-#define l_endian_f32(x) ((float)(x))
-#define l_endian_f64(x) ((double)(x))
 
 #define b_endian_u16(x) ((uint16_t)bswap_16((uint16_t)(x)))
 #define b_endian_u32(x) ((uint32_t)bswap_32((uint32_t)(x)))
@@ -241,8 +235,6 @@ double  l_endian_f64(double x);
 #define b_endian_i16(x) ((int16_t)bswap_16((int16_t)(x)))
 #define b_endian_i32(x) ((int32_t)bswap_32((int32_t)(x)))
 #define b_endian_i64(x) ((int64_t)bswap_64((int64_t)(x)))
-float   b_endian_f32(float x); 
-double  b_endian_f64(double x); 
 
 #endif /* __BYTE_ORDER */
 
@@ -255,8 +247,6 @@ double  b_endian_f64(double x);
 #define lei32p(i) l_endian_i32(*( int32_t*)(i))
 #define leu64p(i) l_endian_u64(*(uint64_t*)(i))
 #define lei64p(i) l_endian_i64(*( int64_t*)(i))
-#define lef32p(i) l_endian_f32(*(float*)(i))
-#define lef64p(i) l_endian_f64(*(double*)(i))
 
 #define beu16p(i) b_endian_u16(*(uint16_t*)(i))
 #define bei16p(i) b_endian_i16(*( int16_t*)(i))
@@ -264,8 +254,6 @@ double  b_endian_f64(double x);
 #define bei32p(i) b_endian_i32(*( int32_t*)(i))
 #define beu64p(i) b_endian_u64(*(uint64_t*)(i))
 #define bei64p(i) b_endian_i64(*( int64_t*)(i))
-#define bef32p(i) b_endian_f32(*(float*)(i))
-#define bef64p(i) b_endian_f64(*(double*)(i))
 
 #define leu16a(i,r) (*(uint16_t*)(r) = l_endian_u16(i))
 #define lei16a(i,r) (*( int16_t*)(r) = l_endian_i16(i))
@@ -273,8 +261,6 @@ double  b_endian_f64(double x);
 #define lei32a(i,r) (*( int32_t*)(r) = l_endian_i32(i))
 #define leu64a(i,r) (*(uint64_t*)(r) = l_endian_u64(i))
 #define lei64a(i,r) (*( int64_t*)(r) = l_endian_i64(i))
-#define lef32a(i,r) (*(   float*)(r) = l_endian_f32(i))
-#define lef64a(i,r) (*(  double*)(r) = l_endian_f64(i))
 
 #define beu16a(i,r) (*(uint16_t*)(r) = b_endian_u16(i))
 #define bei16a(i,r) (*( int16_t*)(r) = b_endian_i16(i))
@@ -282,28 +268,22 @@ double  b_endian_f64(double x);
 #define bei32a(i,r) (*( int32_t*)(r) = b_endian_i32(i))
 #define beu64a(i,r) (*(uint64_t*)(r) = b_endian_u64(i))
 #define bei64a(i,r) (*( int64_t*)(r) = b_endian_i64(i))
-#define bef32a(i,r) (*(   float*)(r) = b_endian_f32(i))
-#define bef64a(i,r) (*(  double*)(r) = b_endian_f64(i))
 
 #else
 /*    SPARC,IA64: missing alignment must be explicitly handled     */ 
-uint16_t leu16p(uint8_t* i);
-int16_t  lei16p(uint8_t* i);
-uint32_t leu32p(uint8_t* i);
-int32_t  lei32p(uint8_t* i);
-uint64_t leu64p(uint8_t* i);
-int64_t  lei64p(uint8_t* i);
-float    lef32p(uint8_t* i);
-double   lef64p(uint8_t* i);
+uint16_t leu16p(const uint8_t* i);
+int16_t  lei16p(const uint8_t* i);
+uint32_t leu32p(const uint8_t* i);
+int32_t  lei32p(const uint8_t* i);
+uint64_t leu64p(const uint8_t* i);
+int64_t  lei64p(const uint8_t* i);
 
-uint16_t beu16p(uint8_t* i);
-int16_t  bei16p(uint8_t* i);
-uint32_t beu32p(uint8_t* i);
-int32_t  bei32p(uint8_t* i);
-uint64_t beu64p(uint8_t* i);
-int64_t  bei64p(uint8_t* i);
-float    bef32p(uint8_t* i);
-double   bef64p(uint8_t* i);
+uint16_t beu16p(const uint8_t* i);
+int16_t  bei16p(const uint8_t* i);
+uint32_t beu32p(const uint8_t* i);
+int32_t  bei32p(const uint8_t* i);
+uint64_t beu64p(const uint8_t* i);
+int64_t  bei64p(const uint8_t* i);
 
 void leu16a(uint16_t i, uint8_t* r);
 void lei16a( int16_t i, uint8_t* r);
@@ -311,8 +291,6 @@ void leu32a(uint32_t i, uint8_t* r);
 void lei32a( int32_t i, uint8_t* r);
 void leu64a(uint64_t i, uint8_t* r);
 void lei64a( int64_t i, uint8_t* r);
-void lef32a(   float i, uint8_t* r);
-void lef64a(  double i, uint8_t* r);
 
 void beu16a(uint16_t i, uint8_t* r);
 void bei16a( int16_t i, uint8_t* r);
@@ -320,10 +298,19 @@ void beu32a(uint32_t i, uint8_t* r);
 void bei32a( int32_t i, uint8_t* r);
 void beu64a(uint64_t i, uint8_t* r);
 void bei64a( int64_t i, uint8_t* r);
+
+#endif
+
+float    lef32p(const uint8_t* i);
+double   lef64p(const uint8_t* i);
+float    bef32p(const uint8_t* i);
+double   bef64p(const uint8_t* i);
+
+void lef32a(   float i, uint8_t* r);
+void lef64a(  double i, uint8_t* r);
 void bef32a(   float i, uint8_t* r);
 void bef64a(  double i, uint8_t* r);
 
-#endif
 #ifdef __cplusplus
 }
 #endif

@@ -362,164 +362,75 @@ uint32_t lcm(uint32_t A, uint32_t B)
 	return((uint32_t)A64);
 };
 
-#if __BYTE_ORDER == __BIG_ENDIAN
-float l_endian_f32(float x)
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
-float b_endian_f32(float x)
-#endif
-{
-	union {
-		float f32;
-		uint32_t u32;
-	} b1;
-	b1.f32 = x;
-	b1.u32 = bswap_32(b1.u32);
-	return(b1.f32);
-}
-
-#if __BYTE_ORDER == __BIG_ENDIAN
-double l_endian_f64(double x)
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
-double b_endian_f64(double x)
-#endif
-{
-	union {
-		double f64;
-		uint64_t u64;
-	} b1;
-	b1.f64 = x;
-	b1.u64 = bswap_64(b1.u64);
-	return(b1.f64);
-}
 
 #ifndef leu16p
 /*    SPARC, ia64: missing alignment must be explicitly handled     */
-uint16_t leu16p(uint8_t* i) {
+uint16_t leu16p(const uint8_t* i) {
 	// decode little endian uint16 pointer
 	return ((*i) + ((uint16_t)*(i+1) << 8));
 }
-int16_t lei16p(uint8_t* i) {
+int16_t lei16p(const uint8_t* i) {
 	// decode little endian int16 pointer
 	uint16_t o = ((*i) + ((uint16_t)*(i+1) << 8));
 	return(*(int16_t*)(&o));
 }
-uint32_t leu32p(uint8_t* i) {
+uint32_t leu32p(const uint8_t* i) {
 	// decode little endian uint32 pointer
 	uint32_t o=0;
-	char k;
-	for (k=0; k<4; k++)
-		o += ((uint32_t)*(i+k))<<(k*8);
-	return(o);
+	memcpy(&o,i,4);
+	return (le32toh(o));
 }
-int32_t lei32p(uint8_t* i) {
+int32_t lei32p(const uint8_t* i) {
 	// decode little endian int32 pointer
 	uint32_t o=0;
-	char k;
-	for (k=0; k<4; k++)
-		o += ((uint32_t)*(i+k))<<(k*8);
-	return(*(int32_t*)(&o));
+	memcpy(&o,i,4);
+	return (le32toh(o));
 }
-uint64_t leu64p(uint8_t* i) {
+uint64_t leu64p(const uint8_t* i) {
 	// decode little endian uint64 pointer
 	uint64_t o=0;
-	char k;
-	for (k=0; k<8; k++)
-		o += ((uint64_t)*(i+k))<<(k*8);
-	return(o);
+	memcpy(&o,i,8);
+	return (le64toh(o));
 }
-int64_t lei64p(uint8_t* i) {
+int64_t lei64p(const uint8_t* i) {
 	// decode little endian int64 pointer
 	uint64_t o=0;
-	char k; 
-	for (k=0; k<8; k++)
-		o += ((uint64_t)*(i+k))<<(k*8);
-	return(*(int64_t*)(&o));
-}
-float lef32p(uint8_t* i) {
-	// decode little endian float pointer
-	uint32_t o;
-	char k; 
-	for (k=0, o=0; k<4; k++)
-		o += ((uint32_t)*(i+k))<<(k*8);
-	return(*(float*)(&o));
-}
-double lef64p(uint8_t* i) {
-	// decode little endian double pointer
-	uint64_t o=0;
-	char k; 
-	for (k=0; k<8; k++)
-		o += ((uint64_t)*(i+k))<<(k*8);
-	return(*(double*)(&o));
+	memcpy(&o,i,8);
+	return (le64toh(o));
 }
 
-uint16_t beu16p(uint8_t* i) {
+uint16_t beu16p(const uint8_t* i) {
 	// decode big endian uint16 pointer
 	return (((uint16_t)*i<<8) + (*(i+1)));
 }
-int16_t bei16p(uint8_t* i) {
+int16_t bei16p(const uint8_t* i) {
 	// decode big endian int16 pointer
 	uint16_t o = (((uint16_t)*i << 8) + (*(i+1)));
 	return(*(int16_t*)(&o));
 }
-uint32_t beu32p(uint8_t* i) {
+uint32_t beu32p(const uint8_t* i) {
 	// decode big endian uint32 pointer
 	uint32_t o=0;
-	char k; 
-	for (k=0; k<4; k++) {
-		o<<=8;
-		o += *(i+k);
-	}
-	return(o);
+	memcpy(&o,i,4);
+	return (be32toh(o));
 }
-int32_t bei32p(uint8_t* i) {
+int32_t bei32p(const uint8_t* i) {
 	// decode big endian int32 pointer
 	uint32_t o=0;
-	char k; 
-	for (k=0; k<4; k++) {
-		o<<=8;
-		o += *(i+k);
-	}
-	return(*(int32_t*)(&o));
+	memcpy(&o,i,4);
+	return (be32toh(o));
 }
-uint64_t beu64p(uint8_t* i) {
+uint64_t beu64p(const uint8_t* i) {
 	// decode big endian uint64 pointer
 	uint64_t o=0;
-	char k;
-	for (k=0; k<8; k++) {
-		o<<=8;
-		o += *(i+k);
-	}
-	return(o);
+	memcpy(&o,i,8);
+	return (be64toh(o));
 }
-int64_t bei64p(uint8_t* i) {
+int64_t bei64p(const uint8_t* i) {
 	// decode big endian int64 pointer
 	uint64_t o=0;
-	char k; 
-	for (k=0; k<8; k++){
-		o<<=8;
-		o += *(i+k);
-	}
-	return(*(int64_t*)(&o));
-}
-float bef32p(uint8_t* i) {
-	// decode big endian float pointer
-	uint32_t o=0;
-	char k; 
-	for (k=0; k<4; k++) {
-		o<<=8;
-		o += *(i+k);
-	}
-	return(*(float*)(&o));
-}
-double bef64p(uint8_t* i) {
-	// decode big endian double pointer
-	uint64_t o=0;
-	char k; 
-	for (k=0; k<8; k++) {
-		o<<=8;
-		o += *(i+k);
-	}
-	return(*(double*)(&o));
+	memcpy(&o,i,8);
+	return (be64toh(o));
 }
 
 void leu16a(uint16_t i, uint8_t* r) {
@@ -546,14 +457,6 @@ void lei64a( int64_t i, uint8_t* r) {
 	i = l_endian_i64(i);
 	memcpy(r, &i, sizeof(i));
 }
-void lef32a( float i, uint8_t* r) {
-	uint32_t i32 = l_endian_u32(*(uint32_t*)(&i));
-	memcpy(r, &i32, sizeof(i32));
-}
-void lef64a(  double i, uint8_t* r) {
-	uint64_t i64 = l_endian_u64(*(uint64_t*)(&i));
-	memcpy(r, &i64, sizeof(i64));
-}
 
 void beu16a(uint16_t i, uint8_t* r) {
 	i = b_endian_u16(i);
@@ -579,16 +482,77 @@ void bei64a( int64_t i, uint8_t* r) {
 	i = b_endian_i64(i);
 	memcpy(r, &i, sizeof(i));
 }
+#endif
+
+float lef32p(const uint8_t* i) {
+	// decode little endian float pointer
+	uint32_t o;
+	union {
+		uint32_t i;
+		double   r;
+	} c;
+	memcpy(&o,i,4);
+	c.i = le32toh(o);
+	return(c.r);
+}
+double lef64p(const uint8_t* i) {
+	// decode little endian double pointer
+	uint64_t o=0;
+	union {
+		uint64_t i;
+		double   r;
+	} c;
+	memcpy(&o,i,8);
+	c.i = le64toh(o);
+	return(c.r);
+}
+float bef32p(const uint8_t* i) {
+	// decode little endian float pointer
+	uint32_t o;
+	union {
+		uint32_t i;
+		double   r;
+	} c;
+	memcpy(&o,i,4);
+	c.i = be32toh(o);
+	return(c.r);
+}
+double bef64p(const uint8_t* i) {
+	// decode little endian double pointer
+	uint64_t o=0;
+	union {
+		uint64_t i;
+		double   r;
+	} c;
+	memcpy(&o,i,8);
+	c.i = be64toh(o);
+	return(c.r);
+}
+
+void lef32a( float i, uint8_t* r) {
+	uint32_t i32;
+	memcpy(&i32, &i, sizeof(i));
+	i32 = le32toh(i32);
+	memcpy(r, &i32, sizeof(i32));
+}
+void lef64a(  double i, uint8_t* r) {
+	uint64_t i64;
+	memcpy(&i64, &i, sizeof(i));
+	i64 = le64toh(i64);
+	memcpy(r, &i64, sizeof(i64));
+}
 void bef32a(   float i, uint8_t* r) {
-	uint32_t i32 = b_endian_u32(*(uint32_t*)(&i));
+	uint32_t i32;
+	memcpy(&i32, &i, sizeof(i));
+	i32 = be32toh(i32);
 	memcpy(r, &i32, sizeof(i32));
 }
 void bef64a(  double i, uint8_t* r) {
-	uint64_t i64 = b_endian_u64(*(uint64_t*)(&i));
+	uint64_t i64;
+	memcpy(&i64, &i, sizeof(i));
+	i64 = be64toh(i64);
 	memcpy(r, &i64, sizeof(i64));
 }
-
-#endif
 
 
 #ifndef  ONLYGDF
@@ -2859,10 +2823,10 @@ void struct2gdfbin(HDRTYPE *hdr)
 	     		*(uint32_t*)(Header2) = l_endian_u32(tag + (TagNLen[tag]<<8)); // Tag=4 & Length of Tag 4
 	     		Header2 += 4;
 	     		for (k=0; k<hdr->NS; k++) {
-	     			*(float*)(Header2 + 4*k)             = l_endian_f32(hdr->CHANNEL[k].Orientation[0]);
-	     			*(float*)(Header2 + 4*k + 4*hdr->NS) = l_endian_f32(hdr->CHANNEL[k].Orientation[1]);
-	     			*(float*)(Header2 + 4*k + 8*hdr->NS) = l_endian_f32(hdr->CHANNEL[k].Orientation[2]);
-	     			*(float*)(Header2 + 4*k +12*hdr->NS) = l_endian_f32(hdr->CHANNEL[k].Area);
+				*(uint32_t*)(Header2 + 4*k)             = le32toh(*(uint32_t*)(hdr->CHANNEL[k].Orientation+0));
+				*(uint32_t*)(Header2 + 4*k + 4*hdr->NS) = le32toh(*(uint32_t*)(hdr->CHANNEL[k].Orientation+1));
+				*(uint32_t*)(Header2 + 4*k + 8*hdr->NS) = le32toh(*(uint32_t*)(hdr->CHANNEL[k].Orientation+2));
+				*(uint32_t*)(Header2 + 4*k +12*hdr->NS) = le32toh(*(uint32_t*)(&(hdr->CHANNEL[k].Area));
 	     		}
      			Header2 += 4*sizeof(float)*hdr->NS;
 	     	}
