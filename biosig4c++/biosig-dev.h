@@ -205,41 +205,6 @@ char *getlogin (void);
 #error  ENDIANITY is not known 
 #endif 
 
-
-
-#if __BYTE_ORDER == __BIG_ENDIAN
-#define l_endian_u16(x) ((uint16_t)bswap_16((uint16_t)(x)))
-#define l_endian_u32(x) ((uint32_t)bswap_32((uint32_t)(x)))
-#define l_endian_u64(x) ((uint64_t)bswap_64((uint64_t)(x)))
-#define l_endian_i16(x) ((int16_t)bswap_16((int16_t)(x)))
-#define l_endian_i32(x) ((int32_t)bswap_32((int32_t)(x)))
-#define l_endian_i64(x) ((int64_t)bswap_64((int64_t)(x)))
-
-#define b_endian_u16(x) ((uint16_t)(x))
-#define b_endian_u32(x) ((uint32_t)(x))
-#define b_endian_u64(x) ((uint64_t)(x))
-#define b_endian_i16(x) ((int16_t)(x))
-#define b_endian_i32(x) ((int32_t)(x))
-#define b_endian_i64(x) ((int64_t)(x))
-
-#elif __BYTE_ORDER==__LITTLE_ENDIAN
-#define l_endian_u16(x) ((uint16_t)(x))
-#define l_endian_u32(x) ((uint32_t)(x))
-#define l_endian_u64(x) ((uint64_t)(x))
-#define l_endian_i16(x) ((int16_t)(x))
-#define l_endian_i32(x) ((int32_t)(x))
-#define l_endian_i64(x) ((int64_t)(x))
-
-#define b_endian_u16(x) ((uint16_t)bswap_16((uint16_t)(x)))
-#define b_endian_u32(x) ((uint32_t)bswap_32((uint32_t)(x)))
-#define b_endian_u64(x) ((uint64_t)bswap_64((uint64_t)(x)))
-#define b_endian_i16(x) ((int16_t)bswap_16((int16_t)(x)))
-#define b_endian_i32(x) ((int32_t)bswap_32((int32_t)(x)))
-#define b_endian_i64(x) ((int64_t)bswap_64((int64_t)(x)))
-
-#endif /* __BYTE_ORDER */
-
-
 static inline uint16_t leu16p(const uint8_t* i) {
 	uint16_t a;
 	memcpy(&a, i, sizeof(a));
