@@ -116,11 +116,51 @@ char *getlogin (void);
 #elif defined(__WIN32__)
 #  include <stdlib.h>
 #  define __BIG_ENDIAN		4321
-#  define __LITTLE_ENDIAN  	1234
-#  define __BYTE_ORDER 		__LITTLE_ENDIAN
-#  define bswap_16(x) _byteswap_ushort(x)
-#  define bswap_32(x) _byteswap_ulong(x)
-#  define bswap_64(x) _byteswap_uint64(x)
+#  define __LITTLE_ENDIAN	1234
+#  define __BYTE_ORDER		__LITTLE_ENDIAN
+#  define bswap_16(x) __builtin_bswap16(x)
+#  define bswap_32(x) __builtin_bswap32(x)
+#  define bswap_64(x) __builtin_bswap64(x)
+
+#	include <winsock2.h>
+#	include <sys/param.h>
+
+#	if BYTE_ORDER == LITTLE_ENDIAN
+#		define htobe16(x) htons(x)
+#		define htole16(x) (x)
+#		define be16toh(x) ntohs(x)
+#		define le16toh(x) (x)
+
+#		define htobe32(x) htonl(x)
+#		define htole32(x) (x)
+#		define be32toh(x) ntohl(x)
+#		define le32toh(x) (x)
+
+#		define htobe64(x) __builtin_bswap64(x)
+#		define htole64(x) (x)
+#		define be64toh(x) __builtin_bswap64(x)
+#		define le64toh(x) (x)
+
+#	elif BYTE_ORDER == BIG_ENDIAN
+		/* that would be xbox 360 */
+#		define htobe16(x) (x)
+#		define htole16(x) __builtin_bswap16(x)
+#		define be16toh(x) (x)
+#		define le16toh(x) __builtin_bswap16(x)
+
+#		define htobe32(x) (x)
+#		define htole32(x) __builtin_bswap32(x)
+#		define be32toh(x) (x)
+#		define le32toh(x) __builtin_bswap32(x)
+
+#		define htobe64(x) (x)
+#		define htole64(x) __builtin_bswap64(x)
+#		define be64toh(x) (x)
+#		define le64toh(x) __builtin_bswap64(x)
+
+#	else
+#		error byte order not supported
+#	endif
 
 #elif defined(__NetBSD__)
 #  include <sys/bswap.h>
@@ -132,17 +172,48 @@ char *getlogin (void);
 #  define bswap_64(x) bswap64(x)
 
 #elif defined(__APPLE__)
-#  include <CoreFoundation/CFByteOrder.h>
-#  define __BIG_ENDIAN       4321
-#  define __LITTLE_ENDIAN  1234
+#	define __BIG_ENDIAN      4321
+#	define __LITTLE_ENDIAN  1234
 #if (defined(__LITTLE_ENDIAN__) && (__LITTLE_ENDIAN__ == 1))
-    #define __BYTE_ORDER __LITTLE_ENDIAN
+	#define __BYTE_ORDER __LITTLE_ENDIAN
 #else
-    #define __BYTE_ORDER __BIG_ENDIAN
+	#define __BYTE_ORDER __BIG_ENDIAN
 #endif
-#  define bswap_16(x) CFSwapInt16(x)
-#  define bswap_32(x) CFSwapInt32(x)
-#  define bswap_64(x) CFSwapInt64(x)
+
+#	include <libkern/OSByteOrder.h>
+#	define bswap_16 OSSwapInt16
+#	define bswap_32 OSSwapInt32
+#	define bswap_64 OSSwapInt64
+
+#	define htobe16(x) OSSwapHostToBigInt16(x)
+#	define htole16(x) OSSwapHostToLittleInt16(x)
+#	define be16toh(x) OSSwapBigToHostInt16(x)
+#	define le16toh(x) OSSwapLittleToHostInt16(x)
+
+#	define htobe32(x) OSSwapHostToBigInt32(x)
+#	define htole32(x) OSSwapHostToLittleInt32(x)
+#	define be32toh(x) OSSwapBigToHostInt32(x)
+#	define le32toh(x) OSSwapLittleToHostInt32(x)
+
+#	define htobe64(x) OSSwapHostToBigInt64(x)
+#	define htole64(x) OSSwapHostToLittleInt64(x)
+#	define be64toh(x) OSSwapBigToHostInt64(x)
+#	define le64toh(x) OSSwapLittleToHostInt64(x)
+
+#elif defined(__OpenBSD__)
+#	include <sys/endian.h>
+#	define bswap_16 __swap16
+#	define bswap_32 __swap32
+#	define bswap_64 __swap64
+
+#elif defined(__NetBSD__) || defined(__FreeBSD__) || defined(__DragonFly__)
+#	include <sys/endian.h>
+#	define be16toh(x) betoh16(x)
+#	define le16toh(x) letoh16(x)
+#	define be32toh(x) betoh32(x)
+#	define le32toh(x) letoh32(x)
+#	define be64toh(x) betoh64(x)
+#	define le64toh(x) letoh64(x)
 
 #elif (defined(BSD) && (BSD >= 199103)) && !defined(__GLIBC__)
 #  include <machine/endian.h>
