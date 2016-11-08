@@ -66,7 +66,10 @@ if (VERBOSE_LEVEL > 5)
 	hdr = sopen(fn, "r", hdr);
 	if (serror2(hdr)) {
 		destructHDR(hdr);
-		fprintf(stdout,"Cannot open file <%s>\n", fn);
+		MLEvaluate(stdlink,"Message[sload::failed]");
+		MLNextPacket(stdlink);
+		MLNewPacket(stdlink);
+		MLPutSymbol(stdlink,"$Failed");
 		return;
 	}
 
@@ -89,7 +92,10 @@ if (VERBOSE_LEVEL > 5)
 	sread(NULL, 0, numberSamples, hdr);
 	if (serror2(hdr)) {
 		destructHDR(hdr);
-		fprintf(stdout,"Error reading data from file <%s>\n", fn);
+		MLEvaluate(stdlink,"Message[sload::failed]");
+		MLNextPacket(stdlink);
+		MLNewPacket(stdlink);
+		MLPutSymbol(stdlink,"$Failed");
 		return;
 	}
 
@@ -117,17 +123,18 @@ if (VERBOSE_LEVEL > 5)
 
 	// generate and write header information in JSON format
 	asprintf_hdr2json(&str, hdr);
-	MLPutString(stdlink, str);
+	MLPutFunction(stdlink,"ImportString",2);
+	  MLPutString(stdlink,str);
+	  MLPutString(stdlink,"JSON");
 	free(str);
 
-if (VERBOSE_LEVEL > 5) {
-	for (k=0; k<numberChannels; k++)
-		fprintf(stdout,"%f ",data[k]);
+	if (VERBOSE_LEVEL > 5) {
+		for (k=0; k<numberChannels; k++)
+			fprintf(stdout,"%f ",data[k]);
 		fprintf(stdout,"\n\nopen filename <%s>@%p sz=[%i,%i]\n", fn, data, sz[1],sz[0]);
 	}
 
 	// *********** close file *********************
-	sclose(hdr);
 	destructHDR(hdr);
 	return;
 }

@@ -18,3 +18,5 @@
  \nNOTE: If sweeps were sampled with different sampling rates, all data is converted to the
  least common multiple of the various sampling rates. (e.g. loading a 20kHz and a 25kHz sweep simultaneously, both sweeps are converted to 100kHz).
  \n\nCompiled on __DATE__"
+
+:Evaluate:      sload::failed="Failed to load file"
