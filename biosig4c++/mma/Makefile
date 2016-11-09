@@ -10,6 +10,10 @@
 ###########################################
 # user-defined variables 
 ###########################################
+CROSS   ?= /home/schloegl/src/mxe.github.schloegl/usr/bin/i686-w64-mingw32.static
+CROSS64 ?= /home/schloegl/src/mxe.github.schloegl/usr/bin/x86_64-w64-mingw32.static
+
+LDLIBS  ?= -lz -lpthread -lcholmod -liconv
  
 ###########################################
 ## set Mathematica variables
@@ -68,27 +72,26 @@ endif
 
 MPREP     = ${CADDSDIR}/mprep
 
-all : sload.exe ${SYSwin}/sload.exe ${SYSwin64}/sload.exe
-mma : sload.exe
+TARGET = sload
+
+all : ${TARGET}.exe ${SYSwin}/${TARGET}.exe ${SYSwin64}/${TARGET}.exe
+mma : ${TARGET}.exe
 
 .c.o:
 	${CC} ${CFLAGS} -c ${INCDIR} "$<"
 
-sloadtm.c: sload.tm
+${TARGET}tm.c: ${TARGET}.tm
 	${MPREP} "$<" -o "$@"
 	# enable macro expansion
 	${SED} -i 's# __DATE__# ",__DATE__," ",__TIME__,"#' "$@"
 
-sload.exe: sload.o sloadtm.o
-	# static linking
-	#${LD} ${LDFLAGS} sloadtm.o sload.o ../libbiosig2.a $(shell pkg-config --libs libbiosig) -lstdc++ ${LIBDIR} -l${MLLIB} ${EXTRALIBS} -o "$@"
-	# dynamic linking
+${TARGET}.exe: ${TARGET}.o ${TARGET}tm.o
 	mkdir -p ${SYS}
-	${LD} ${LDFLAGS} sloadtm.o sload.o $(shell pkg-config --libs libbiosig) -lbiosig2 -lstdc++ ${LIBDIR} -l${MLLIB} ${EXTRALIBS} -o ${SYS}/"$@"
+	# static linking
+	${LD} ${LDFLAGS} ${TARGET}tm.o ${TARGET}.o ../libbiosig2.a $(shell pkg-config --libs libbiosig) -lstdc++ ${LIBDIR} -l${MLLIB} ${EXTRALIBS} -o ${SYS}/"$@"
+	# dynamic linking
+	#${LD} ${LDFLAGS} ${TARGET}tm.o ${TARGET}.o $(shell pkg-config --libs libbiosig) -lbiosig2 -lstdc++ ${LIBDIR} -l${MLLIB} ${EXTRALIBS} -o ${SYS}/"$@"
 	ln -sf ${SYS}/"$@"
-	# copy to user directory if available
-	#-cp -r ${SYS} ~/K/Software/MathematicaTools/
-	#-cp "$@" ~/K/Software/MathematicaTools/${SYS}/sload-$(shell date +%Y%m%d)
 
 
 ###########################################
@@ -104,23 +107,22 @@ EXTRALIBSwin = -lgdi32 -lm -lstdc++ -lws2_32 $(LDLIBS) # Set these with appropri
 
 MPREPwin     = ${CADDSDIRwin}/bin/mprep.exe
 
-sloadtm.win32.c : sload.tm
-	wine ${MPREPwin} "$<" -o "$@"
+${TARGET}tm.win32.c : ${TARGET}.tm
+	WINEPREFIX=${HOME}/.wine32.mma wine ${MPREPwin} "$<" -o "$@"
 	sed -i 's# __DATE__# ",__DATE__," ",__TIME__,"#' "$@"
 
-sload.obj : sload.c
+${TARGET}.obj : ${TARGET}.c
 	${CCw32} -c ${INCDIRwin} "$<" -o "$@"
-sloadtm.obj : sloadtm.win32.c
+${TARGET}tm.obj : ${TARGET}tm.win32.c
 	${CCw32} -c ${INCDIRwin} "$<" -o "$@"
 
-win32mma : ${SYSwin}/sload.exe
+win32mma : ${SYSwin}/${TARGET}.exe
 
-${SYSwin}/sload.exe : sload.obj sloadtm.obj
+${SYSwin}/${TARGET}.exe : ${TARGET}.obj ${TARGET}tm.obj
 	mkdir -p ${SYSwin}
-	${CCw32} sload.obj sloadtm.obj -static-libgcc -static-libstdc++ -lbiosig2 -lssp -L${LIBDIRwin} -l${MLLIBwin} ${EXTRALIBSwin} -o "$@"
+	${CCw32} $^ -mwindows -static-libgcc -static-libstdc++ -lbiosig2 -lssp -L${LIBDIRwin} -l${MLLIBwin} ${EXTRALIBSwin} -o "$@"
 	# copy to users directory if available
-	#-cp -r ${SYSwin} ~/K/Software/MathematicaTools/
-	#-cp "$@" ~/K/Software/MathematicaTools/${SYSwin}/sload-$(shell date +%Y%m%d).exe
+	-cp -r ${SYSwin} ~/K/Software/MathematicaTools/${TARGET}
 
 
 ###########################################
@@ -134,30 +136,31 @@ LIBDIRwin64   = ${CADDSDIRwin64}/lib
 
 MPREPwin64    = ${CADDSDIRwin64}/bin/mprep.exe
 
-sloadtm.win64.c : sload.tm
-	wine ${MPREPwin} "$<" -o "$@"   ## use 32bit mprep.exe because wine can not handle the 64bit mprep.exe
+${TARGET}tm.win64.c : ${TARGET}.tm
+	WINEPREFIX=${HOME}/.wine64.mma wine64 ${MPREPwin64} "$<" -o "$@"
+	#${MPREP} "$<" -o "$@"
 	sed -i 's# __DATE__# ",__DATE__," ",__TIME__,"#' "$@"
 
-sload.w64.obj : sload.c
+${TARGET}.w64obj : ${TARGET}.c
 	${CCw64} -c ${INCDIRwin64} "$<" -o "$@"
-sloadtm.w64.obj : sloadtm.win64.c
+${TARGET}tm.w64obj : ${TARGET}tm.win64.c
 	${CCw64} -c ${INCDIRwin64} "$<" -o "$@"
 
-win64mma : ${SYSwin64}/sload.exe
+win64mma : ${SYSwin64}/${TARGET}.exe
 
-${SYSwin64}/sload.exe : sload.w64.obj sloadtm.w64.obj
+### curentlly the 64bit MXE cross-compilation does not work - use instead use 32bit version i
+#${SYSwin64}/${TARGET}.exe : ${TARGET}.w64obj ${TARGET}tm.w64obj
+${SYSwin64}/${TARGET}.exe : ${SYSwin}/${TARGET}.exe
 	mkdir -p ${SYSwin64}
-	${CCw64} sload.w64.obj sloadtm.w64.obj -static-libgcc -static-libstdc++  -lbiosig2 -lssp -L${LIBDIRwin64} -l${MLLIBwin64} ${EXTRALIBSwin} -o "$@"
-	# copy to users directory if available
-	#-cp -r ${SYSwin64} ~/K/Software/MathematicaTools/
-	#-cp "$@" ~/K/Software/MathematicaTools/${SYSwin64}/sload-$(shell date +%Y%m%d).exe
+#	${CCw64} $^ -static-libgcc -static-libstdc++ -lbiosig2 -lssp -L${LIBDIRwin64} -l${MLLIBwin64} ${EXTRALIBSwin} -o "$@"
+	-cp "$<" "$@"
 
-	
+
 ###########################################
 clean:
 	-$(RM) *.o
 	-$(RM) *.obj
 	-$(RM) *tm.c
-	-$(RM) ${SYSwin64}/sload.exe ${SYSwin32}/sload.exe
-	-$(RM) ${SYS}/sload
+	-$(RM) ${SYSwin64}/${TARGET}.exe ${SYSwin32}/${TARGET}.exe
+	-$(RM) ${SYS}/${TARGET} ${SYS}/${TARGET}.exe
 	
