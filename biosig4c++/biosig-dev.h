@@ -393,7 +393,7 @@ static inline float lef32p(const uint8_t* i) {
 	uint32_t o;
 	union {
 		uint32_t i;
-		double   r;
+		float   r;
 	} c;
 	memcpy(&o,i,4);
 	c.i = le32toh(o);
@@ -415,7 +415,7 @@ static inline float bef32p(const uint8_t* i) {
 	uint32_t o;
 	union {
 		uint32_t i;
-		double   r;
+		float   r;
 	} c;
 	memcpy(&o,i,4);
 	c.i = be32toh(o);
