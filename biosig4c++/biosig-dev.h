@@ -1,6 +1,6 @@
 /*
 
-% Copyright (C) 2005,2006,2007,2008,2009,2011,2013,2106 Alois Schloegl <alois.schloegl@gmail.com>
+% Copyright (C) 2005-2016 Alois Schloegl <alois.schloegl@gmail.com>
 % This file is part of the "BioSig for C/C++" repository 
 % (biosig4c++) at http://biosig.sf.net/ 
 
@@ -276,119 +276,119 @@ char *getlogin (void);
 #error  ENDIANITY is not known 
 #endif 
 
-static inline uint16_t leu16p(const uint8_t* i) {
+static inline uint16_t leu16p(const void* i) {
 	uint16_t a;
 	memcpy(&a, i, sizeof(a));
 	return (le16toh(a));
 }
-static inline int16_t lei16p(const uint8_t* i) {
+static inline int16_t lei16p(const void* i) {
 	uint16_t a;
 	memcpy(&a, i, sizeof(a));
 	return ((int16_t)le16toh(a));
 }
-static inline uint32_t leu32p(const uint8_t* i) {
+static inline uint32_t leu32p(const void* i) {
 	uint32_t a;
 	memcpy(&a, i, sizeof(a));
 	return (le32toh(a));
 }
-static inline int32_t lei32p(const uint8_t* i) {
+static inline int32_t lei32p(const void* i) {
 	uint32_t a;
 	memcpy(&a, i, sizeof(a));
 	return ((int32_t)le32toh(a));
 }
-static inline uint64_t leu64p(const uint8_t* i) {
+static inline uint64_t leu64p(const void* i) {
 	uint64_t a;
 	memcpy(&a, i, sizeof(a));
 	return (le64toh(a));
 }
-static inline int64_t lei64p(const uint8_t* i) {
+static inline int64_t lei64p(const void* i) {
 	uint64_t a;
 	memcpy(&a, i, sizeof(a));
 	return ((int64_t)le64toh(a));
 }
 
-static inline uint16_t beu16p(const uint8_t* i) {
+static inline uint16_t beu16p(const void* i) {
 	uint16_t a;
 	memcpy(&a, i, sizeof(a));
 	return ((int16_t)be16toh(a));
 }
-static inline int16_t bei16p(const uint8_t* i) {
+static inline int16_t bei16p(const void* i) {
 	uint16_t a;
 	memcpy(&a, i, sizeof(a));
 	return ((int16_t)be16toh(a));
 }
-static inline uint32_t beu32p(const uint8_t* i) {
+static inline uint32_t beu32p(const void* i) {
 	uint32_t a;
 	memcpy(&a, i, sizeof(a));
 	return (be32toh(a));
 }
-static inline int32_t bei32p(const uint8_t* i) {
+static inline int32_t bei32p(const void* i) {
 	uint32_t a;
 	memcpy(&a, i, sizeof(a));
 	return ((int32_t)be32toh(a));
 }
-static inline uint64_t beu64p(const uint8_t* i) {
+static inline uint64_t beu64p(const void* i) {
 	uint64_t a;
 	memcpy(&a, i, sizeof(a));
 	return ((int64_t)be64toh(a));
 }
-static inline int64_t bei64p(const uint8_t* i) {
+static inline int64_t bei64p(const void* i) {
 	uint64_t a;
 	memcpy(&a, i, sizeof(a));
 	return ((int64_t)be64toh(a));
 }
 
-static inline void leu16a(uint16_t i, uint8_t* r) {
+static inline void leu16a(uint16_t i, void* r) {
 	i = htole16(i);
 	memcpy(r, &i, sizeof(i));
 }
-static inline void lei16a( int16_t i, uint8_t* r) {
+static inline void lei16a( int16_t i, void* r) {
 	i = htole16(i);
 	memcpy(r, &i, sizeof(i));
 }
-static inline void leu32a(uint32_t i, uint8_t* r) {
+static inline void leu32a(uint32_t i, void* r) {
 	i = htole32(i);
 	memcpy(r, &i, sizeof(i));
 }
-static inline void lei32a( int32_t i, uint8_t* r) {
+static inline void lei32a( int32_t i, void* r) {
 	i = htole32(i);
 	memcpy(r, &i, sizeof(i));
 }
-static inline void leu64a(uint64_t i, uint8_t* r) {
+static inline void leu64a(uint64_t i, void* r) {
 	i = htole64(i);
 	memcpy(r, &i, sizeof(i));
 }
-static inline void lei64a( int64_t i, uint8_t* r) {
+static inline void lei64a( int64_t i, void* r) {
 	i = htole64(i);
 	memcpy(r, &i, sizeof(i));
 }
 
-static inline void beu16a(uint16_t i, uint8_t* r) {
+static inline void beu16a(uint16_t i, void* r) {
 	i = htobe16(i);
 	memcpy(r, &i, sizeof(i));
 };
-static inline void bei16a( int16_t i, uint8_t* r) {
+static inline void bei16a( int16_t i, void* r) {
 	i = htobe16(i);
 	memcpy(r, &i, sizeof(i));
 }
-static inline void beu32a(uint32_t i, uint8_t* r) {
+static inline void beu32a(uint32_t i, void* r) {
 	i = htobe32(i);
 	memcpy(r, &i, sizeof(i));
 }
-static inline void bei32a( int32_t i, uint8_t* r) {
+static inline void bei32a( int32_t i, void* r) {
 	i = htobe32(i);
 	memcpy(r, &i, sizeof(i));
 }
-static inline void beu64a(uint64_t i, uint8_t* r) {
+static inline void beu64a(uint64_t i, void* r) {
 	i = htobe64(i);
 	memcpy(r, &i, sizeof(i));
 }
-static inline void bei64a( int64_t i, uint8_t* r) {
+static inline void bei64a( int64_t i, void* r) {
 	i = htobe64(i);
 	memcpy(r, &i, sizeof(i));
 }
 
-static inline float lef32p(const uint8_t* i) {
+static inline float lef32p(const void* i) {
 	// decode little endian float pointer
 	uint32_t o;
 	union {
@@ -399,7 +399,7 @@ static inline float lef32p(const uint8_t* i) {
 	c.i = le32toh(o);
 	return(c.r);
 }
-static inline double lef64p(const uint8_t* i) {
+static inline double lef64p(const void* i) {
 	// decode little endian double pointer
 	uint64_t o=0;
 	union {
@@ -410,7 +410,7 @@ static inline double lef64p(const uint8_t* i) {
 	c.i = le64toh(o);
 	return(c.r);
 }
-static inline float bef32p(const uint8_t* i) {
+static inline float bef32p(const void* i) {
 	// decode little endian float pointer
 	uint32_t o;
 	union {
@@ -421,7 +421,7 @@ static inline float bef32p(const uint8_t* i) {
 	c.i = be32toh(o);
 	return(c.r);
 }
-static inline double bef64p(const uint8_t* i) {
+static inline double bef64p(const void* i) {
 	// decode little endian double pointer
 	uint64_t o=0;
 	union {
@@ -433,25 +433,25 @@ static inline double bef64p(const uint8_t* i) {
 	return(c.r);
 }
 
-static inline void lef32a( float i, uint8_t* r) {
+static inline void lef32a( float i, void* r) {
 	uint32_t i32;
 	memcpy(&i32, &i, sizeof(i));
 	i32 = le32toh(i32);
 	memcpy(r, &i32, sizeof(i32));
 }
-static inline void lef64a(  double i, uint8_t* r) {
+static inline void lef64a(  double i, void* r) {
 	uint64_t i64;
 	memcpy(&i64, &i, sizeof(i));
 	i64 = le64toh(i64);
 	memcpy(r, &i64, sizeof(i64));
 }
-static inline void bef32a(   float i, uint8_t* r) {
+static inline void bef32a(   float i, void* r) {
 	uint32_t i32;
 	memcpy(&i32, &i, sizeof(i));
 	i32 = be32toh(i32);
 	memcpy(r, &i32, sizeof(i32));
 }
-static inline void bef64a(  double i, uint8_t* r) {
+static inline void bef64a(  double i, void* r) {
 	uint64_t i64;
 	memcpy(&i64, &i, sizeof(i));
 	i64 = be64toh(i64);
