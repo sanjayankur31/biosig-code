@@ -825,6 +825,9 @@ if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (%i): %f %f %f %f %f %f\n",__FILE__,__LI
 #if defined(WITH_SON)
   #include "sonintl.h"
   // defines __SONINTL__
+#else
+#define ADCdataBlkSize  32000
+
 #endif
 
 
@@ -1004,24 +1007,21 @@ if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s\n",__FILE__,__LINE__,__fu
  	 *********************************************/
 	hdr->CHANNEL = (CHANNEL_TYPE*)realloc(hdr->CHANNEL, hdr->NS * sizeof(CHANNEL_TYPE));
 
-	typeof(hdr->NS) k,ns=0;
+	typeof(hdr->NS) k;
 
-if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s: ns=%i\n",__FILE__,__LINE__,__func__,ns);
+if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s:\n",__FILE__,__LINE__,__func__);
 
 	size_t bpb = 0;
 	for (k = 0; k < hdr->NS; k++) {
 		uint32_t off = 512 + k*140;
 		CHANNEL_TYPE *hc    = hdr->CHANNEL+k;
 
-		hc->Cal   = 1.0; //lef32p(hdr->AS.Header + off + 124);	// v.adc.scale
-		hc->Off   = 0.0; //lef32p(hdr->AS.Header + off + 128);	// v.adc.off
+		hc->Cal   = lef32p(hdr->AS.Header + off + 124);	// v.adc.scale
+		hc->Off   = lef32p(hdr->AS.Header + off + 128);	// v.adc.off
 		hc->OnOff = 0;   //*(int16_t*)(hdr->AS.Header + off + 106) != 0;
+		hc->SPR   = 0;
 		hc->GDFTYP = 3;
 		hc->LeadIdCode = 0;
-		hc->DigMax = (double)(int16_t)0x7fff;
-		hc->DigMin = (double)(int16_t)0x8000;
-		hc->PhysMax = hc->DigMax * hc->Cal + hc->Off;
-		hc->PhysMin = hc->DigMin * hc->Cal + hc->Off;
 
 		int stringLength = hdr->AS.Header[off+108];
 		assert(stringLength < MAX_LENGTH_LABEL);
@@ -1036,10 +1036,22 @@ if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s: ns=%i\n",__FILE__,__LINE
 		memcpy(PhysicalUnit, hdr->AS.Header+off+132+1, stringLength);
 		PhysicalUnit[stringLength] = '\0';
 		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): #%i <%s> <%s>\n",__FILE__,__LINE__, k+1, hc->Label, PhysicalUnit);
-		hc->PhysDimCode = PhysDimCode(PhysicalUnit);
+
+		if (!strcmp(PhysicalUnit,"Volt") || !strcmp(PhysicalUnit," Volt"))
+			hc->PhysDimCode = 4256;
+		else if (!strcmp(PhysicalUnit,"mVolt"))
+			hc->PhysDimCode = 4274;
+		else if (!strcmp(PhysicalUnit,"uVolt"))
+			hc->PhysDimCode = 4275;
+		else
+			hc->PhysDimCode = PhysDimCode(PhysicalUnit);
+
+if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s: %i %i %s\n",__FILE__,__LINE__,__func__,k,hc->PhysDimCode,PhysicalUnit);
+
 		}
 
-if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s: %i ns=%i\n",__FILE__,__LINE__,__func__,k,ns);
+		uint32_t firstBlock = leu32p(hdr->AS.Header+off+6);
+		uint32_t lastBlock  = leu32p(hdr->AS.Header+off+10);
 
 		hc->bi = bpb;
 		hc->bi8= 0;
@@ -1049,11 +1061,34 @@ if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s: %i ns=%i\n",__FILE__,__L
 			//    ChanOff=0,          /* the channel is OFF - */
 			hc->OnOff = 0;
 			break;
-		case 1:
+		case 1: {
 			//    Adc,                /* a 16-bit waveform channel */
-			hc->OnOff = 1;
-			hc->GDFTYP = 3;
+			hc->OnOff   = 1;
+			hc->GDFTYP  = 3;
+			hc->Cal     = lef32p(hdr->AS.Header + off + 124) / 6553.6;
+			hc->Off     = lef32p(hdr->AS.Header + off + 128);
+			hc->DigMax  = (double)(int16_t)0x7fff;
+			hc->DigMin  = (double)(int16_t)0x8000;
+			hc->PhysMax = hc->DigMax * hc->Cal + hc->Off;
+			hc->PhysMin = hc->DigMin * hc->Cal + hc->Off;
+
+			uint32_t blocks = leu16p(hdr->AS.Header+off+14);
+			size_t bpbnew   = bpb + blocks * ADCdataBlkSize * 2;
+			hdr->AS.rawdata = realloc(hdr->AS.rawdata,bpbnew);
+
+			uint32_t pos = firstBlock;
+			while (1) {
+				uint32_t items = leu16p(hdr->AS.Header+pos+18);
+				memcpy(hdr->AS.rawdata+bpb, hdr->AS.Header+pos+20, items*2);
+				bpb     += items*2;
+				hc->SPR += items;
+			if (pos == lastBlock) break;
+				pos  = leu32p(hdr->AS.Header+pos+4);
+			};
+
+			hdr->SPR    = lcm(hdr->SPR, hc->SPR);
 			break;
+		}
 		case 2:
 			//    EventFall,          /* Event times (falling edges) */
 			hc->OnOff = 0;
@@ -1082,36 +1117,44 @@ if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s: %i ns=%i\n",__FILE__,__L
 			//    TextMark,           /* Marker plus text string */
 			hc->OnOff = 0;
 			break;
-		case 9:
+		case 9: {
 			//    RealWave            /* waveform of float numbers */
-			hc->OnOff = 0;
-			hc->GDFTYP = 16;
+			hc->OnOff   = 1;
+			hc->GDFTYP  = 16;
+			hc->LeadIdCode = 0;
+			hc->Cal     = lef32p(hdr->AS.Header + off + 124) / 6553.6;
+			hc->Off     = lef32p(hdr->AS.Header + off + 128);
+			hc->DigMax  = +1e9;
+			hc->DigMin  = -1e9;
+			hc->PhysMax = hc->DigMax * hc->Cal + hc->Off;
+			hc->PhysMin = hc->DigMin * hc->Cal + hc->Off;
+
+			uint32_t blocks = leu16p(hdr->AS.Header+off+14);
+			size_t bpbnew   = bpb + blocks * ADCdataBlkSize * 4;
+			hdr->AS.rawdata = realloc(hdr->AS.rawdata, bpbnew);
+
+			uint32_t pos = firstBlock;
+			while (1) {
+				uint32_t items = leu16p(hdr->AS.Header+pos+18);
+				memcpy(hdr->AS.rawdata+bpb, hdr->AS.Header+pos+20, items*4);
+				bpb     += items*4;
+				hc->SPR += items;
+			if (pos == lastBlock) break;
+				pos  = leu32p(hdr->AS.Header+pos+4);
+			}
+
+			hdr->SPR    = lcm(hdr->SPR, hc->SPR);
 			break;
+		}
 		default:
 			//    unknown
 			hc->OnOff = 0;
 			fprintf(stderr,"SMR/SON: channel %i ignored - unknown type %i\n",k,kind);
 		}
 
-if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s: %i ns=%i\n",__FILE__,__LINE__,__func__,k,ns);
+if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s: %i\n",__FILE__,__LINE__,__func__,k);
 
-		uint32_t nbytes = (leu32p(hdr->AS.Header+off+10) - leu32p(hdr->AS.Header+off+6));
-		if (hc->OnOff && nbytes ) {
-			ns++;
-			hc->bufptr = hdr->AS.Header + leu32p(hdr->AS.Header+off+6);
-			hc->SPR    = nbytes / (GDFTYP_BITS[hc->GDFTYP]>>3);
-			hdr->SPR   = lcm(hdr->SPR, hc->SPR);
-			bpb       += nbytes;
-		}
-		else {
-			hc->OnOff  = 0;
-			hc->SPR    = 0;
-			hc->bufptr = NULL;
-		}
-
-if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s: %i ns=%i\n",__FILE__,__LINE__,__func__,k,ns);
-
-		if (0) { //(VERBOSE_LEVEL > 6) {
+		if (VERBOSE_LEVEL > 6) {
 			char tmp[98-26+1];
 			fprintf(stdout,"[%i].delSize\t%i\n",k,lei16p(hdr->AS.Header+off));
 
@@ -1159,6 +1202,7 @@ if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s: %i ns=%i\n",__FILE__,__L
 
 			fprintf(stdout,"[%i].v.real.max\t%f\n", (int)k, lef32p(hdr->AS.Header+off+124));
 			fprintf(stdout,"[%i].v.real.min\t%f\n", (int)k, lef32p(hdr->AS.Header+off+128));
+			fprintf(stdout,"[%i].v.real.units\t%s\n", (int)k, hdr->AS.Header+off+132+1);
 
 			fprintf(stdout,"[%i].v.event\t%0x\t%g\n", (int)k, leu32p(hdr->AS.Header+off+124), lef32p(hdr->AS.Header+off+124));
 		}
@@ -1168,11 +1212,10 @@ if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s: %i ns=%i\n",__FILE__,__L
 	  read blocks
  	 *********************************************/
 
-if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s:  ns=%i %g %g %gHz\n",__FILE__,__LINE__,__func__,ns,maxFTime,timebase,hdr->SampleRate);
+if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s: %g %g %gHz\n",__FILE__,__LINE__,__func__,maxFTime,timebase,hdr->SampleRate);
 
 	hdr->NRec       = 1;
 	hdr->AS.bpb	= bpb;
-	hdr->NS = ns;
 
 }
 
