@@ -826,10 +826,9 @@ mex4m: $(patsubst mex/%.cpp, mex/%.$(MEX_EXT), $(MEX_OBJECTS))
 
 ifneq (Darwin,$(shell uname))
 mex/%.$(MEX_EXT): mex/%.cpp
-	$(MEX) $(MEX_OPTION) $(DEFINES) "$<" $(shell $(PKGCONF) --libs libbiosig) -output "$@"
+	$(MEX) $(MEX_OPTION) $(DEFINES) "$<" libbiosig.a -lz -lcholmod -output "$@"
 else
 mex/%.$(MEX_EXT): mex/%.cpp
-	## $(MEX) $(MEX_OPTION) $(DEFINES) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
 	$(MEX) $(DEFINES) -outdir mex "$<" libbiosig.dylib
 endif
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
@@ -839,7 +838,7 @@ mex: mex4o mexw32 mexw64
 endif
 
 mex/%.mex: mex/%.cpp
-	$(OCT) $(DEFINES) -v -g --mex "$<" -Wl,-rpath,$(shell pwd) -I./ -L./ -lbiosig $(LIBS) -o "$@"
+	$(OCT) $(DEFINES) -v -g --mex "$<" -Wl,-rpath,$(shell pwd) -I./ libbiosig.a $(LIBS) -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
 mex/%.oct: mex/%.cpp
@@ -875,6 +874,16 @@ mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz: mex/*.cpp
 	$(TAR) cvfz "$@" $($@_TMP)/../mexbiosig-$(BIOSIG_VERSION)
 	-(cp "$@" ~/L/public_html/biosig/prereleases/ )
 	-rm -rf $(shell dirname $($@_TMP) )
+
+#############################################################
+#	R/sload
+#############################################################
+
+R: R/sload.so libbiosig
+
+R/sload.so: R/sload.c
+	make -C R LDFLAGS=$(LDFLAGS) LIBS=$(LIBS)
+
 
 #############################################################
 #	SigViewer
@@ -958,6 +967,7 @@ distclean: clean
 	-$(MAKE) -C mma clean
 	-$(MAKE) -C php clean
 	-$(MAKE) -C perl clean
+	-$(MAKE) -C R clean
 	-$(MAKE) -C ruby clean
 	-$(MAKE) -C tcl clean
 
@@ -989,6 +999,7 @@ clean:
 	-$(MAKE) -C mma clean
 	-$(MAKE) -C php clean
 	-$(MAKE) -C perl clean
+	-$(MAKE) -C R clean
 	-$(MAKE) -C ruby clean
 	-$(MAKE) -C tcl clean
 

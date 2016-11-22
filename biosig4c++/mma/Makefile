@@ -24,7 +24,7 @@ LDLIBS  ?= -lz -lpthread -lcholmod -liconv
 #MLINKDIR = /usr/local/Wolfram/Mathematica/10.0
 
 ifeq (Darwin,$(shell uname))
-MLINKDIR := /Applications/Mathematica.app/Contents
+MLINKDIR := /Applications/Mathematica.app/Contents/
 SYS       = MacOSX-x86-64
 LDFLAGS  += -demangle -dynamic -arch x86_64 -macosx_version_min 10.10.0
 LDFLAGS  += -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration
