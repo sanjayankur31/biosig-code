@@ -957,8 +957,6 @@ EXTERN_C void sopen_smr_read(HDRTYPE* hdr) {
 		fprintf(stdout,"v.real.max\t%i %i\n",(int)offsetof(TChannel,v.real.max),(int)sizeof(tc->v.real.max));
 		fprintf(stdout,"v.real.units\t%i %i\n",(int)offsetof(TChannel,v.real.units),(int)sizeof(tc->v.real.units));
 
-fprintf(stdout,"%s (line %i) %s: %li  %li %li %li\n",__FILE__,__LINE__,__func__,sizeof(TSONTimeDate),sizeof(TFileHead),sizeof(TChannel),sizeof(TDataBlock));
-
 		assert(sizeof(TSONTimeDate)==8);
 		assert(sizeof(TFileHead)==512);
 		assert(sizeof(TChannel)==140);
@@ -987,13 +985,6 @@ fprintf(stdout,"%s (line %i) %s: %li  %li %li %li\n",__FILE__,__LINE__,__func__,
 	}
 	hdr->SPR = 1;
 
-	assert( timebase == 1e-6 || hdr->VERSION >= 6 );
-	if (VERBOSE_LEVEL > 6) {
-		fprintf(stdout,"SMR:\tmaxFTime=%i\n\t timebase=%g\n\t dTimeBase=%g timePerADC=%i\n",maxFTime,timebase,dTimeBase,timePerADC);
-	}
-
-if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s\n",__FILE__,__LINE__,__func__);
-
 	while (!ifeof(hdr)) {
 		// read channel header and extra data
 		hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header,hdr->HeadLen*2);
@@ -1008,9 +999,6 @@ if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s\n",__FILE__,__LINE__,__fu
 	hdr->CHANNEL = (CHANNEL_TYPE*)realloc(hdr->CHANNEL, hdr->NS * sizeof(CHANNEL_TYPE));
 
 	typeof(hdr->NS) k;
-
-if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s:\n",__FILE__,__LINE__,__func__);
-
 	size_t bpb = 0;
 	for (k = 0; k < hdr->NS; k++) {
 		uint32_t off = 512 + k*140;
@@ -1045,9 +1033,6 @@ if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s:\n",__FILE__,__LINE__,__f
 			hc->PhysDimCode = 4275;
 		else
 			hc->PhysDimCode = PhysDimCode(PhysicalUnit);
-
-if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s: %i %i %s\n",__FILE__,__LINE__,__func__,k,hc->PhysDimCode,PhysicalUnit);
-
 		}
 
 		uint32_t firstBlock = leu32p(hdr->AS.Header+off+6);
@@ -1152,8 +1137,6 @@ if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s: %i %i %s\n",__FILE__,__L
 			fprintf(stderr,"SMR/SON: channel %i ignored - unknown type %i\n",k,kind);
 		}
 
-if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s: %i\n",__FILE__,__LINE__,__func__,k);
-
 		if (VERBOSE_LEVEL > 6) {
 			char tmp[98-26+1];
 			fprintf(stdout,"[%i].delSize\t%i\n",k,lei16p(hdr->AS.Header+off));
@@ -1208,15 +1191,8 @@ if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s: %i\n",__FILE__,__LINE__,
 		}
         }
 
-	/*********************************************
-	  read blocks
- 	 *********************************************/
-
-if (VERBOSE_LEVEL > 6) fprintf(stdout,"%s (line %i) %s: %g %g %gHz\n",__FILE__,__LINE__,__func__,maxFTime,timebase,hdr->SampleRate);
-
 	hdr->NRec       = 1;
 	hdr->AS.bpb	= bpb;
-
 }
 
 

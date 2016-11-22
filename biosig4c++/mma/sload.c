@@ -41,7 +41,7 @@ void sload(const char *fn, int *SZ, long SZlen) {
 #else
 	size_t sz[2];
 #endif
-	biosig_data_type *data;
+	biosig_data_type *data=NULL;
 #ifdef __LIBBIOSIG2_H__
 	size_t rowcol[2];
 #endif
