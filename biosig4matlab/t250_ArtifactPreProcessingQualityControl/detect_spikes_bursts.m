@@ -275,6 +275,9 @@ Fs = 20000; 	% assumed samplerate
 %	Output
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+	HDR.NRec = size(s,1);
+	HDR.SPR = 1;
+	HDR = rmfield(HDR,'AS');
 	if ~isempty(outFile)
 		%%% write data to output
 		HDR.TYPE  = 'GDF';
@@ -289,11 +292,8 @@ Fs = 20000; 	% assumed samplerate
 		HDR.DigMin(:) = -2^15;
 		HDR.GDFTYP(:) = 3;
 		HDR.FLAG.UCAL = 0;
-		HDR.NRec = size(s,1);
-		HDR.SPR = 1;
 		HDR.NS  = size(s,2);
 		HDR.Dur = 1/HDR.SampleRate;
-		HDR = rmfield(HDR,'AS');
 		HDR = sopen(HDR,'w');
 		if (HDR.FILE.FID < 0)
 			fprintf(2,'Warning can not open file <%s> - GDF file can not be written\n',HDR.FileName);
