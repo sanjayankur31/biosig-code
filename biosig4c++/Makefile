@@ -145,8 +145,9 @@ ifeq (Darwin,$(shell uname))
 	TAR	       = gtar
 	LD	       = ld
 	CFLAGS        += -I/usr/local/opt/libiconv/include
+	CFLAGS        += -mmacosx-version-min=10.7
 	LDLIBS        += -L/usr/local/opt/libiconv/lib/ -liconv -lstdc++
-	LDFLAGS       += -dylib -arch x86_64 -macosx_version_min 10.10
+	LDFLAGS       += -dylib -arch x86_64 -macosx_version_min 10.7
 	DLEXT          = dylib
 	FULLDLEXT      = ${BIOSIG_VERSION}.dylib
 	SONAME_PREFIX  = -install_name # the last space character is crucial

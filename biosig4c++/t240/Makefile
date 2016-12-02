@@ -9,6 +9,10 @@ OBJS=${ASN_MODULE_SOURCES:.c=.o}
 WINOBJS=${ASN_MODULE_SOURCES:.c=.obj}
 W64OBJS=${ASN_MODULE_SOURCES:.c=.o64}
 
+ifeq (Darwin,$(shell uname))
+	CFLAGS        += -mmacosx-version-min=10.7
+endif
+
 CC ?= gcc
 MinGWCC   = $(CROSS)-gcc 
 MinGW64CC = $(CROSS64)-gcc 
