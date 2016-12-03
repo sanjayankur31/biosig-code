@@ -188,7 +188,7 @@ endif
 DEFINES_ALL   = #-D=NDEBUG
 
 DEFINES      += $(DEFINES_ALL)
-#DEFINES      += -D=WITH_SON 
+#DEFINES      += -D=WITH_SON
 #DEFINES      += -D=WITHOUT_SCP_DECODE
 #DEFINES      += -D=WITH_TIMESTAMPEVENT
 #DEFINES      += -D=WITH_TIMESTAMPCHANNEL
@@ -763,21 +763,21 @@ libbiosig2.def: $(OBJECTS) biosig2.o t240/libcnsfef.a
 
 ## save2gdf, pdp2gdf
 %${BINEXT}: %.c
-	$(CXX) $(DEFINES) $(CXXFLAGS) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
+	$(CXX) $(DEFINES) $(CFLAGS) $(shell $(PKGCONF) --cflags libbiosig) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
 	#$(CXX) $(DEFINES) $(CXXFLAGS) "$<" -L. libbiosig.a -lz -lcholmod -o "$@"
 
 pu${BINEXT} : pu.c physicalunits.o
-	$(CC) $(DEFINES) $(CFLAGS) $^  $(shell $(PKGCONF) --libs libbiosig) -o "$@"
+	$(CC) $(DEFINES) $(CFLAGS) $(shell $(PKGCONF) --cflags libbiosig) $^  $(shell $(PKGCONF) --libs libbiosig) -o "$@"
 
 biosig_fhir${BINEXT}: biosig_fhir.c
-	$(CC) $(DEFINES) $(CFLAGS) $^ -lb64 $(shell $(PKGCONF) --libs libbiosig) -lstdc++ -o "$@"
+	$(CC) $(DEFINES) $(CFLAGS) $(shell $(PKGCONF) --cflags libbiosig) $^ -lb64 $(shell $(PKGCONF) --libs libbiosig) -lstdc++ -o "$@"
 
 bscs: biosig_client{BINEXT} biosig_server{BINEXT} sandbox.o biosig.o
 biosig_client${BINEXT}: biosig_client.c libbiosig.$(LIBEXT) biosig-network.o
-	$(CXX) $(DEFINES) $(CXXFLAGS) biosig_client.c biosig-network.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o "$@"
+	$(CXX) $(DEFINES) $(CXXFLAGS) $(shell $(PKGCONF) --cflags libbiosig) biosig_client.c biosig-network.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o "$@"
 
 biosig_server${BINEXT}: biosig_server.c libbiosig.$(LIBEXT) biosig-network.o
-	$(CXX) $(DEFINES) $(CXXFLAGS) biosig_server.c biosig-network.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o "$@"
+	$(CXX) $(DEFINES) $(CXXFLAGS) $(shell $(PKGCONF) --cflags libbiosig) biosig_server.c biosig-network.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o "$@"
 
 
 #############################################################
@@ -827,10 +827,10 @@ mex4m: $(patsubst mex/%.cpp, mex/%.$(MEX_EXT), $(MEX_OBJECTS))
 
 ifneq (Darwin,$(shell uname))
 mex/%.$(MEX_EXT): mex/%.cpp
-	$(MEX) $(MEX_OPTION) $(DEFINES) "$<" libbiosig.a -lz -lcholmod -output "$@"
+	$(MEX) $(MEX_OPTION) $(DEFINES) $(shell $(PKGCONF) --cflags libbiosig) "$<" -lbiosig $(shell $(PKGCONF) --libs libbiosig)  -output "$@"
 else
 mex/%.$(MEX_EXT): mex/%.cpp
-	$(MEX) $(DEFINES) -outdir mex "$<" libbiosig.dylib
+	$(MEX) $(DEFINES) $(shell $(PKGCONF) --cflags libbiosig) -outdir mex "$<" -lbiosig
 endif
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
@@ -839,11 +839,11 @@ mex: mex4o mexw32 mexw64
 endif
 
 mex/%.mex: mex/%.cpp
-	$(OCT) $(DEFINES) -v -g --mex "$<" -Wl,-rpath,$(shell pwd) -I./ libbiosig.a $(LIBS) -o "$@"
+	$(OCT) $(DEFINES) $(shell $(PKGCONF) --cflags libbiosig) -v -g --mex "$<" -Wl,-rpath,$(shell pwd) -lbiosig $(LIBS) -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
 mex/%.oct: mex/%.cpp
-	$(OCT) $(DEFINES) "$<" -Wl,-rpath,$(shell pwd) -I./ -L./ -lbiosig $(LIBS) -o "$@"
+	$(OCT) $(DEFINES) $(shell $(PKGCONF) --cflags libbiosig) "$<" -Wl,-rpath,$(shell pwd) -lbiosig $(LIBS) -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
 mex/%.mexw32: mex/%.cpp Makefile biosig.h biosig-dev.h

@@ -264,11 +264,11 @@ mex4m: $(patsubst %.cpp, %.$(MEX_EXT), $(MEX_OBJECTS))
 
 ifneq (Darwin,$(shell uname))
 %.$(MEX_EXT): %.cpp
-	$(MEX) $(MEX_OPTION) $(DEFINES) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
+	$(MEX) $(MEX_OPTION) $(DEFINES) $(shell $(PKGCONF) --cflags libbiosig) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
 else
 %.$(MEX_EXT): %.cpp
 	## $(MEX) $(MEX_OPTION) $(DEFINES) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
-	$(MEX) $(DEFINES) -outdir mex "$<" libbiosig.dylib
+	$(MEX) $(DEFINES) $(shell $(PKGCONF) --cflags libbiosig) -outdir mex "$<" -lbiosig
 endif
 
 else
@@ -276,10 +276,10 @@ mex: mex4o mexw32 mexw64
 endif
 
 %.mex: %.cpp
-	$(OCT) $(DEFINES) -v -g --mex "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
+	$(OCT) $(DEFINES) $(shell $(PKGCONF) --cflags libbiosig) -v -g --mex "$<" -lbiosig $(shell $(PKGCONF) --libs libbiosig) -o "$@"
 
 %.oct: %.cpp
-	$(OCT) $(DEFINES) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
+	$(OCT) $(DEFINES) $(shell $(PKGCONF) --cflags libbiosig) "$<" -lbiosig $(shell $(PKGCONF) --libs libbiosig) -o "$@"
 
 %.mexw32: %.cpp Makefile biosig.h biosig-dev.h
 	## $(CROSS)-g++ is used instead of $(CXX), so it can be called from biosig as well as mxe. 
