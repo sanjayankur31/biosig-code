@@ -36,11 +36,7 @@ void sload(const char *fn, int *SZ, long SZlen) {
 	double samplerate;
 	double *t;
 	char *str = NULL;
-#ifdef _WIN32
 	long int sz[2];
-#else
-	size_t sz[2];
-#endif
 	biosig_data_type *data=NULL;
 #ifdef __LIBBIOSIG2_H__
 	size_t rowcol[2];
@@ -115,8 +111,8 @@ if (VERBOSE_LEVEL > 5)
 
 	// generate and write time axis
 	t = (double*)malloc(numberSamples * sizeof(double));
-	for (k=0; k < numberSamples;) {
-		t[k] = (++k)/samplerate;
+	for (k=0; k < numberSamples;k++) {
+		t[k] = (k+1)/samplerate;
 	}
 	MLPutRealList(stdlink, t, numberSamples);
 	free(t);
@@ -131,7 +127,7 @@ if (VERBOSE_LEVEL > 5)
 	if (VERBOSE_LEVEL > 5) {
 		for (k=0; k<numberChannels; k++)
 			fprintf(stdout,"%f ",data[k]);
-		fprintf(stdout,"\n\nopen filename <%s>@%p sz=[%i,%i]\n", fn, data, sz[1],sz[0]);
+		fprintf(stdout,"\n\nopen filename <%s>@%p sz=[%zd,%zd]\n", fn, data, sz[1],sz[0]);
 	}
 
 	// *********** close file *********************
