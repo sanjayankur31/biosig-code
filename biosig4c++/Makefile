@@ -144,8 +144,10 @@ ifeq (Darwin,$(shell uname))
 	##
 	TAR	       = gtar
 	LD	       = ld
+	CFLAGS        += -I/usr/local/include
 	CFLAGS        += -I/usr/local/opt/libiconv/include
 	CFLAGS        += -mmacosx-version-min=10.7
+	LDLIBS        += -L/usr/local/lib/
 	LDLIBS        += -L/usr/local/opt/libiconv/lib/ -liconv -lstdc++
 	LDFLAGS       += -dylib -arch x86_64 -macosx_version_min 10.7
 	DLEXT          = dylib
@@ -763,7 +765,7 @@ libbiosig2.def: $(OBJECTS) biosig2.o t240/libcnsfef.a
 
 ## save2gdf, pdp2gdf
 %${BINEXT}: %.c
-	$(CC) $(DEFINES) $(CFLAGS) $(shell $(PKGCONF) --cflags libbiosig) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
+	$(CC) $(DEFINES) $(CFLAGS) $(shell $(PKGCONF) --cflags libbiosig) "$<" $(shell $(PKGCONF) --libs libbiosig) -lm -o "$@"
 	#$(CXX) $(DEFINES) $(CXXFLAGS) "$<" -L. libbiosig.a -lz -lcholmod -o "$@"
 
 pu${BINEXT} : pu.c physicalunits.o
@@ -790,7 +792,7 @@ mmaall: mma/sload.tm mma/sload.c
 mma : mma/sload.exe
 
 mma/sload.exe: mma/sload.tm mma/sload.c
-	$(MAKE) -C mma CROSS=$(CROSS) CROSS64=$(CROSS64) LDLIBS="$(LDLIBS) -liconv" mma
+	$(MAKE) -C mma CROSS=$(CROSS) CROSS64=$(CROSS64) mma
 
 win32mma: mma/sload.tm mma/sload.c
 	$(MAKE) -C mma CROSS=$(CROSS) LDLIBS="$(LDLIBS) -liconv" win32mma
