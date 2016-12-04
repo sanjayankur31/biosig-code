@@ -13,8 +13,6 @@
 CROSS   ?= /home/schloegl/src/mxe.github.schloegl/usr/bin/i686-w64-mingw32.static
 CROSS64 ?= /home/schloegl/src/mxe.github.schloegl/usr/bin/x86_64-w64-mingw32.static
 
-LDLIBS  ?= -lz -lpthread -lcholmod -liconv
- 
 ###########################################
 ## set Mathematica variables
 
@@ -26,7 +24,7 @@ LDLIBS  ?= -lz -lpthread -lcholmod -liconv
 ifeq (Darwin,$(shell uname))
 MLINKDIR := /Applications/Mathematica.app/Contents/
 SYS       = MacOSX-x86-64
-LDFLAGS  += -demangle -dynamic -arch x86_64 -macosx_version_min 10.10.0
+LDFLAGS  += -demangle -dynamic -arch x86_64
 LDFLAGS  += -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration
 else
 MLINKDIR := $(dir $(shell readlink -f $(shell which mathematica) ) )..
@@ -61,9 +59,9 @@ SED	= gsed
 else
 MLLIB   = ML$(shell getconf LONG_BIT)i${MLIVER} # ML32i3 # Set this to ML64i3 if using a 64-bit system
 EXTRALIBS += -lrt
-LD 	= ${CC}
 SED	= sed
 endif
+LD 	= ${CC}
 
 
 ifneq (${MLIVER},)
@@ -78,7 +76,7 @@ all : ${TARGET}.exe ${SYSwin}/${TARGET}.exe ${SYSwin64}/${TARGET}.exe
 mma : ${TARGET}.exe
 
 .c.o:
-	${CC} ${CFLAGS} -c ${INCDIR} "$<"
+	${CC} ${CFLAGS} $(shell pkg-config --cflags libbiosig) -c ${INCDIR} "$<"
 
 ${TARGET}tm.c: ${TARGET}.tm
 	${MPREP} "$<" -o "$@"
@@ -87,10 +85,7 @@ ${TARGET}tm.c: ${TARGET}.tm
 
 ${TARGET}.exe: ${TARGET}.o ${TARGET}tm.o
 	mkdir -p ${SYS}
-	# static linking
-	${LD} ${LDFLAGS} ${TARGET}tm.o ${TARGET}.o ../libbiosig2.a $(shell pkg-config --libs libbiosig) -lstdc++ ${LIBDIR} -l${MLLIB} ${EXTRALIBS} -o ${SYS}/"$@"
-	# dynamic linking
-	#${LD} ${LDFLAGS} ${TARGET}tm.o ${TARGET}.o $(shell pkg-config --libs libbiosig) -lbiosig2 -lstdc++ ${LIBDIR} -l${MLLIB} ${EXTRALIBS} -o ${SYS}/"$@"
+	${LD} ${LDFLAGS} ${TARGET}tm.o ${TARGET}.o ${LIBDIR} -l${MLLIB} ${EXTRALIBS} -lbiosig2 $(shell pkg-config --libs libbiosig) -o ${SYS}/"$@"
 	ln -sf ${SYS}/"$@"
 
 
