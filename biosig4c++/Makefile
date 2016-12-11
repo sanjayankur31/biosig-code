@@ -764,14 +764,13 @@ libbiosig2.def: $(OBJECTS) biosig2.o t240/libcnsfef.a
 
 ## save2gdf, pdp2gdf
 %${BINEXT}: %.c
-	$(CC) $(DEFINES) $(CFLAGS) $(shell $(PKGCONF) --cflags libbiosig) "$<" $(shell $(PKGCONF) --libs libbiosig) -lm -o "$@"
-	#$(CXX) $(DEFINES) $(CXXFLAGS) "$<" -L. libbiosig.a -lz -lcholmod -o "$@"
+	$(CXX) $(DEFINES) $(CXXFLAGS) $(shell $(PKGCONF) --cflags libbiosig) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
 
 pu${BINEXT} : pu.c physicalunits.o
-	$(CC) $(DEFINES) $(CFLAGS) $(shell $(PKGCONF) --cflags libbiosig) $^  $(shell $(PKGCONF) --libs libbiosig) -o "$@"
+	$(CC) $(DEFINES) $(CFLAGS) $^ -o "$@"
 
 biosig_fhir${BINEXT}: biosig_fhir.c
-	$(CC) $(DEFINES) $(CFLAGS) $(shell $(PKGCONF) --cflags libbiosig) $^ -lb64 $(shell $(PKGCONF) --libs libbiosig) -lstdc++ -o "$@"
+	$(CXX) $(DEFINES) $(CXXFLAGS) $(shell $(PKGCONF) --cflags libbiosig) "$<" -lb64 $(shell $(PKGCONF) --libs libbiosig) -o "$@"
 
 bscs: biosig_client{BINEXT} biosig_server{BINEXT} sandbox.o biosig.o
 biosig_client${BINEXT}: biosig_client.c libbiosig.$(LIBEXT) biosig-network.o
