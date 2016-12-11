@@ -20,14 +20,14 @@
 
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 #include <b64/cencode.h>
 #include <biosig-dev.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /*
   https://www.hl7.org/fhir/binary.html
@@ -60,7 +60,7 @@ int biosig_hdr2gdf_base64(HDRTYPE *hdr, FILE *fid) {
 	base64_init_encodestate(&B64STATE);
 
 	// write header	
-	int c = base64_encode_block(hdr->AS.Header, (int)hdr->HeadLen, buf, &B64STATE);
+	int c = base64_encode_block((char*)hdr->AS.Header, (int)hdr->HeadLen, buf, &B64STATE);
 	fwrite(buf,1,c,fid);
 
 	// write data block	
@@ -74,7 +74,7 @@ int biosig_hdr2gdf_base64(HDRTYPE *hdr, FILE *fid) {
 	}
 
 	// write event table
-	c = base64_encode_block(hdr->AS.rawEventData, (int)len3, buf, &B64STATE);
+	c = base64_encode_block((char*)hdr->AS.rawEventData, (int)len3, buf, &B64STATE);
 	fwrite(buf,1,c,fid);
 
 	c = base64_encode_blockend(buf, &B64STATE);
