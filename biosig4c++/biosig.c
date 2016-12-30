@@ -8909,6 +8909,8 @@ if (VERBOSE_LEVEL>2)
 			if (ptr[0]=='+') ByteOffset[k] = (size_t)strtod(ptr+1,&ptr);
 
 			if (ptr != NULL) ADCgain = strtod(ptr+1,&ptr);
+			if (ADCgain==0) ADCgain=200;	// DEFGAIN: https://www.physionet.org/physiotools/wag/header-5.htm
+
 			if (ptr[0] == '(') {
 				baseline = strtod(ptr+1,&ptr);
 				ptr++;
