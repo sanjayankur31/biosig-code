@@ -8856,7 +8856,7 @@ if (VERBOSE_LEVEL>2)
 			hdr->T0 = tm_time2gdf_time(&t);
 		}
 
-                if (VERBOSE_LEVEL>7) hdr2ascii(hdr,stdout,4);                 
+                if (VERBOSE_LEVEL>8) hdr2ascii(hdr,stdout,2);	// channel header not parsed yet
 
 		int fmt=0,FMT=0;
 		size_t MUL=1;
@@ -9083,7 +9083,8 @@ if (VERBOSE_LEVEL>2)
                         Marker[count]=0;
 
                         /* define user specified events according to http://www.physionet.org/physiotools/wfdb/lib/ecgcodes.h */
-        		hdr->EVENT.CodeDesc = (typeof(hdr->EVENT.CodeDesc)) realloc(hdr->EVENT.CodeDesc,257*sizeof(*hdr->EVENT.CodeDesc));
+                        hdr->EVENT.CodeDesc = (typeof(hdr->EVENT.CodeDesc)) realloc(hdr->EVENT.CodeDesc,257*sizeof(*hdr->EVENT.CodeDesc));
+                        hdr->EVENT.CodeDesc[0] = "";
         		for (k=0; strlen(MIT_EVENT_DESC[k])>0; k++) {
 
         			if (VERBOSE_LEVEL>7) fprintf(stdout,"[MIT 182] %i\n",(int)k);
@@ -12483,15 +12484,9 @@ size_t sread(biosig_data_type* data, size_t start, size_t length, HDRTYPE* hdr) 
 	int stride = 1; 
 
 #ifndef  ONLYGDF
-	uint16_t MITTYP=0;
-	if (hdr->TYPE==MIT) {
-		MITTYP = *(uint16_t*)hdr->AS.auxBUF;
-		if (VERBOSE_LEVEL>7)
-			fprintf(stdout,"FMT=%i 0x%x 0x%x \n",MITTYP, *(uint32_t*)hdr->AS.rawdata,*(uint32_t*)hdr->AS.rawdata);
-	} 
-	else if (hdr->TYPE==Axona) 
+	if (hdr->TYPE==Axona)
 		stride = 64; 
-	else if (hdr->TYPE==TMS32) 
+	else if (hdr->TYPE==TMS32)
 		stride = hdr->NS; 
 #endif //ONLYGDF
 
@@ -12704,16 +12699,6 @@ size_t sread(biosig_data_type* data, size_t start, size_t length, HDRTYPE* hdr) 
 			break;
 
 		default:
-/*
-			if (MITTYP==212)
-				;
-			else if (MITTYP==310)
-				;
-			else if (MITTYP==311)
-				;
-			else
- */
-
 			if (VERBOSE_LEVEL > 7) fprintf(stdout,"%s (line %i) GDFTYP=%i %i %i \n", __FILE__, __LINE__, GDFTYP, (int)k1, (int)k2);
 			biosigERROR(hdr, B4C_DATATYPE_UNSUPPORTED, "Error SREAD: datatype not supported");
 			return(-1);
