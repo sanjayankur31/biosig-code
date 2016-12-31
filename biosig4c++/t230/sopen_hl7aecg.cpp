@@ -985,6 +985,7 @@ EXTERN_C int sclose_HL7aECG_write(HDRTYPE* hdr){
     root->SetAttribute("xsi:schemaLocation", "urn:hl7-org:v3/HL7/aECG/2003-12/schema/PORT_MT020001.xsd");
     root->SetAttribute("classCode", "OBS");
     root->SetAttribute("moodCode", "EVN");
+    root->SetAttribute("type", "Observation");
     doc.LinkEndChild(root);
 
     TiXmlElement *rootid = new TiXmlElement("id");
@@ -1002,19 +1003,14 @@ EXTERN_C int sclose_HL7aECG_write(HDRTYPE* hdr){
 	char timelow[24], timehigh[24];
 	gdf_time t1,t2;
 	t1 = hdr->T0;// + ldexp(timezone/(3600.0*24),32);	
+
 	t0 = gdf_time2tm_time(t1);
-	t2 = tm_time2gdf_time(t0);
-	double dT;
-	dT = ldexp(t1-t2,-32)*(3600*24);
-	dT = round(dT*1000);
-	sprintf(timelow, "%4d%2d%2d%2d%2d%2d.%3d", t0->tm_year+1900, t0->tm_mon+1, t0->tm_mday, t0->tm_hour, t0->tm_min, t0->tm_sec,(int)ceil(dT));
+	sprintf(timelow, "%4d%2d%2d%2d%2d%2d", t0->tm_year+1900, t0->tm_mon+1, t0->tm_mday, t0->tm_hour, t0->tm_min, t0->tm_sec);
 
 	t1 = hdr->T0 + ldexp((hdr->SPR/hdr->SampleRate)/(3600.0*24),32);	
 	t0 = gdf_time2tm_time(t1);
-	t2 = tm_time2gdf_time(t0);
-	dT = ldexp(t1-t2,-32)*(3600*24);
-	dT = floor(dT*1000);
-	sprintf(timehigh, "%4d%2d%2d%2d%2d%2d.%3d", t0->tm_year+1900, t0->tm_mon+1, t0->tm_mday, t0->tm_hour, t0->tm_min, t0->tm_sec,(int)ceil(dT));
+	sprintf(timehigh, "%4d%2d%2d%2d%2d%2d", t0->tm_year+1900, t0->tm_mon+1, t0->tm_mday, t0->tm_hour, t0->tm_min, t0->tm_sec);
+
 	for(int i=0; i<18; ++i) {
 		if (VERBOSE_LEVEL>7) fprintf(stdout,"hl7c 920 %i\n",i);
 		if(timelow[i] == ' ')
@@ -1110,7 +1106,7 @@ EXTERN_C int sclose_HL7aECG_write(HDRTYPE* hdr){
 		t0 = gdf_time2tm_time(hdr->Patient.Birthday);
 
 		// TODO: fixme if "t0->tm_sec"
-		sprintf(tmp, "%04d%02d%02d%02d%02d%02d.000", t0->tm_year+1900, t0->tm_mon+1, t0->tm_mday, t0->tm_hour, t0->tm_min, t0->tm_sec);
+		sprintf(tmp, "%04d%02d%02d%02d%02d%02d", t0->tm_year+1900, t0->tm_mon+1, t0->tm_mday, t0->tm_hour, t0->tm_min, t0->tm_sec);
 
 		TiXmlElement *subjectDemographicPersonBirthtime = new TiXmlElement("birthTime");
 		subjectDemographicPersonBirthtime->SetAttribute("value", tmp);
