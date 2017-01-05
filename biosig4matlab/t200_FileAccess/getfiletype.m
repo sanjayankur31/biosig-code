@@ -75,6 +75,9 @@ if exist(HDR.FileName,'dir')
 		HDR.FILE.Name = 'patient.txt';
 		HDR.FileName = fullfile(HDR.FILE.Path,'patient.txt');
 
+        elseif exist(fullfile(HDR.FileName,'conf.json'),'file') && ~isempty(dir(fullfile(HDR.FileName,'series-*.bin')))
+                HDR.FileName = fullfile(HDR.FileName,'conf.json')
+
         else
     		HDR.TYPE = 'DIR'; 
     		return; 
@@ -153,13 +156,13 @@ else
                         HDR.TYPE='AST';
                 elseif strncmp(ss,'Brain Vision Data Exchange Header File',38); 
                         HDR.TYPE = 'BrainVision';
-                elseif strncmp(ss,'Brain Vision V-Amp Data Header File Version',38); 
+                elseif strncmp(ss,'Brain Vision V-Amp Data Header File Version',38);
                         HDR.TYPE = 'BrainVisionVAmp';
-                elseif strncmp(ss,[239,187,191,'Brain Vision Data Exchange Header File'],38); 
+                elseif strncmp(ss,[char([239,187,191]),'Brain Vision Data Exchange Header File'],38);
                         HDR.TYPE = 'BrainVision';
-                elseif strncmp(ss,'Brain Vision Data Exchange Marker File',38); 
+                elseif strncmp(ss,'Brain Vision Data Exchange Marker File',38);
                         HDR.TYPE = 'BrainVision_MarkerFile';
-                elseif strncmp(ss,'[Header]',8); 
+                elseif strncmp(ss,'[Header]',8);
                         HDR.TYPE='ET-MEG';
                 elseif all(256.^[0:3]*reshape(s(1:80),[4,20])==[0,16,32,32,512,536,1,1,1048,412,1,1,1460,80,32,1,4020,76,128,128]); 
                         HDR.TYPE='ET-MEG:SQD';
@@ -227,7 +230,7 @@ else
                         
                 elseif (c>278) && strncmp(ss,'Embla data file',15) && strcmp(HDR.FILE.Name,ss(279:278+length(HDR.FILE.Name))),
                         HDR.TYPE='EMBLA';
-                elseif strcmp(ss(1:20),['Header',13,10,'File Version'])  
+                elseif strcmp(ss(1:20),['Header',char(13),char(10),'File Version'])
                         HDR.TYPE='ETG4000';
                 elseif strncmp(ss, MAGIC.ePrime, length(MAGIC.ePrime))  
                         HDR.TYPE='ePrime';
@@ -324,15 +327,15 @@ else
 
                 elseif all(s([1:2,4:8])==[3,17,0,8,9,176,2]) && any(s(3)==[240:249])	% v2.40 - v2.49
                         HDR.TYPE='BLSC2';
-                elseif (c>317) && all(ss(308:318)==['E',zeros(1,7),'DAT']) % CeeGraph, Bio-Logic Systems Corp. 
+                elseif (c>317) && all(ss(308:318)==['E',char(zeros(1,7)),'DAT']) % CeeGraph, Bio-Logic Systems Corp.
                         HDR.TYPE='BLSC2';
                 elseif all(s([129,130,132:136])==[3,17,0,8,9,176,2]) && any(s(3)==[240:249])	% v2.40 - v2.49
                         HDR.TYPE='BLSC2-128';
-                elseif (c>445) && strncmp(ss(436:446),[HDR.FILE.Name,0,HDR.FILE.Ext],length(HDR.FILE.Name)+length(HDR.FILE.Ext)+1) % CeeGraph, Bio-Logic Systems Corp. 
+                elseif (c>445) && strncmp(ss(436:446),[HDR.FILE.Name,char(0),HDR.FILE.Ext],length(HDR.FILE.Name)+length(HDR.FILE.Ext)+1) % CeeGraph, Bio-Logic Systems Corp.
                         HDR.TYPE='BLSC2';
-                elseif (c>445) && strncmp(ss(436:446),[HDR.FILE.Name,0,HDR.FILE.Ext],length(HDR.FILE.Name)+length(HDR.FILE.Ext)+1) % CeeGraph, Bio-Logic Systems Corp. 
+                elseif (c>445) && strncmp(ss(436:446),[HDR.FILE.Name,char(0),HDR.FILE.Ext],length(HDR.FILE.Name)+length(HDR.FILE.Ext)+1) % CeeGraph, Bio-Logic Systems Corp.
                         HDR.TYPE='BLSC2';
-                elseif (c>445) && strncmp(ss(436:446),[HDR.FILE.Name,0,0,0,0],length(HDR.FILE.Name)+4) % CeeGraph, Bio-Logic Systems Corp. 
+                elseif (c>445) && strncmp(ss(436:446),[HDR.FILE.Name,char([0,0,0,0])],length(HDR.FILE.Name)+4) % CeeGraph, Bio-Logic Systems Corp.
                         HDR.TYPE='BLSC2';
                         
                 elseif any(s(1)==[100:103]) && all(s([2:8])==[0,0,0,176,1,0,0]) && strcmpi(HDR.FILE.Ext,'DDT'); 
@@ -580,13 +583,15 @@ else
                 elseif all(s(1:2)==[hex2dec('55'),hex2dec('3A')]);      % little endian 
                         HDR.TYPE='SEG2';
                         HDR.Endianity = 'ieee-le';
-                elseif all(s(1:2)==[hex2dec('3A'),hex2dec('55')]);      % big endian 
+                elseif all(s(1:2)==[hex2dec('3A'),hex2dec('55')]);      % big endian
                         HDR.TYPE='SEG2';
                         HDR.Endianity = 'ieee-be';
                         
                 elseif strncmp(ss,'MATLAB Data Acquisition File.',29);  % Matlab Data Acquisition File 
                         HDR.TYPE='DAQ';
-                elseif strncmp(ss,'MATLAB 5.0 MAT-file',19); 
+                elseif all(s(1:4)==[137,abs('HDF')]);
+                        HDR.TYPE='HDF5';
+                elseif strncmp(ss,'MATLAB 5.0 MAT-file',19);
                         HDR.TYPE='MAT5';
                         if (s(127:128)==abs('MI')),
                                 HDR.Endianity = 'ieee-le';
@@ -1309,7 +1314,20 @@ else
                         HDR.TYPE = 'FIF';	% Neuromag MEG data (company is now part of 4D Neuroimaging)
                         
                 elseif strcmpi(HDR.FILE.Ext,'bdip')
-                        
+
+	        elseif strcmpi(HDR.FILE.Ext,'json') && exist('loadjson','file');
+			X = loadjson(HDR.FileName);
+			if isfield(X,'dtype') && isfield(X,'shape') && isnumeric(X.shape) && (numel(X.shape)==2)
+				% https://www.janelia.org/lab/svoboda-lab/data
+				HDR.TYPE = 'SvobodaLab';
+				HDR.NS  = X.shape(1);
+				HDR.SPR = X.shape(2);
+				HDR.Svoboda = X;
+			end
+
+	        elseif strcmpi(HDR.FILE.Ext,'json') && ~exist('loadjson','file')
+			fprintf(2,'Cannot load JSON file because function "loadjson(...)" is not available');
+
                 elseif strcmpi(HDR.FILE.Ext,'ela')
                         
                 elseif strcmpi(HDR.FILE.Ext,'trl')
@@ -1327,7 +1345,7 @@ else
                         
                 end;
         end;
-        
+
         if 0, strcmpi(HDR.TYPE,'unknown'),
                 try
                         [status, HDR.XLS.sheetNames] = xlsfinfo(HDR.FileName)

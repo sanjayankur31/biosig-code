@@ -9227,8 +9227,24 @@ elseif strcmp(HDR.TYPE,'ET-MEG:SQD'),
                 HDR.AS.endpos= HDR.SPR*HDR.NRec; 
                 HDR.AS.bpb   = 2*HDR.NS;		% Bytes per Block
         end
-        
-        
+
+elseif strcmp(HDR.TYPE,'SvobodaLab')
+	fn = dir(fullfile(HDR.FILE.Path,'series*.bin'));
+	HDR.NRec = length(fn);
+	HDR.data = [];
+	for k=1:length(fn)
+		fid = fopen(fullfile(HDR.FILE.Path,fn(k).name), 'r');
+		d   = fread(fid, [HDR.SPR, inf], HDR.Svoboda.dtype);
+		fclose(fid);
+		HDR.data = [HDR.data, d];
+	end
+	switch (HDR.Svoboda.dtype)
+	case {'float64'}
+		HDR.GDFTYP=17;
+	case {'float32'}
+		HDR.GDFTYP=16;
+	end
+
 elseif strncmp(HDR.TYPE,'WINEEG',3),
         if any(HDR.FILE.PERMISSION=='r'),
         	fprintf(HDR.FILE.stderr,'Warning SOPEN (WINEEG): this is still under developement.\n');  
