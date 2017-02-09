@@ -226,8 +226,6 @@ OCT           := mkoctfile$(OCTAVE_VERSION)
 ##########################################################
 
 
-LIB_OBJECTS = libbiosig.a libbiosig2.a libgdf.a libgdftime.a libphysicalunits.a libbiosig.$(DLEXT) libbiosig2.$(DLEXT) libgdf.$(DLEXT) libgdftime.$(DLEXT) libphysicalunits.$(DLEXT)
-
 first: mex4o 
 
 

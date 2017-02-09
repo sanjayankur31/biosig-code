@@ -91,7 +91,7 @@ PathToSigViewer = ../sigviewer
 PathToSigViewerWIN32 = ../sigviewer4win32
 PathToSigViewerWIN64 = ../sigviewer4win64
 
-CFLAGS       += -std=gnu11
+CFLAGS       += -std=gnu11 -g
 CFLAGS       += -fstack-protector -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -pipe -fPIC -fno-builtin-memcmp -O2 -Wno-unused-result
 CFLAGS       += -Wno-deprecated
 CFLAGS       += -D_GNU_SOURCE
@@ -106,19 +106,19 @@ ifeq (,$(TARGET))
 	CXX     ?= g++
 	AR      := ar rcs
 	PKGCONF := pkg-config
-	PREFIX  ?= /usr/local
+	prefix  ?= /usr/local
 ifneq (Darwin,$(shell uname))
-	LFLAGS  += -Wl,-z,relro,-z,now
+	LDFLAGS += -Wl,-z,relro,-z,now
 endif
 else ifeq (intel,$(TARGET))
 	CC      := /opt/intel/bin/icc
 	CXX     := /opt/intel/bin/icc
 	LD      := /opt/intel/bin/xild
 	AR      := /opt/intel/bin/xiar crs
-	PREFIX  ?= /usr/local
+	prefix  ?= /usr/local
 else 
-	prefix  := $(subst /bin/,/,$(dir $(shell which $(TARGET)-gcc)))
-	PREFIX	?= $(dir $(dir $(prefix)))$(TARGET)
+	PREFIX  := $(subst /bin/,/,$(dir $(shell which $(TARGET)-gcc)))
+	prefix	?= $(dir $(dir $(PREFIX)))$(TARGET)
 	CC      := $(TARGET)-gcc
 	CXX     := $(TARGET)-g++
 	LD      := $(TARGET)-ld
@@ -144,16 +144,15 @@ ifeq (Darwin,$(shell uname))
 	##
 	TAR	       = gtar
 	LD	       = ld
-	CFLAGS        += -I/usr/local/include
+	CFLAGS        += -I$(prefix)/include
 	CFLAGS        += -mmacosx-version-min=10.7
-	LDLIBS        += -L/usr/local/lib/
+	LDLIBS        += -L$(prefix)/lib/
 	LDLIBS        += -liconv -lstdc++
 	LDFLAGS       += -dylib -arch x86_64 -macosx_version_min 10.7
 	DLEXT          = dylib
 	FULLDLEXT      = ${BIOSIG_VERSION}.dylib
 	SONAME_PREFIX  = -install_name # the last space character is crucial
 	SONAME_POSTFIX = .${MAJOR_VERSION}.${MINOR_VERSION}.$(DLEXT)
-	prefix        ?= /usr/local
 
 else ifneq (,$(findstring MINGW, $(shell uname)))
 	## add gnulib's getlogin
@@ -173,7 +172,7 @@ else ifneq (,$(findstring MINGW, $(shell uname)))
 	SONAME_POSTFIX = ${MAJOR_VERSION}${MINOR_VERSION}.$(DLEXT)
 	LIBS    += -lssp
 	LDLIBS  += -liconv -lws2_32 -Wl,-subsystem,windows
-	prefix  :=
+	LDLIBS  += -L$(prefix)/lib/
 
 else
 	TAR	       = tar
@@ -183,7 +182,6 @@ else
 	FULLDLEXT      = so.${BIOSIG_VERSION}
 	SONAME_PREFIX  = -Wl,-soname=
 	SONAME_POSTFIX = .$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}
-	prefix        ?= /usr/local
 endif
 
 DEFINES_ALL   = #-D=NDEBUG
@@ -236,6 +234,7 @@ endif
 ifneq (,$(findstring WITH_PTHREAD, $(DEFINES)))
   LDLIBS     += -lpthread
 endif
+LDLIBS += -lb64
 
 ifneq (,$(findstring WITH_CHOLMOD, $(DEFINES)))
   LDLIBS     += -lcholmod
@@ -353,10 +352,10 @@ endif
 
 ####### Output directory
 OBJ	      = ./obj
-INC	      = $(DESTDIR)$(PREFIX)/include
-BIN	      = $(DESTDIR)$(PREFIX)/bin
-LIB	      = $(DESTDIR)$(PREFIX)/lib
-SHARE	      = $(DESTDIR)$(PREFIX)/share
+INC	      = $(DESTDIR)$(prefix)/include
+BIN	      = $(DESTDIR)$(prefix)/bin
+LIB	      = $(DESTDIR)$(prefix)/lib
+SHARE	      = $(DESTDIR)$(prefix)/share
 
 ####### Files
 SOURCES      += biosig.c \
@@ -470,7 +469,7 @@ endif
 
 MinGW64OBJECTS  = $(patsubst win32/%.obj, win64/%.obj, $(MinGWOBJECTS))
 
-LIB_OBJECTS = libbiosig.a libbiosig2.a libgdf.a libgdftime.a libphysicalunits.a libbiosig.$(DLEXT) libbiosig2.$(DLEXT) libgdf.$(DLEXT) libgdftime.$(DLEXT) libphysicalunits.$(DLEXT)
+LIB_OBJECTS = libbiosig.a libbiosig2.a libgdf.a libphysicalunits.a libbiosig.$(DLEXT) libbiosig2.$(DLEXT) libgdf.$(DLEXT) libphysicalunits.$(DLEXT)
 
 first: $(IO_H_FILE2) lib
 tools: save2gdf${BINEXT} pu${BINEXT} biosig_fhir${BINEXT}
@@ -621,17 +620,19 @@ python/biosig.py python/swig_wrap.cxx: python/biosig.i
 	$(SWIG) -python  -I/usr/include/python$(PYTHONVER)/ -I$(NUMPY_INC) -o python/swig_wrap.cxx python/biosig.i
 python/_biosig.so : python/swig_wrap.cxx  libbiosig.$(LIBEXT)
 	$(CXX) -c $(DEFINES) $(CXXFLAGS) -I$(PYTHON_INCPATH) -I$(NUMPY_INC) python/swig_wrap.cxx -o python/swig_wrap.o
-	$(CXX) -shared python/swig_wrap.o $(LFLAGS) $(LIBS) -lbiosig -lphysicalunits -l$(PYTHON_LIB) -o python/_biosig.so
+	$(CXX) -shared python/swig_wrap.o $(LDFLAGS) $(LIBS) -lbiosig -lphysicalunits -l$(PYTHON_LIB) -o python/_biosig.so
 python/biosig2.py python/biosig2_wrap.cxx: python/biosig2.i
 	$(SWIG) -python  -I/usr/include/python$(PYTHONVER)/ -I$(NUMPY_INC) -o python/biosig2_wrap.cxx python/biosig2.i
 python/_biosig2.so : python/biosig2_wrap.cxx  libbiosig2.$(LIBEXT)
 	$(CXX) -c $(DEFINES) $(CXXFLAGS) -I$(PYTHON_INCPATH) -I$(NUMPY_INC) python/biosig2_wrap.cxx -o python/biosig2_wrap.o
-	$(CXX) -shared python/biosig2_wrap.o $(LFLAGS) $(LIBS) -lbiosig2 -l$(PYTHON_LIB) -o python/_biosig2.so
+	$(CXX) -shared python/biosig2_wrap.o $(LDFLAGS) $(LIBS) -lbiosig2 -l$(PYTHON_LIB) -o python/_biosig2.so
 
 python: libbiosig.$(LIBEXT) libbiosig2.$(LIBEXT) python/biosig.i python/biosig2.i
 	$(MAKE) -C python 
 else
 ## biosig4python based on module extensions
+biosig4python : python
+
 python:
 	(cd  python && $(PYTHON) setup.py build)
 
@@ -706,10 +707,10 @@ libbiosig2.${FULLDLEXT}: $(OBJECTS)  biosig2.o t240/libcnsfef.a
 libgdf.${FULLDLEXT}: gdf.o getlogin.o gdftime.o physicalunits.o
 	$(LD) ${SONAME_PREFIX}libgdf${SONAME_POSTFIX} $? $(LDFLAGS) $(LIBS) -o "$@"
 
-libgdftime.${FULLDLEXT}: gdftime.o
-	$(LD) ${SONAME_PREFIX}libgdftime${SONAME_POSTFIX} $? $(LDFLAGS) $(LIBS) -o "$@"
+#libgdftime.${FULLDLEXT}: gdftime.o
+#	$(LD) ${SONAME_PREFIX}libgdftime${SONAME_POSTFIX} $? $(LDFLAGS) $(LIBS) -o "$@"
 libphysicalunits.${FULLDLEXT}: physicalunits.o
-	$(LD) ${SONAME_PREFIX}libgdftime${SONAME_POSTFIX} $? $(LDFLAGS) $(LIBS) -o "$@"
+	$(LD) ${SONAME_PREFIX}libphysicalunits${SONAME_POSTFIX} $? $(LDFLAGS) $(LIBS) -o "$@"
 
 %.${DLEXT}: %.${FULLDLEXT}
 	ln -sf "$(*F).${FULLDLEXT}"	"$(*F)${SONAME_POSTFIX}"
@@ -721,11 +722,11 @@ libphysicalunits.a: physicalunits.o
 libphysicalunits.def: physicalunits.o
 	$(CXX) -o libphysicalunits.dll -s -shared -fPIC "$<" $(LIBS) -Wl,--subsystem,windows,--output-def,libphysicalunits.def,--out-implib,libphysicalunits.dll.a
 
-libgdftime.a: gdftime.o
-	-$(DELETE) "$@"
-	$(AR) "$@" "$<"
-libgdftime.def: gdftime.o
-	$(CC) -o libgdftime.dll -s -shared -fPIC "$@" -Wl,--subsystem,windows,--output-def,libgdftime.def,--out-implib,libgdftime.dll.a
+#libgdftime.a: gdftime.o
+#	-$(DELETE) "$@"
+#	$(AR) "$@" "$<"
+#libgdftime.def: gdftime.o
+#	$(CC) -o libgdftime.dll -s -shared -fPIC "$@" -Wl,--subsystem,windows,--output-def,libgdftime.def,--out-implib,libgdftime.dll.a
 
 libgdf.a: gdf.o getlogin.o gdftime.o physicalunits.o
 	-$(DELETE) "$@"
@@ -742,18 +743,19 @@ libbiosig.def: $(OBJECTS) t240/libcnsfef.a libbiosig.pc
 libbiosig.pc :
 	mkdir -p pkgconfig
 	echo "# Defines libbiosig.pc"       > "$@"
-	echo "prefix=$(PREFIX)"             >>"$@"
-	echo "exec_prefix=$(PREFIX)"        >>"$@"
-	echo "libdir=$(PREFIX)/lib"         >>"$@"
-	echo "includedir=$(PREFIX)/include" >>"$@"
+	echo "prefix=$(prefix)"             >>"$@"
+	echo "exec_prefix=$(prefix)"        >>"$@"
+	echo "libdir=$(prefix)/lib"         >>"$@"
+	echo "includedir=$(prefix)/include" >>"$@"
 	echo                                >>"$@"
 	echo "Name: libbiosig"		    >>"$@"
 	echo "Description: Biosig library"  >>"$@"
 	echo "Version: ${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING}" >>"$@"
 	echo "URL: http://biosig.sf.net"    >>"$@"
-	echo "Libs: -L$(LIB) -lbiosig $(LDLIBS)"  >>"$@"
+	echo "Libs: $(LDFLAGS) $(LDLIBS) -L$(LIB) -lbiosig"  >>"$@"
 	#echo "Libs.private: -liconv"  >>"$@"
 	echo "Cflags: $(DEFINES) -I$(INC)" >>"$@"
+	#echo "Cflags: -I$(INC)" >>"$@"
 
 libbiosig2.a: $(OBJECTS) biosig2.o t240/libcnsfef.a
 	-$(DELETE) libbiosig2.a
@@ -764,20 +766,20 @@ libbiosig2.def: $(OBJECTS) biosig2.o t240/libcnsfef.a
 
 ## save2gdf, pdp2gdf
 %${BINEXT}: %.c
-	$(CXX) $(DEFINES) $(CXXFLAGS) $(shell $(PKGCONF) --cflags libbiosig) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
+	$(CC) $(CFLAGS) $(shell $(PKGCONF) --cflags libbiosig) "$<" $(shell $(PKGCONF) --libs libbiosig) -lm -o "$@"
 
 pu${BINEXT} : pu.c physicalunits.o
-	$(CC) $(DEFINES) $(CFLAGS) $^ -o "$@"
+	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o "$@"
 
 biosig_fhir${BINEXT}: biosig_fhir.c
-	$(CXX) $(DEFINES) $(CXXFLAGS) $(shell $(PKGCONF) --cflags libbiosig) "$<" -lb64 $(shell $(PKGCONF) --libs libbiosig) -o "$@"
+	$(CC) $(CFLAGS) $(shell $(PKGCONF) --cflags libbiosig) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
 
 bscs: biosig_client{BINEXT} biosig_server{BINEXT} sandbox.o biosig.o
 biosig_client${BINEXT}: biosig_client.c libbiosig.$(LIBEXT) biosig-network.o
-	$(CXX) $(DEFINES) $(CXXFLAGS) $(shell $(PKGCONF) --cflags libbiosig) biosig_client.c biosig-network.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o "$@"
+	$(CXX) $(CXXFLAGS) $(shell $(PKGCONF) --cflags libbiosig) biosig_client.c biosig-network.o libbiosig.$(LIBEXT) $(LDFLAGS) $(LIBS) -o "$@"
 
 biosig_server${BINEXT}: biosig_server.c libbiosig.$(LIBEXT) biosig-network.o
-	$(CXX) $(DEFINES) $(CXXFLAGS) $(shell $(PKGCONF) --cflags libbiosig) biosig_server.c biosig-network.o libbiosig.$(LIBEXT) $(LFLAGS) $(LIBS) -o "$@"
+	$(CXX) $(CXXFLAGS) $(shell $(PKGCONF) --cflags libbiosig) biosig_server.c biosig-network.o libbiosig.$(LIBEXT) $(LDFLAGS) $(LIBS) -o "$@"
 
 
 #############################################################
@@ -827,10 +829,10 @@ mex4m: $(patsubst mex/%.cpp, mex/%.$(MEX_EXT), $(MEX_OBJECTS))
 
 ifneq (Darwin,$(shell uname))
 mex/%.$(MEX_EXT): mex/%.cpp
-	$(MEX) $(MEX_OPTION) $(DEFINES) $(shell $(PKGCONF) --cflags libbiosig) "$<" -lbiosig $(shell $(PKGCONF) --libs libbiosig) -output "$@"
+	$(MEX) $(MEX_OPTION) $(shell $(PKGCONF) --cflags libbiosig) "$<" -lbiosig -output "$@"
 else
 mex/%.$(MEX_EXT): mex/%.cpp
-	$(MEX) $(DEFINES) $(shell $(PKGCONF) --cflags libbiosig) -outdir mex "$<" -lbiosig $(shell $(PKGCONF) --libs libbiosig)
+	$(MEX) $(shell $(PKGCONF) --cflags libbiosig) -outdir mex "$<" -lbiosig
 endif
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
@@ -839,11 +841,11 @@ mex: mex4o mexw32 mexw64
 endif
 
 mex/%.mex: mex/%.cpp
-	$(OCT) $(DEFINES) $(shell $(PKGCONF) --cflags libbiosig) -v -g --mex "$<" -Wl,-rpath,$(shell pwd) -lbiosig $(shell $(PKGCONF) --libs libbiosig) -o "$@"
+	$(OCT) $(shell $(PKGCONF) --cflags libbiosig) -v -g --mex "$<" -Wl,-rpath,$(shell pwd) -lbiosig -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
 mex/%.oct: mex/%.cpp
-	$(OCT) $(DEFINES) $(shell $(PKGCONF) --cflags libbiosig) "$<" -Wl,-rpath,$(shell pwd) -lbiosig $(shell $(PKGCONF) --libs libbiosig) -o "$@"
+	$(OCT) $(shell $(PKGCONF) --cflags libbiosig) "$<" -Wl,-rpath,$(shell pwd) -lbiosig -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
 mex/%.mexw32: mex/%.cpp Makefile biosig.h biosig-dev.h
@@ -1014,23 +1016,23 @@ install_headers: biosig-dev.h biosig.h biosig2.h gdftime.h physicalunits.h
 	install -d 			$(INC)
 	install $?		    	$(INC)
 
-install_libbiosig.a: libbiosig.a libbiosig2.a libphysicalunits.a libgdftime.a
+install_libbiosig.a: libbiosig.a libbiosig2.a libphysicalunits.a
 	install -d 			$(LIB)/pkgconfig/
 	install $?			$(LIB)
 	install libbiosig.pc		$(LIB)/pkgconfig/
 
-install_libbiosig.$(DLEXT): libbiosig2.$(FULLDLEXT) libbiosig.$(FULLDLEXT) libphysicalunits.$(DLEXT) libgdftime.$(DLEXT) libbiosig.pc
+install_libbiosig.$(DLEXT): libbiosig2.$(FULLDLEXT) libbiosig.$(FULLDLEXT) libphysicalunits.$(DLEXT) libbiosig.pc
 	install -d 			$(LIB)/pkgconfig/
 	install libbiosig.pc		$(LIB)/pkgconfig/
 	install $?			$(LIB)
 
-install: install_libbiosig.$(DLEXT) install_libbiosig.a install_headers
+install: install_libbiosig.$(DLEXT) install_libbiosig.a install_headers install_tools
 	ln -sf $(LIB)/libbiosig2.${FULLDLEXT}	$(LIB)/libbiosig2${SONAME_POSTFIX}
 	ln -sf $(LIB)/libbiosig.${FULLDLEXT}	$(LIB)/libbiosig${SONAME_POSTFIX}
 	ln -sf $(LIB)/libbiosig2${SONAME_POSTFIX}	$(LIB)/libbiosig2.${DLEXT}
 	ln -sf $(LIB)/libbiosig${SONAME_POSTFIX}	$(LIB)/libbiosig.${DLEXT}
 
-install_tools: pu${BINEXT} save2gdf${BINEXT} biosig_fhir${BINEXT} doc/save2gdf.1 install
+install_tools: pu${BINEXT} save2gdf${BINEXT} biosig_fhir${BINEXT} doc/save2gdf.1
 	install -d 			$(BIN)
 	install save2gdf${BINEXT}	$(BIN)
 	install heka2itx  		$(BIN)
@@ -1102,7 +1104,6 @@ uninstall remove: uninstall_mexbiosig uninstall_tools
 	-$(DELETE) $(LIB)/libbiosig.*
 	-$(DELETE) $(LIB)/libbiosig2.*
 	-$(DELETE) $(LIB)/libphysicalunits.*
-	-$(DELETE) $(LIB)/libgdftime.*
 	-$(DELETE) $(LIB)/pkgconfig/libbiosig.pc
 
 
