@@ -1,2 +1,4 @@
 usr/bin
 usr/share/man/man1/save2*
+usr/share/man/man1/pu.1
+usr/share/man/man1/biosig_fhir.1

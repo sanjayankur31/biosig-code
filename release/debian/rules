@@ -25,9 +25,9 @@ override_dh_auto_configure:
 
 override_dh_auto_build:
 	: # Build everything upstream builds by default
-	make $(MAKEOPTS)
+	DESTDIR=$$(pwd)/debian/biosig $(MAKE) $(MAKEOPTS)
 	: # Assure additional interesting to us pieces are built
-	make $(MAKEOPTS) save2gdf libbiosig.so mex4o biosig4python 
+	DESTDIR=$$(pwd)/debian/biosig $(MAKE) $(MAKEOPTS) tools libbiosig.so mex4o biosig4python
 	#make libbiosig.a save2gdf save2aecg save2scp pdp2gdf \
 	#	 biosig_client biosig_server
 	# Later: libbiosig.so -- fails, no SONAME etc,
@@ -48,13 +48,12 @@ PYDIR=$(shell /bin/ls -d /usr/lib/$(PYTHON)/*-packages)
 OCTDIR=$(shell octave-config --oct-site-dir)
 
 override_dh_auto_install:
-        #$(MAKE) DESTDIR=$$(pwd)/debian/biosig prefix=/usr install
-
-	dh_auto_install
+	dh_auto_install -- prefix=/usr
 
 	: I: install Python binding for current Python version TODO: all
-	mkdir -p debian/python-biosig$(PYDIR)
-	install -m 0644 python/biosig.py python/_biosig.so debian/python-biosig$(PYDIR)
+	#mkdir -p debian/python-biosig$(PYDIR)
+	#(cd  python && python setup.py build)
+	install -m 0644 python/setup.py python/biosigmodule.[ch] debian/python-biosig$(PYDIR)
 
 	: I: install Octave bindings
 	mkdir -p debian/octave-biosig$(OCTDIR)
@@ -73,11 +72,11 @@ override_dh_makeshlibs:
 
 
 override_dh_strip:
-	dh_strip --dbg-package=libbiosig17
+	dh_strip --dbg-package=libbiosig1.8
 	: # Address lintian concern about location
-	[ -d debian/libbiosig17-dbg/usr/lib/debug/usr/lib/pyshared ] && \
-		mv debian/libbiosig17-dbg/usr/lib/debug/usr/lib/pyshared \
-		   debian/libbiosig17-dbg/usr/lib/debug/usr/lib/pymodules || :
+	[ -d debian/libbiosig1.8-dbg/usr/lib/debug/usr/lib/pyshared ] && \
+		mv debian/libbiosig1.8-dbg/usr/lib/debug/usr/lib/pyshared \
+		   debian/libbiosig1.8-dbg/usr/lib/debug/usr/lib/pymodules || :
 
 # Tune up permission for .mex files this late in the chain
 # Silly dh_strip, dh_shlibdeps do not process those since extension
@@ -88,5 +87,5 @@ override_dh_gencontrol:
 
 override_dh_auto_clean:
 	dh_auto_clean
-	make $(MAKEOPTS) clean					# distclean invoked by auto isn't enough
+	DESTDIR=$$(pwd)/debian/biosig $(MAKE) $(MAKEOPTS) clean					# distclean invoked by auto isn't enough
 

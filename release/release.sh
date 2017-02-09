@@ -5,10 +5,9 @@
 #    ./release.sh VERSION_NAME
 #
 #  for example:
-#    ./release.sh 1.6.1
+#    ./release.sh 1.8.4
 #
-# Copyright (C) 2004,2008,2011,2012,2013,2014 Alois Schloegl 
-
+# Copyright (C) 2004,2008,2011,2012,2013,2014,2017 Alois Schloegl
 
 
 #####################################
@@ -16,8 +15,8 @@
 #####################################
 
 CWD=`pwd`
-BIOSIG4M_DIR=$CWD/biosig4matlab
-BIOSIG4C_DIR=$CWD/biosig4c++-$1
+BIOSIG4M_DIR="$CWD/biosig4matlab"
+BIOSIG4C_DIR="$CWD/biosig4c++-$1"
 
 echo "== prepare space (delete previous attempts) =="
 rm -rf biosig-code $BIOSIG4M_DIR $BIOSIG4C_DIR $BIOSIG4M_DIR/../NaN $BIOSIG4M_DIR/../tsa
@@ -57,8 +56,9 @@ rm $BIOSIG4C_DIR/todo.txt
 	awk -f annotatedECG.awk "extern/11073-10102-AnnexB.txt" > "11073-10102-AnnexB.i" && \
 	awk -f units.awk "extern/units.csv" > "units.i" ) 
 
+rm $CWD/biosig4c++-$1.src.tar.gz $CWD/biosig4c++_$1.orig.tar.gz
 # 'tar h ...' needed for symbolic link extern/units.csv, etc. 
-(cd $CWD; tar acvfh biosig4c++-$1.src.tar.gz biosig4c++-$1 > /dev/null; cd $SRCDIR) 
+(cd $CWD; tar acvfh biosig4c++-$1.src.tar.gz biosig4c++-$1 > /dev/null)
 ln $CWD/biosig4c++-$1.src.tar.gz $CWD/biosig4c++_$1.orig.tar.gz 
 
 #####################################

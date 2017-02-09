@@ -4,16 +4,16 @@ Maintainer: Alois Schloegl <alois.schloegl@ist.ac.at>
 Uploaders: Yaroslav Halchenko <debian@onerussian.com>, Michael Hanke <michael.hanke@gmail.com>
 Build-Depends: debhelper (>= 8),
                gawk,
-               python-all-dev, swig, python-numpy,
-               zlib1g-dev, libsuitesparse-dev,
+               python-dev, python-numpy,
+               libz-dev, libsuitesparse-dev, libb64-dev,
                octave-pkg-dev (>= 0.5.7),
-Standards-Version: 3.9.5
+Standards-Version: 3.9.6
 Section: science
 Homepage: http://biosig.sf.net/
 Vcs-Git: git://git.code.sf.net/p/biosig/code
 Vcs-Browser: http://sourceforge.net/p/biosig/code/ci/master/tree/biosig4c++/
 
-Package: libbiosig17
+Package: libbiosig1.8
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -26,10 +26,10 @@ Description: I/O library for biomedical data - dynamic library
  .
  This package provides dynamic library.
 
-Package: libbiosig17-dbg
+Package: libbiosig1.8-dbg
 Section: debug
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libbiosig16 (= ${binary:Version})
+Depends: libbiosig1.8 (= ${binary:Version}), ${misc:Depends}
 Description: I/O library for biomedical data - debug symbols
  BioSig is a library for accessing files in several biomedical data formats
  (including EDF, BDF, GDF, BrainVision, BCI2000, CFWB, HL7aECG,
@@ -42,7 +42,7 @@ Description: I/O library for biomedical data - debug symbols
 Package: libbiosig-dev
 Section: libdevel
 Architecture: any
-Depends: libbiosig17 (= ${binary:Version}), ${misc:Depends}
+Depends: libbiosig1.8 (= ${binary:Version}), ${misc:Depends}
 Description: I/O library for biomedical data - development files
  BioSig is a library for accessing files in several biomedical data formats
  (including EDF, BDF, GDF, BrainVision, BCI2000, CFWB, HL7aECG,
@@ -60,10 +60,15 @@ Description: format conversion tools for biomedical data formats
  Based on BioSig library, this package provides command line
  tools, such as
  .
-  - save2gdf: converter between different file formats, including but
-    not limited to SCP-ECG(EN1064), HL7aECG (FDA-XML), GDF, EDF, BDF,
-    CWFB.  save2gdf can be also used to upload or retrieve data from a
-    bscs server.
+  - save2gdf: converter between different biomdedical signal file
+    formats, including but not limited to SCP-ECG(EN1064),
+    HL7aECG (FDA-XML), GDF, EDF, BDF, CWFB.
+  - biosig_fhir enables to extraction if the header information in
+    XML and JSON format, and encodes binary biomedical signal data
+    in base64-encoded GDF format in order to support HL7/FHIR-based
+    services for biomedical signal data.
+  - pu is a converter for the encoding of physical units
+    according to 11073-10101.
 
 Package: python-biosig
 Section: python
@@ -71,8 +76,9 @@ Architecture: any
 Depends: ${python:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Description: Python bindings for BioSig library
  This package provides Python bindings for BioSig library. Primary
- goal -- I/O interface to variety of biomedical file formats, including
- but not limited to SCP-ECG(EN1064), HL7aECG (FDA-XML), GDF, EDF.
+ goal is an I/O interface to variety of biomedical signal file formats,
+ including but not limited to SCP-ECG(EN1064), HL7aECG (FDA-XML),
+ GDF, EDF, MFER.
  The complete list of supported file formats is available at
  http://pub.ist.ac.at/~schloegl/biosig/TESTED .
 
@@ -80,9 +86,13 @@ Package: octave-biosig
 Architecture: any
 Depends: ${octave:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Description: Octave bindings for BioSig library
- This package provides Octave bindings for BioSig library. Primary
- goal -- I/O interface to variety of biomedical file formats, including
- but not limited to SCP-ECG(EN1064), HL7aECG (FDA-XML), GDF, EDF.
+ This package provides Octave bindings for BioSig library. It provides
+ the functions mexSOPEN (reads metainformation like header information
+ and events, markers and annotation), mexSLOAD (reads metainformation
+ and sample values) and mexSSAVE for storing biomedical signal data
+ to files. The primary goal is a general I/O interface to variety of
+ biomedical signal file formats, including but not limited to
+ SCP-ECG(EN1064), HL7aECG (FDA-XML), GDF, EDF.
  The complete list of supported file formats is available at
  http://pub.ist.ac.at/~schloegl/biosig/TESTED .
 

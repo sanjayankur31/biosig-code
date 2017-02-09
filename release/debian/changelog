@@ -1,3 +1,25 @@
+biosig4c++ (1.8.4-1) unstable; urgency=low
+  * update upstream release
+
+  * bug fixes for numerous file formats including
+    MIT-BIH, HL7aECG, EDFplus, EDF, BDF, CFS.
+  * bug fix for ARM (Raspberry Pi) platform
+  * gcc-6 compatibility
+
+  * support for HL7/FHIR binary templates added
+
+  * R binding added
+
+  * Python binding has changed, the metainformation
+    (header and annotations) is now provided in JSON
+    format. Use json.loads(...) or json.JSONDecode(...)
+    to extract ińdividual elements.
+
+  * debian/control
+    boosted policy compliance to 3.9.6
+
+ -- Alois Schloegl <alois.schloegl@ist.ac.at>  Tue, 07 Feb 2017 14:03:02  +0200
+
 biosig4c++ (1.7.0-1) unstable; urgency=low
 
   * gcc-5 compatibility 
@@ -9,7 +31,7 @@ biosig4c++ (1.7.0-1) unstable; urgency=low
 
 biosig4c++ (1.6.1-1) unstable; urgency=low
 
-  * debian/contral:
+  * debian/control:
        switch to dh-python2
        boosted policy compliance to 3.9.5
 
