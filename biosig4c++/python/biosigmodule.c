@@ -67,9 +67,11 @@ static int PyBiosig_Data(const char *filename, PyObject **D) {
 	case 8:
 		type_num=NPY_FLOAT64;
 		break;
+#if NPY_BITSOF_LONGDOUBLE >= 128
 	case 16:
 		type_num=NPY_FLOAT128;
 		break;
+#endif
 	}
 
         *D = PyArray_SimpleNew(nd, dims, type_num);
