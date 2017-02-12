@@ -16,8 +16,16 @@ export DH_VERBOSE=1
 # This has to be exported to make some magic below work.
 export DH_OPTIONS
 
+PYTHON2_VERSIONS = $(shell pyversions -r)
+PYTHON3_VERSIONS = $(shell py3versions -r)
+py3sdo  = set -e; $(foreach py, $(PYTHON3_VERSIONS), $(py) $(1);)
+pyalldo = set -e; $(foreach py, $(PYTHON2_VERSIONS) $(PYTHON3_VERSIONS), (cd python;$(py) $(1));)
+#pyalldo = set -e; $(foreach py, $(PYTHON2_VERSIONS) $(PYTHON3_VERSIONS), $(MAKE) $(MAKEOPTS) -C python  $(1);)
+
+export PYBUILD_NAME=biosig
+
 %:
-	dh $@ --with python2
+	dh $@ --with python2,python3
 
 override_dh_auto_configure:
 	dh_auto_configure
@@ -27,33 +35,24 @@ override_dh_auto_build:
 	: # Build everything upstream builds by default
 	DESTDIR=$$(pwd)/debian/biosig $(MAKE) $(MAKEOPTS)
 	: # Assure additional interesting to us pieces are built
-	DESTDIR=$$(pwd)/debian/biosig $(MAKE) $(MAKEOPTS) tools libbiosig.so mex4o biosig4python
+	DESTDIR=$$(pwd)/debian/biosig $(MAKE) $(MAKEOPTS) tools libbiosig.so libbiosig.a mex4o python
 	#make libbiosig.a save2gdf save2aecg save2scp pdp2gdf \
 	#	 biosig_client biosig_server
-	# Later: libbiosig.so -- fails, no SONAME etc,
-	#         mex4o -- there are some copying etc
-	# Later: Python -- depends on obsolete Numeric
-	#        biosig4python 
-	#  to build for multiple Python's would need to loop
-	#  between versions with smth like make python -B PYTHONVER=2.6
+        : I: build Python bindings
+	$(call pyalldo, setup.py build)
 
 override_dh_auto_test:
 	: I: skip testing for now -- relies on download of test data
 
 # Manual crafting of installing Octave and Python bindings
-# TODO: proper
-PYTHON=$(shell pyversions -vr)
-PYDIR=$(shell /bin/ls -d /usr/lib/$(PYTHON)/*-packages)
 
 OCTDIR=$(shell octave-config --oct-site-dir)
 
 override_dh_auto_install:
 	dh_auto_install -- prefix=/usr
 
-	: I: install Python binding for current Python version TODO: all
-	#mkdir -p debian/python-biosig$(PYDIR)
-	#(cd  python && python setup.py build)
-	install -m 0644 python/setup.py python/biosigmodule.[ch] debian/python-biosig$(PYDIR)
+	: I: install Python bindings
+	$(call pyalldo, setup.py install --root=$(CURDIR)/debian/$(DEB_SOURCE)/tmp --install-layout=deb)
 
 	: I: install Octave bindings
 	mkdir -p debian/octave-biosig$(OCTDIR)
@@ -73,10 +72,8 @@ override_dh_makeshlibs:
 
 override_dh_strip:
 	dh_strip --dbg-package=libbiosig1.8
-	: # Address lintian concern about location
-	[ -d debian/libbiosig1.8-dbg/usr/lib/debug/usr/lib/pyshared ] && \
-		mv debian/libbiosig1.8-dbg/usr/lib/debug/usr/lib/pyshared \
-		   debian/libbiosig1.8-dbg/usr/lib/debug/usr/lib/pymodules || :
+#	dh_strip -ppython-biosig  --dbg-package=python-biosig-dbg
+#	dh_strip -ppython3-biosig --dbg-package=python3-biosig-dbg
 
 # Tune up permission for .mex files this late in the chain
 # Silly dh_strip, dh_shlibdeps do not process those since extension
@@ -88,4 +85,5 @@ override_dh_gencontrol:
 override_dh_auto_clean:
 	dh_auto_clean
 	DESTDIR=$$(pwd)/debian/biosig $(MAKE) $(MAKEOPTS) clean					# distclean invoked by auto isn't enough
-
+	rm -rf python/build
+	rm -rf python/*.egg-info

@@ -5,6 +5,7 @@ Uploaders: Yaroslav Halchenko <debian@onerussian.com>, Michael Hanke <michael.ha
 Build-Depends: debhelper (>= 8),
                gawk,
                python-dev, python-numpy,
+               python3-dev, python3-numpy,
                libz-dev, libsuitesparse-dev, libb64-dev,
                octave-pkg-dev (>= 0.5.7),
 Standards-Version: 3.9.6
@@ -75,6 +76,18 @@ Section: python
 Architecture: any
 Depends: ${python:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Description: Python bindings for BioSig library
+ This package provides Python bindings for BioSig library. Primary
+ goal is an I/O interface to variety of biomedical signal file formats,
+ including but not limited to SCP-ECG(EN1064), HL7aECG (FDA-XML),
+ GDF, EDF, MFER.
+ The complete list of supported file formats is available at
+ http://pub.ist.ac.at/~schloegl/biosig/TESTED .
+
+Package: python3-biosig
+Section: python
+Architecture: any
+Depends: ${python3:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Description: Python3 bindings for BioSig library
  This package provides Python bindings for BioSig library. Primary
  goal is an I/O interface to variety of biomedical signal file formats,
  including but not limited to SCP-ECG(EN1064), HL7aECG (FDA-XML),
