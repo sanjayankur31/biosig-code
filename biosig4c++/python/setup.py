@@ -3,9 +3,9 @@ from distutils.core import setup, Extension
 module1 = Extension('biosig',
                     define_macros = [('MAJOR_VERSION', '1'),
                                      ('MINOR_VERSION', '8')],
-                    include_dirs = ['/usr/local/include'],
+                    include_dirs = ['./..','/usr/local/include'],
                     libraries = ['biosig'],
-                    library_dirs = ['/usr/local/lib'],
+                    library_dirs = ['./..','/usr/local/lib'],
                     sources = ['biosigmodule.c'])
 
 setup (name = 'Biosig',

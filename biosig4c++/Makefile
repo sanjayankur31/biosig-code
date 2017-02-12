@@ -1,4 +1,4 @@
-####### Makefile for "BioSig for C/C++" #####################
+######## Makefile for "BioSig for C/C++" #####################
 ###
 ###  Copyright (C) 2006-2015 Alois Schloegl <alois.schloegl@ist.ac.at>
 ###  This file is part of the "BioSig for C/C++" repository
@@ -197,7 +197,7 @@ ifeq (,$(findstring MINGW, $(shell uname)))
 DEFINES      += -D=WITH_ZLIB
 endif
 
-DEFINES      += -D=WITH_PTHREAD
+#DEFINES      += -D=WITH_PTHREAD
 #DEFINES      += -D=WITH_CURL
 DEFINES      += -D=__4HAERTEL__
 DEFINES      += -D=WITH_FAMOS
@@ -234,7 +234,6 @@ endif
 ifneq (,$(findstring WITH_PTHREAD, $(DEFINES)))
   LDLIBS     += -lpthread
 endif
-LDLIBS += -lb64
 
 ifneq (,$(findstring WITH_CHOLMOD, $(DEFINES)))
   LDLIBS     += -lcholmod
@@ -469,7 +468,7 @@ endif
 
 MinGW64OBJECTS  = $(patsubst win32/%.obj, win64/%.obj, $(MinGWOBJECTS))
 
-LIB_OBJECTS = libbiosig.a libbiosig2.a libgdf.a libphysicalunits.a libbiosig.$(DLEXT) libbiosig2.$(DLEXT) libgdf.$(DLEXT) libphysicalunits.$(DLEXT)
+LIB_OBJECTS = libbiosig.a libbiosig2.a libgdf.a libphysicalunits.a libbiosig.$(DLEXT) libbiosig2.$(DLEXT) libgdf.$(DLEXT) libphysicalunits.$(DLEXT) libbiosig.pc
 
 first: $(IO_H_FILE2) lib
 tools: save2gdf${BINEXT} pu${BINEXT} biosig_fhir${BINEXT}
@@ -752,7 +751,7 @@ libbiosig.pc :
 	echo "Description: Biosig library"  >>"$@"
 	echo "Version: ${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING}" >>"$@"
 	echo "URL: http://biosig.sf.net"    >>"$@"
-	echo "Libs: $(LDFLAGS) $(LDLIBS) -L$(LIB) -lbiosig"  >>"$@"
+	echo "Libs: $(LDFLAGS) $(LDLIBS) -L$(LIB)"  >>"$@"
 	#echo "Libs.private: -liconv"  >>"$@"
 	echo "Cflags: $(DEFINES) -I$(INC)" >>"$@"
 	#echo "Cflags: -I$(INC)" >>"$@"
@@ -766,13 +765,13 @@ libbiosig2.def: $(OBJECTS) biosig2.o t240/libcnsfef.a
 
 ## save2gdf, pdp2gdf
 %${BINEXT}: %.c
-	$(CC) $(CFLAGS) $(shell $(PKGCONF) --cflags libbiosig) "$<" $(shell $(PKGCONF) --libs libbiosig) -lm -o "$@"
+	$(CC) $(CFLAGS) -I./ $(shell $(PKGCONF) --cflags libbiosig) "$<" $(LDFLAGS) $(shell $(PKGCONF) --libs libbiosig) -lm -L./ -lbiosig -o "$@"
 
 pu${BINEXT} : pu.c physicalunits.o
-	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o "$@"
+	$(CC) $(CFLAGS) -I./ $^ $(LDFLAGS) -L./ -lbiosig -o "$@"
 
 biosig_fhir${BINEXT}: biosig_fhir.c
-	$(CC) $(CFLAGS) $(shell $(PKGCONF) --cflags libbiosig) "$<" $(shell $(PKGCONF) --libs libbiosig) -o "$@"
+	$(CC) $(CFLAGS) -I./ $(shell $(PKGCONF) --cflags libbiosig) "$<" $(LDFLAGS) $(shell $(PKGCONF) --libs libbiosig) -lb64 -L./ -lbiosig -o "$@"
 
 bscs: biosig_client{BINEXT} biosig_server{BINEXT} sandbox.o biosig.o
 biosig_client${BINEXT}: biosig_client.c libbiosig.$(LIBEXT) biosig-network.o
@@ -829,10 +828,10 @@ mex4m: $(patsubst mex/%.cpp, mex/%.$(MEX_EXT), $(MEX_OBJECTS))
 
 ifneq (Darwin,$(shell uname))
 mex/%.$(MEX_EXT): mex/%.cpp
-	$(MEX) $(MEX_OPTION) $(shell $(PKGCONF) --cflags libbiosig) "$<" -lbiosig -output "$@"
+	$(MEX) -I./ $(MEX_OPTION) $(shell $(PKGCONF) --cflags libbiosig) "$<" -L./ -lbiosig -output "$@"
 else
 mex/%.$(MEX_EXT): mex/%.cpp
-	$(MEX) $(shell $(PKGCONF) --cflags libbiosig) -outdir mex "$<" -lbiosig
+	$(MEX) -I./ $(shell $(PKGCONF) --cflags libbiosig) -outdir mex "$<" -L./ -lbiosig
 endif
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
@@ -841,11 +840,11 @@ mex: mex4o mexw32 mexw64
 endif
 
 mex/%.mex: mex/%.cpp
-	$(OCT) $(shell $(PKGCONF) --cflags libbiosig) -v -g --mex "$<" -Wl,-rpath,$(shell pwd) -lbiosig -o "$@"
+	$(OCT) -I./ $(shell $(PKGCONF) --cflags libbiosig) -v -g --mex "$<" -L./ -lbiosig -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
 mex/%.oct: mex/%.cpp
-	$(OCT) $(shell $(PKGCONF) --cflags libbiosig) "$<" -Wl,-rpath,$(shell pwd) -lbiosig -o "$@"
+	$(OCT) -I./ $(shell $(PKGCONF) --cflags libbiosig) "$<" -L./ -lbiosig -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
 mex/%.mexw32: mex/%.cpp Makefile biosig.h biosig-dev.h
