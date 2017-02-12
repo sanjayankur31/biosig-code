@@ -19,8 +19,7 @@ export DH_OPTIONS
 PYTHON2_VERSIONS = $(shell pyversions -r)
 PYTHON3_VERSIONS = $(shell py3versions -r)
 py3sdo  = set -e; $(foreach py, $(PYTHON3_VERSIONS), $(py) $(1);)
-pyalldo = set -e; $(foreach py, $(PYTHON2_VERSIONS) $(PYTHON3_VERSIONS), (cd python;$(py) $(1));)
-#pyalldo = set -e; $(foreach py, $(PYTHON2_VERSIONS) $(PYTHON3_VERSIONS), $(MAKE) $(MAKEOPTS) -C python  $(1);)
+pyalldo = set -e; $(foreach py, $(PYTHON2_VERSIONS) $(PYTHON3_VERSIONS), (cd python; $(py) $(1));)
 
 export PYBUILD_NAME=biosig
 
@@ -33,13 +32,11 @@ override_dh_auto_configure:
 
 override_dh_auto_build:
 	: # Build everything upstream builds by default
-	DESTDIR=$$(pwd)/debian/biosig $(MAKE) $(MAKEOPTS)
-	: # Assure additional interesting to us pieces are built
-	DESTDIR=$$(pwd)/debian/biosig $(MAKE) $(MAKEOPTS) tools libbiosig.so libbiosig.a mex4o python
-	#make libbiosig.a save2gdf save2aecg save2scp pdp2gdf \
+	DESTDIR=$$(pwd)/debian/biosig \
+		$(MAKE) $(MAKEOPTS) lib tools mex4o
 	#	 biosig_client biosig_server
         : I: build Python bindings
-	$(call pyalldo, setup.py build)
+	$(call pyalldo,setup.py build)
 
 override_dh_auto_test:
 	: I: skip testing for now -- relies on download of test data
@@ -52,7 +49,7 @@ override_dh_auto_install:
 	dh_auto_install -- prefix=/usr
 
 	: I: install Python bindings
-	$(call pyalldo, setup.py install --root=$(CURDIR)/debian/$(DEB_SOURCE)/tmp --install-layout=deb)
+	$(call pyalldo,setup.py install --root=$(CURDIR)/debian/$(DEB_SOURCE)tmp --install-layout=deb)
 
 	: I: install Octave bindings
 	mkdir -p debian/octave-biosig$(OCTDIR)
@@ -72,8 +69,6 @@ override_dh_makeshlibs:
 
 override_dh_strip:
 	dh_strip --dbg-package=libbiosig1.8
-#	dh_strip -ppython-biosig  --dbg-package=python-biosig-dbg
-#	dh_strip -ppython3-biosig --dbg-package=python3-biosig-dbg
 
 # Tune up permission for .mex files this late in the chain
 # Silly dh_strip, dh_shlibdeps do not process those since extension

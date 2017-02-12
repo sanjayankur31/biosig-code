@@ -8,6 +8,7 @@ Build-Depends: debhelper (>= 8),
                python3-dev, python3-numpy,
                libz-dev, libsuitesparse-dev, libb64-dev,
                octave-pkg-dev (>= 0.5.7),
+               debhelper (>= 10)
 Standards-Version: 3.9.6
 Section: science
 Homepage: http://biosig.sf.net/
@@ -26,19 +27,6 @@ Description: I/O library for biomedical data - dynamic library
  formats is available at http://pub.ist.ac.at/~schloegl/biosig/TESTED .
  .
  This package provides dynamic library.
-
-Package: libbiosig1.8-dbg
-Section: debug
-Architecture: any
-Depends: libbiosig1.8 (= ${binary:Version}), ${misc:Depends}
-Description: I/O library for biomedical data - debug symbols
- BioSig is a library for accessing files in several biomedical data formats
- (including EDF, BDF, GDF, BrainVision, BCI2000, CFWB, HL7aECG,
- SCP_ECG (EN1064), MFER, ACQ, CNT(Neuroscan), DEMG, EGI, EEG1100,
- FAMOS, SigmaPLpro, TMS32). The complete list of supported file
- formats is available at http://pub.ist.ac.at/~schloegl/biosig/TESTED .
- .
- This package provides debug symbols.
 
 Package: libbiosig-dev
 Section: libdevel
