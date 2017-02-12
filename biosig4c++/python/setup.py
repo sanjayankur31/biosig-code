@@ -13,6 +13,7 @@ setup (name = 'Biosig',
        description = 'This is a biosig package',
        author = 'Alois Schloegl',
        author_email = 'alois.schloegl@ist.ac.at',
+       license = 'GPL',
        url = 'http://docs.python.org/extending/building',
        long_description = '''This is the biosig demo package.''',
        ext_modules = [module1])
