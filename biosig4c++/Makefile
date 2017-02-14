@@ -699,9 +699,13 @@ t240/libcnsfef.a:
 
 libbiosig.${FULLDLEXT}: $(OBJECTS) biosig.o t240/libcnsfef.a
 	$(LD) ${SONAME_PREFIX}libbiosig${SONAME_POSTFIX} $(OBJECTS) t240/*.o $(LDFLAGS) $(LIBS) -o "$@"
+	ln -sf libbiosig.${FULLDLEXT}  libbiosig${SONAME_POSTFIX}
+	ln -sf libbiosig${SONAME_POSTFIX}      libbiosig.${DLEXT}
 
 libbiosig2.${FULLDLEXT}: $(OBJECTS)  biosig2.o t240/libcnsfef.a
 	$(LD) ${SONAME_PREFIX}libbiosig2${SONAME_POSTFIX} $(OBJECTS) biosig2.o t240/*.o $(LDFLAGS) $(LIBS) -o "$@"
+	ln -sf libbiosig2.${FULLDLEXT} libbiosig2${SONAME_POSTFIX}
+	ln -sf libbiosig2${SONAME_POSTFIX}     libbiosig2.${DLEXT}
 
 libgdf.${FULLDLEXT}: gdf.o getlogin.o gdftime.o physicalunits.o
 	$(LD) ${SONAME_PREFIX}libgdf${SONAME_POSTFIX} $? $(LDFLAGS) $(LIBS) -o "$@"
@@ -994,7 +998,7 @@ clean:
 	-$(DELETE) t240/*.o*
 	-$(DELETE) t240/libcnsfef.a
 	-$(DELETE) libbiosig.* libbiosig2.*
-	-$(DELETE) pdp2gdf save2gdf pu
+	-$(DELETE) pdp2gdf save2gdf pu biosig_fhir
 	-$(DELETE) mex/*.o mex/*.obj mex/*.o64 mex/core mex/octave-core mex/*.oct mex/*~ mex/*.mex* 
 	-$(MAKE) -C java clean
 	-$(MAKE) -C matlab clean
@@ -1026,10 +1030,6 @@ install_libbiosig.$(DLEXT): libbiosig2.$(FULLDLEXT) libbiosig.$(FULLDLEXT) libph
 	install $?			$(LIB)
 
 install: install_libbiosig.$(DLEXT) install_libbiosig.a install_headers install_tools
-	ln -sf $(LIB)/libbiosig2.${FULLDLEXT}	$(LIB)/libbiosig2${SONAME_POSTFIX}
-	ln -sf $(LIB)/libbiosig.${FULLDLEXT}	$(LIB)/libbiosig${SONAME_POSTFIX}
-	ln -sf $(LIB)/libbiosig2${SONAME_POSTFIX}	$(LIB)/libbiosig2.${DLEXT}
-	ln -sf $(LIB)/libbiosig${SONAME_POSTFIX}	$(LIB)/libbiosig.${DLEXT}
 
 install_tools: pu${BINEXT} save2gdf${BINEXT} biosig_fhir${BINEXT} doc/save2gdf.1
 	install -d 			$(BIN)

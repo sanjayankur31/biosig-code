@@ -1,0 +1,15 @@
+
+# How to build the Debian packages from this reposititory:
+
+# install prerequisites: 
+  sudo apt-get install debhelper build-essential
+
+# checkout the source
+  git clone git://git.code.sf.net/p/biosig/code biosig-code 
+
+# change to release directory 
+  cd biosig-code/release 
+ 
+# run the release script and provide the version number
+  ./release.sh 1.8.4 
+
