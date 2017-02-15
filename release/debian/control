@@ -8,7 +8,7 @@ Build-Depends: debhelper (>= 8),
                python3-dev, python3-numpy,
                libz-dev, libsuitesparse-dev, libb64-dev,
                octave-pkg-dev (>= 0.5.7),
-               debhelper (>= 9.20160114)
+               debhelper (>= 9)
 Standards-Version: 3.9.8
 Section: science
 Homepage: http://biosig.sf.net/
@@ -18,7 +18,7 @@ Vcs-Browser: http://sourceforge.net/p/biosig/code/ci/master/tree/biosig4c++/
 Package: libbiosig1.8
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, zlib, libcholmod
 Description: I/O library for biomedical data - dynamic library
  BioSig is a library for accessing files in several biomedical data formats
  (including EDF, BDF, GDF, BrainVision, BCI2000, CFWB, HL7aECG,
@@ -44,7 +44,7 @@ Description: I/O library for biomedical data - development files
 Package: biosig-tools
 Section: science
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: libbiosig1.8 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: format conversion tools for biomedical data formats
  Based on BioSig library, this package provides command line
  tools, such as

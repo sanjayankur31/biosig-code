@@ -1,3 +1,13 @@
+biosig4c++ (1.8.4-2) experimental; urgency=low
+
+  improve debian packaging
+  * add many lintian issues
+  * fix bug #734046: octave-biosig: Use unversioned path for installing the
+    *.mex files
+  * add hints from Yaroslav
+
+ -- Alois Schloegl <alois.schloegl@ist.ac.at>  Wed, 15 Feb 2017 08:15:02 +0200
+
 biosig4c++ (1.8.4-1) experimental; urgency=low
 
   * update upstream release
