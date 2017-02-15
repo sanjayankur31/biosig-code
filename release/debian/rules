@@ -43,7 +43,7 @@ override_dh_auto_test:
 
 # Manual crafting of installing Octave and Python bindings
 
-OCTDIR=$(shell octave-config --oct-site-dir)
+OCTDIR=$(shell octave-config -p LOCALOCTFILEDIR)/biosig
 
 override_dh_auto_install:
 	dh_auto_install -- prefix=/usr
