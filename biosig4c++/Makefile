@@ -91,7 +91,7 @@ PathToSigViewer = ../sigviewer
 PathToSigViewerWIN32 = ../sigviewer4win32
 PathToSigViewerWIN64 = ../sigviewer4win64
 
-CFLAGS       += -std=gnu11 -g
+CFLAGS       += -std=gnu11
 CFLAGS       += -fstack-protector -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -pipe -fPIC -fno-builtin-memcmp -O2 -Wno-unused-result
 CFLAGS       += -Wno-deprecated
 CFLAGS       += -D_GNU_SOURCE
@@ -755,6 +755,7 @@ libbiosig.pc :
 	echo "Description: Biosig library"  >>"$@"
 	echo "Version: ${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING}" >>"$@"
 	echo "URL: http://biosig.sf.net"    >>"$@"
+	#echo "Libs: -L$(LIB) -lbiosig $(LDLIBS)"  >>"$@"
 	echo "Libs: $(LDFLAGS) $(LDLIBS) -L$(LIB)"  >>"$@"
 	#echo "Libs.private: -liconv"  >>"$@"
 	echo "Cflags: $(DEFINES) -I$(INC)" >>"$@"
@@ -769,20 +770,20 @@ libbiosig2.def: $(OBJECTS) biosig2.o t240/libcnsfef.a
 
 ## save2gdf, pdp2gdf
 %${BINEXT}: %.c
-	$(CC) $(CFLAGS) -I./ $(shell $(PKGCONF) --cflags libbiosig) "$<" $(LDFLAGS) $(shell $(PKGCONF) --libs libbiosig) -lm -L./ -lbiosig -o "$@"
+	$(CC) $(DEFINES) $(CFLAGS) "$<"  $(LDFLAGS) -L./ -lbiosig -lm -o "$@"
 
 pu${BINEXT} : pu.c physicalunits.o
-	$(CC) $(CFLAGS) -I./ $^ $(LDFLAGS) -L./ -lbiosig -o "$@"
+	$(CC) $(DEFINES) $(CFLAGS) $^ $(LDFLAGS) -o "$@"
 
 biosig_fhir${BINEXT}: biosig_fhir.c
-	$(CC) $(CFLAGS) -I./ $(shell $(PKGCONF) --cflags libbiosig) "$<" $(LDFLAGS) $(shell $(PKGCONF) --libs libbiosig) -lb64 -L./ -lbiosig -o "$@"
+	$(CC) $(DEFINES) $(CFLAGS) "$<" $(LDFLAGS) -L./ -lbiosig -lb64  -o "$@"
 
-bscs: biosig_client{BINEXT} biosig_server{BINEXT} sandbox.o biosig.o
+bscs: biosig_client${BINEXT} biosig_server${BINEXT} sandbox.o biosig.o
 biosig_client${BINEXT}: biosig_client.c libbiosig.$(LIBEXT) biosig-network.o
-	$(CXX) $(CXXFLAGS) $(shell $(PKGCONF) --cflags libbiosig) biosig_client.c biosig-network.o libbiosig.$(LIBEXT) $(LDFLAGS) $(LIBS) -o "$@"
+	$(CC) $(CFLAGS) biosig_client.c biosig-network.o libbiosig.$(LIBEXT) $(LDFLAGS) $(LIBS) -o "$@"
 
 biosig_server${BINEXT}: biosig_server.c libbiosig.$(LIBEXT) biosig-network.o
-	$(CXX) $(CXXFLAGS) $(shell $(PKGCONF) --cflags libbiosig) biosig_server.c biosig-network.o libbiosig.$(LIBEXT) $(LDFLAGS) $(LIBS) -o "$@"
+	$(CC) $(CFLAGS) biosig_server.c biosig-network.o libbiosig.$(LIBEXT) $(LDFLAGS) $(LIBS) -o "$@"
 
 
 #############################################################
