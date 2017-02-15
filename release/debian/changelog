@@ -1,4 +1,5 @@
-biosig4c++ (1.8.4-1) unstable; urgency=low
+biosig4c++ (1.8.4-1) experimental; urgency=low
+
   * update upstream release
 
   * bug fixes for numerous file formats including
@@ -20,34 +21,34 @@ biosig4c++ (1.8.4-1) unstable; urgency=low
 
  -- Alois Schloegl <alois.schloegl@ist.ac.at>  Tue, 07 Feb 2017 14:03:02  +0200
 
-biosig4c++ (1.7.0-1) unstable; urgency=low
+biosig4c++ (1.7.0-1) UNRELEASED; urgency=low
 
-  * gcc-5 compatibility 
+  * gcc-5 compatibility
   * improved support for HEKA, ITX, AXG format
   * improved support for GDF/BDF/EDF, SCP-ECG
   * number of bug fixes and minor improvement
 
  -- Alois Schloegl <alois.schloegl@ist.ac.at>  Tue, 17 Aug 2015 09:32:25  +0200
 
-biosig4c++ (1.6.1-1) unstable; urgency=low
+biosig4c++ (1.6.1-1) UNRELEASED; urgency=low
 
   * debian/control:
        switch to dh-python2
        boosted policy compliance to 3.9.5
 
   * support for additional data formats
-       ABF1, AXG, 
-  * support improved for 
-       CFS (performance, scaling), SCP (convert strings to UTF-8), 
+       ABF1, AXG
+  * support improved for
+       CFS (performance, scaling), SCP (convert strings to UTF-8),
        ISHNE, HEKA (TimeStamps, performance), MFER, IGOR
-  * bug fixes in supported data formats: 
+  * bug fixes in supported data formats:
        EDF+, ITX, HEKA (scaling), CFS
 
-  * JSON output format for header added. 
+  * JSON output format for header added.
 
   * ABI changed:
     The size of some structs, and some enumeration types have changed.
-    Most likely, You'll need to recompile your application, even if 
+    Most likely, You'll need to recompile your application, even if
     the dynamic biosig library (.so, .dll) is used.
 
   * API change: field CHANNEL->PhysDim is removed.
@@ -76,7 +77,7 @@ biosig4c++ (1.3.6-1) experimental; urgency=low
     - deb_no_mex_copy_upstairs: adjusted to just override COPY in mex/Makefile
     - deb_no_locals: adopted upstream
     - others refreshed to reflect (partial) adoption upstream and changes
-    - up_no_need_for_-lidn to remove obsolete -lidn 
+    - up_no_need_for_-lidn to remove obsolete -lidn
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 07 Sep 2012 14:44:22 -0400
 
