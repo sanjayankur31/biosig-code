@@ -163,7 +163,6 @@ else ifneq (,$(findstring MINGW, $(shell uname)))
 	CXX = g++
 	CFLAGS  += -I.
 	CFLAGS  += -pipe -fPIC -D_REENTRANT -D=BUILD_DLL
-	LDFLAGS += -shared
 	TAR	 = tar
 	LD	 = $(CXX)
 	DLEXT    = dll
@@ -177,7 +176,6 @@ else ifneq (,$(findstring MINGW, $(shell uname)))
 else
 	TAR	       = tar
 	LD	       = $(CXX)
-	LDFLAGS       += -shared
 	DLEXT          = so
 	FULLDLEXT      = so.${BIOSIG_VERSION}
 	SONAME_PREFIX  = -Wl,-soname=
@@ -698,22 +696,22 @@ t240/libcnsfef.a:
 	$(MAKE) -C t240 libcnsfef.a CC=$(CC) AR='$(AR)'	# generate t240/*.o files
 
 libbiosig.${FULLDLEXT}: $(OBJECTS) biosig.o t240/libcnsfef.a
-	$(LD) ${SONAME_PREFIX}libbiosig${SONAME_POSTFIX} $(OBJECTS) t240/*.o $(LDFLAGS) $(LIBS) -o "$@"
+	$(LD) ${SONAME_PREFIX}libbiosig${SONAME_POSTFIX} $(OBJECTS) t240/*.o -shared $(LDFLAGS) $(LIBS) -o "$@"
 	ln -sf libbiosig.${FULLDLEXT}  libbiosig${SONAME_POSTFIX}
 	ln -sf libbiosig${SONAME_POSTFIX}      libbiosig.${DLEXT}
 
 libbiosig2.${FULLDLEXT}: $(OBJECTS)  biosig2.o t240/libcnsfef.a
-	$(LD) ${SONAME_PREFIX}libbiosig2${SONAME_POSTFIX} $(OBJECTS) biosig2.o t240/*.o $(LDFLAGS) $(LIBS) -o "$@"
+	$(LD) ${SONAME_PREFIX}libbiosig2${SONAME_POSTFIX} $(OBJECTS) biosig2.o t240/*.o -shared $(LDFLAGS) $(LIBS) -o "$@"
 	ln -sf libbiosig2.${FULLDLEXT} libbiosig2${SONAME_POSTFIX}
 	ln -sf libbiosig2${SONAME_POSTFIX}     libbiosig2.${DLEXT}
 
 libgdf.${FULLDLEXT}: gdf.o getlogin.o gdftime.o physicalunits.o
-	$(LD) ${SONAME_PREFIX}libgdf${SONAME_POSTFIX} $? $(LDFLAGS) $(LIBS) -o "$@"
+	$(LD) ${SONAME_PREFIX}libgdf${SONAME_POSTFIX} $? -shared $(LDFLAGS) $(LIBS) -o "$@"
 
 #libgdftime.${FULLDLEXT}: gdftime.o
-#	$(LD) ${SONAME_PREFIX}libgdftime${SONAME_POSTFIX} $? $(LDFLAGS) $(LIBS) -o "$@"
+#	$(LD) ${SONAME_PREFIX}libgdftime${SONAME_POSTFIX} $? -shared $(LDFLAGS) $(LIBS) -o "$@"
 libphysicalunits.${FULLDLEXT}: physicalunits.o
-	$(LD) ${SONAME_PREFIX}libphysicalunits${SONAME_POSTFIX} $? $(LDFLAGS) $(LIBS) -o "$@"
+	$(LD) ${SONAME_PREFIX}libphysicalunits${SONAME_POSTFIX} $? -shared $(LDFLAGS) $(LIBS) -o "$@"
 
 %.${DLEXT}: %.${FULLDLEXT}
 	ln -sf "$(*F).${FULLDLEXT}"	"$(*F)${SONAME_POSTFIX}"
@@ -770,7 +768,7 @@ libbiosig2.def: $(OBJECTS) biosig2.o t240/libcnsfef.a
 
 ## save2gdf, pdp2gdf
 %${BINEXT}: %.c
-	$(CC) $(DEFINES) $(CFLAGS) "$<"  $(LDFLAGS) -L./ -lbiosig -lm -o "$@"
+	$(CC) $(DEFINES) $(CFLAGS) "$<" $(LDFLAGS) -L./ -lbiosig -lm -o "$@"
 
 pu${BINEXT} : pu.c physicalunits.o
 	$(CC) $(DEFINES) $(CFLAGS) $^ $(LDFLAGS) -o "$@"
