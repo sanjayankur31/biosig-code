@@ -54,6 +54,10 @@
 	# requires: brew tap homebrew/dupes
 	#	    brew install libiconv
 
+#export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+DPKG_EXPORT_BUILDFLAGS = 1
+-include /usr/share/dpkg/buildflags.mk
+
 ###############################
 # whether dynamic or static linking is used, can be controlled with
 # LIBEXT. Setting it to 'a' links statically, 'so' links dynamically
@@ -92,12 +96,12 @@ PathToSigViewerWIN32 = ../sigviewer4win32
 PathToSigViewerWIN64 = ../sigviewer4win64
 
 CFLAGS       += -std=gnu11
-CFLAGS       += -fstack-protector -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -pipe -fPIC -fno-builtin-memcmp -O2 -Wno-unused-result
+CFLAGS       += -pipe -fPIC -fno-builtin-memcmp -O2 -Wno-unused-result
 CFLAGS       += -Wno-deprecated
 CFLAGS       += -D_GNU_SOURCE
 CFLAGS       += -D_XOPEN_SOURCE=700
 CFLAGS       += -D_DEFAULT_SOURCE
-CXXFLAGS      = $(CFLAGS)
+CXXFLAGS     += $(CFLAGS)
 CXXFLAGS     += -std=gnu++11
 
 ## TARGET dependencies
@@ -107,9 +111,7 @@ ifeq (,$(TARGET))
 	AR      := ar rcs
 	PKGCONF := pkg-config
 	prefix  ?= /usr/local
-ifneq (Darwin,$(shell uname))
-	LDFLAGS += -Wl,-z,relro,-z,now
-endif
+	SHAREDLIB = -shared
 else ifeq (intel,$(TARGET))
 	CC      := /opt/intel/bin/icc
 	CXX     := /opt/intel/bin/icc
@@ -128,8 +130,7 @@ else
 		## add gnulib's getlogin
 		SOURCES += win32/getlogin.c win32/getline.c win32/getdelim.c
 		OBJECTS += getlogin.o getline.o getdelim.o
-		CFLAGS  += -I.
-		LIBS    += -lssp
+		LDLIBS  += -lssp
 		LDLIBS  += -liconv -liberty -lws2_32
 		BINEXT   = .exe
 	endif
@@ -143,16 +144,16 @@ ifeq (Darwin,$(shell uname))
 	##	brew install homebrew/science/suite-sparse
 	##
 	TAR	       = gtar
-	LD	       = ld
 	CFLAGS        += -I$(prefix)/include
 	CFLAGS        += -mmacosx-version-min=10.7
-	LDLIBS        += -L$(prefix)/lib/
 	LDLIBS        += -liconv -lstdc++
 	LDFLAGS       += -dylib -arch x86_64 -macosx_version_min 10.7
+	LDFLAGS       += -L$(prefix)/lib/
 	DLEXT          = dylib
 	FULLDLEXT      = ${BIOSIG_VERSION}.dylib
 	SONAME_PREFIX  = -install_name # the last space character is crucial
 	SONAME_POSTFIX = .${MAJOR_VERSION}.${MINOR_VERSION}.$(DLEXT)
+	SHAREDLIB      =
 
 else ifneq (,$(findstring MINGW, $(shell uname)))
 	## add gnulib's getlogin
@@ -161,7 +162,6 @@ else ifneq (,$(findstring MINGW, $(shell uname)))
 	## exclude conflicting definition of sopen from mingw's io.h
 	CC  = gcc
 	CXX = g++
-	CFLAGS  += -I.
 	CFLAGS  += -pipe -fPIC -D_REENTRANT -D=BUILD_DLL
 	TAR	 = tar
 	LD	 = $(CXX)
@@ -169,9 +169,10 @@ else ifneq (,$(findstring MINGW, $(shell uname)))
 	FULLDLEXT      = ${MAJOR_VERSION}${MINOR_VERSION}.dll
 	SONAME_PREFIX  = -Wl,-soname=
 	SONAME_POSTFIX = ${MAJOR_VERSION}${MINOR_VERSION}.$(DLEXT)
-	LIBS    += -lssp
-	LDLIBS  += -liconv -lws2_32 -Wl,-subsystem,windows
-	LDLIBS  += -L$(prefix)/lib/
+	LDLIBS  += -lssp
+	LDLIBS  += -liconv -lws2_32
+	LDFLAGS += -Wl,-subsystem,windows
+	LDFLAGS += -L$(prefix)/lib/
 
 else
 	TAR	       = tar
@@ -264,8 +265,6 @@ ifneq (,$(findstring MINGW, $(shell uname)))
   LDLIBS     += -lssp -liconv
 endif
 endif
-
-LIBS         += $(LDLIBS)
 
 DELETE        = rm -f
 COPY          = cp -f
@@ -617,12 +616,12 @@ python/biosig.py python/swig_wrap.cxx: python/biosig.i
 	$(SWIG) -python  -I/usr/include/python$(PYTHONVER)/ -I$(NUMPY_INC) -o python/swig_wrap.cxx python/biosig.i
 python/_biosig.so : python/swig_wrap.cxx  libbiosig.$(LIBEXT)
 	$(CXX) -c $(DEFINES) $(CXXFLAGS) -I$(PYTHON_INCPATH) -I$(NUMPY_INC) python/swig_wrap.cxx -o python/swig_wrap.o
-	$(CXX) -shared python/swig_wrap.o $(LDFLAGS) $(LIBS) -lbiosig -lphysicalunits -l$(PYTHON_LIB) -o python/_biosig.so
+	$(CXX) $(SHAREDLIB) python/swig_wrap.o $(LDFLAGS) $(LDLIBS) -lbiosig -lphysicalunits -l$(PYTHON_LIB) -o python/_biosig.so
 python/biosig2.py python/biosig2_wrap.cxx: python/biosig2.i
 	$(SWIG) -python  -I/usr/include/python$(PYTHONVER)/ -I$(NUMPY_INC) -o python/biosig2_wrap.cxx python/biosig2.i
 python/_biosig2.so : python/biosig2_wrap.cxx  libbiosig2.$(LIBEXT)
 	$(CXX) -c $(DEFINES) $(CXXFLAGS) -I$(PYTHON_INCPATH) -I$(NUMPY_INC) python/biosig2_wrap.cxx -o python/biosig2_wrap.o
-	$(CXX) -shared python/biosig2_wrap.o $(LDFLAGS) $(LIBS) -lbiosig2 -l$(PYTHON_LIB) -o python/_biosig2.so
+	$(CXX) $(SHAREDLIB) python/biosig2_wrap.o $(LDFLAGS) $(LDLIBS) -lbiosig2 -l$(PYTHON_LIB) -o python/_biosig2.so
 
 python: libbiosig.$(LIBEXT) libbiosig2.$(LIBEXT) python/biosig.i python/biosig2.i
 	$(MAKE) -C python 
@@ -672,7 +671,6 @@ win32/%.exe: %.c
 win32: mexw32 win32mma
 
 
-
 #############################################################
 #	WIN64 - BUILD
 #############################################################
@@ -686,9 +684,8 @@ win64/%.exe: %.c
 win64: mexw64
 
 
-
 #############################################################
-#	GNU/Linux - BUILD
+#	GNU/Linux - Shared Libaries
 #############################################################
 
 t240/libcnsfef.a:
@@ -696,32 +693,73 @@ t240/libcnsfef.a:
 	$(MAKE) -C t240 libcnsfef.a CC=$(CC) AR='$(AR)'	# generate t240/*.o files
 
 libbiosig.${FULLDLEXT}: $(OBJECTS) biosig.o t240/libcnsfef.a
-	$(LD) ${SONAME_PREFIX}libbiosig${SONAME_POSTFIX} $(OBJECTS) t240/*.o -shared $(LDFLAGS) $(LIBS) -o "$@"
+	$(LD) ${SONAME_PREFIX}libbiosig${SONAME_POSTFIX} $(OBJECTS) t240/*.o $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
 	ln -sf libbiosig.${FULLDLEXT}  libbiosig${SONAME_POSTFIX}
 	ln -sf libbiosig${SONAME_POSTFIX}      libbiosig.${DLEXT}
 
 libbiosig2.${FULLDLEXT}: $(OBJECTS)  biosig2.o t240/libcnsfef.a
-	$(LD) ${SONAME_PREFIX}libbiosig2${SONAME_POSTFIX} $(OBJECTS) biosig2.o t240/*.o -shared $(LDFLAGS) $(LIBS) -o "$@"
+	$(LD) ${SONAME_PREFIX}libbiosig2${SONAME_POSTFIX} $(OBJECTS) biosig2.o t240/*.o $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
 	ln -sf libbiosig2.${FULLDLEXT} libbiosig2${SONAME_POSTFIX}
-	ln -sf libbiosig2${SONAME_POSTFIX}     libbiosig2.${DLEXT}
+	ln -sf libbiosig2${SONAME_POSTFIX}      libbiosig2.${DLEXT}
 
 libgdf.${FULLDLEXT}: gdf.o getlogin.o gdftime.o physicalunits.o
-	$(LD) ${SONAME_PREFIX}libgdf${SONAME_POSTFIX} $? -shared $(LDFLAGS) $(LIBS) -o "$@"
+	$(LD) ${SONAME_PREFIX}libgdf${SONAME_POSTFIX} $? $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
+	ln -sf libgdf.${FULLDLEXT} libgdf${SONAME_POSTFIX}
+	ln -sf libgdf${SONAME_POSTFIX}      libgdf.${DLEXT}
 
 #libgdftime.${FULLDLEXT}: gdftime.o
-#	$(LD) ${SONAME_PREFIX}libgdftime${SONAME_POSTFIX} $? -shared $(LDFLAGS) $(LIBS) -o "$@"
+#	$(LD) ${SONAME_PREFIX}libgdftime${SONAME_POSTFIX} $? $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
 libphysicalunits.${FULLDLEXT}: physicalunits.o
-	$(LD) ${SONAME_PREFIX}libphysicalunits${SONAME_POSTFIX} $? -shared $(LDFLAGS) $(LIBS) -o "$@"
+	$(LD) ${SONAME_PREFIX}libphysicalunits${SONAME_POSTFIX} $? $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
+	ln -sf libphysicalunits.${FULLDLEXT} libphysicalunits${SONAME_POSTFIX}
+	ln -sf libphysicalunits${SONAME_POSTFIX}      libphysicalunits.${DLEXT}
 
 %.${DLEXT}: %.${FULLDLEXT}
 	ln -sf "$(*F).${FULLDLEXT}"	"$(*F)${SONAME_POSTFIX}"
-	ln -sf "$(*F)${SONAME_POSTFIX}"	"$@"
+	ln -sf "$(*F)${SONAME_POSTFIX}" "$@"
+
+#############################################################
+#	MacOSX: Shared Libaries
+#############################################################
+libbiosig.dylib: $(OBJECTS) biosig.o t240/libcnsfef.a
+	# CC:      $(CC)
+	# CXX:     $(CXX)
+	# LD:      $(LD)
+	# CFLAGS:  $(CFLAGS)
+	# CPPFLAGS:$(CPPFLAGS)
+	# CXXFLAGS:$(CXXFLAGS)
+	# LFLAGS:  $(LFLAGS)
+	# LDFLAGS: $(LDFLAGS)
+	# LDLIBS:  $(LDLIBS)
+	# FULLDLEXT:  $(FULLDLEXT)
+	$(LD) $(OBJECTS) t240/*.o $(LDFLAGS) $(LDLIBS) -lm -o "$@"
+	ln -sf libbiosig.${FULLDLEXT}  libbiosig${SONAME_POSTFIX}
+
+libbiosig2.dylib: $(OBJECTS)  biosig2.o t240/libcnsfef.a
+	$(LD) $(OBJECTS) biosig2.o t240/*.o $(LDFLAGS) $(LDLIBS) -o "$@"
+	ln -sf libbiosig2.${FULLDLEXT} libbiosig2${SONAME_POSTFIX}
+
+libgdf.dylib: gdf.o getlogin.o gdftime.o physicalunits.o
+	$(LD) $? $(LDFLAGS) $(LDLIBS) -o "$@"
+
+#libgdftime.dylib: gdftime.o
+#	$(LD) $? $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
+libphysicalunits.dylib: physicalunits.o
+	$(LD) $? $(LDFLAGS) $(LDLIBS) -o "$@"
+
+%.${DLEXT}: %.${FULLDLEXT}
+	ln -sf "$(*F).${FULLDLEXT}"	"$(*F)${SONAME_POSTFIX}"
+
+
+#############################################################
+#	Static Libaries
+#############################################################
 
 libphysicalunits.a: physicalunits.o
 	-$(DELETE) "$@"
 	$(AR) "$@" "$<"
 libphysicalunits.def: physicalunits.o
-	$(CXX) -o libphysicalunits.dll -s -shared -fPIC "$<" $(LIBS) -Wl,--subsystem,windows,--output-def,libphysicalunits.def,--out-implib,libphysicalunits.dll.a
+	$(CXX) -o libphysicalunits.dll -s -shared -fPIC "$<" $(LDLIBS) -Wl,--subsystem,windows,--output-def,libphysicalunits.def,--out-implib,libphysicalunits.dll.a
 
 #libgdftime.a: gdftime.o
 #	-$(DELETE) "$@"
@@ -733,13 +771,13 @@ libgdf.a: gdf.o getlogin.o gdftime.o physicalunits.o
 	-$(DELETE) "$@"
 	$(AR) "$@" gdf.o getlogin.o gdftime.o physicalunits.o
 libgdf.def: gdf.o getlogin.o gdftime.o physicalunits.o
-	$(CXX) -s -shared -fPIC -o libgdf.dll gdf.o getlogin.o gdftime.o physicalunits.o $(LIBS) -Wl,--subsystem,windows,--output-def,libgdf.def,--out-implib,libgdf.dll.a
+	$(CXX) -s -shared -fPIC -o libgdf.dll gdf.o getlogin.o gdftime.o physicalunits.o $(LDLIBS) -Wl,--subsystem,windows,--output-def,libgdf.def,--out-implib,libgdf.dll.a
 
 libbiosig.a: $(OBJECTS) t240/libcnsfef.a libbiosig.pc
 	-$(DELETE) libbiosig.a
 	$(AR) libbiosig.a $(OBJECTS) t240/*.o
 libbiosig.def: $(OBJECTS) t240/libcnsfef.a libbiosig.pc
-	$(CXX) -o libbiosig.dll -s -shared -fPIC  $(OBJECTS) t240/libcnsfef.a $(LIBS) -Wl,--subsystem,windows,--output-def,libbiosig.def,--out-implib,libbiosig.dll.a
+	$(CXX) -o libbiosig.dll -s -shared -fPIC  $(OBJECTS) t240/libcnsfef.a $(LDLIBS) -Wl,--subsystem,windows,--output-def,libbiosig.def,--out-implib,libbiosig.dll.a
 
 libbiosig.pc :
 	mkdir -p pkgconfig
@@ -754,7 +792,7 @@ libbiosig.pc :
 	echo "Version: ${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING}" >>"$@"
 	echo "URL: http://biosig.sf.net"    >>"$@"
 	#echo "Libs: -L$(LIB) -lbiosig $(LDLIBS)"  >>"$@"
-	echo "Libs: $(LDFLAGS) $(LDLIBS) -L$(LIB)"  >>"$@"
+	echo "Libs: $(LDFLAGS) $(LDLIBS)"  >>"$@"
 	#echo "Libs.private: -liconv"  >>"$@"
 	echo "Cflags: $(DEFINES) -I$(INC)" >>"$@"
 	#echo "Cflags: -I$(INC)" >>"$@"
@@ -763,25 +801,25 @@ libbiosig2.a: $(OBJECTS) biosig2.o t240/libcnsfef.a
 	-$(DELETE) libbiosig2.a
 	$(AR) libbiosig2.a $(OBJECTS) biosig2.o t240/*.o
 libbiosig2.def: $(OBJECTS) biosig2.o t240/libcnsfef.a
-	$(LD) -o libbiosig2.dll -s -shared -fPIC  $(OBJECTS) biosig2.o t240/libcnsfef.a $(LIBS) -Wl,--subsystem,windows,--output-def,libbiosig2.def,--out-implib,libbiosig2.dll.a
+	$(LD) -o libbiosig2.dll -s -shared -fPIC  $(OBJECTS) biosig2.o t240/libcnsfef.a $(LDLIBS) -Wl,--subsystem,windows,--output-def,libbiosig2.def,--out-implib,libbiosig2.dll.a
 
 
 ## save2gdf, pdp2gdf
 %${BINEXT}: %.c
-	$(CC) $(DEFINES) $(CFLAGS) "$<" $(LDFLAGS) -L./ -lbiosig -lm -o "$@"
+	$(CC) $(DEFINES) $(CFLAGS) "$<" $(LDFLAGS) -L. -lbiosig -lm -o "$@"
 
 pu${BINEXT} : pu.c physicalunits.o
 	$(CC) $(DEFINES) $(CFLAGS) $^ $(LDFLAGS) -o "$@"
 
 biosig_fhir${BINEXT}: biosig_fhir.c
-	$(CC) $(DEFINES) $(CFLAGS) "$<" $(LDFLAGS) -L./ -lbiosig -lb64  -o "$@"
+	$(CC) $(DEFINES) $(CFLAGS) "$<" $(LDFLAGS) -L. -lbiosig -lb64  -o "$@"
 
 bscs: biosig_client${BINEXT} biosig_server${BINEXT} sandbox.o biosig.o
 biosig_client${BINEXT}: biosig_client.c libbiosig.$(LIBEXT) biosig-network.o
-	$(CC) $(CFLAGS) biosig_client.c biosig-network.o libbiosig.$(LIBEXT) $(LDFLAGS) $(LIBS) -o "$@"
+	$(CC) $(CFLAGS) biosig_client.c biosig-network.o libbiosig.$(LIBEXT) $(LDFLAGS) $(LDLIBS) -o "$@"
 
 biosig_server${BINEXT}: biosig_server.c libbiosig.$(LIBEXT) biosig-network.o
-	$(CC) $(CFLAGS) biosig_server.c biosig-network.o libbiosig.$(LIBEXT) $(LDFLAGS) $(LIBS) -o "$@"
+	$(CC) $(CFLAGS) biosig_server.c biosig-network.o libbiosig.$(LIBEXT) $(LDFLAGS) $(LDLIBS) -o "$@"
 
 
 #############################################################
@@ -884,10 +922,10 @@ mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz: mex/*.cpp
 #	R/sload
 #############################################################
 
-R: R/sload.so libbiosig
+R: R/sload.so
 
-R/sload.so: R/sload.c
-	make -C R LDFLAGS=$(LDFLAGS) LIBS=$(LIBS)
+R/sload.so: R/sload.c libbiosig2.so
+	(cd R; R CMD SHLIB sload.c -L.. -lbiosig2)
 
 
 #############################################################
@@ -998,6 +1036,7 @@ clean:
 	-$(DELETE) t240/libcnsfef.a
 	-$(DELETE) libbiosig.* libbiosig2.*
 	-$(DELETE) pdp2gdf save2gdf pu biosig_fhir
+	-$(DELETE) mma/sload.exe mma/*/sload.exe
 	-$(DELETE) mex/*.o mex/*.obj mex/*.o64 mex/core mex/octave-core mex/*.oct mex/*~ mex/*.mex* 
 	-$(MAKE) -C java clean
 	-$(MAKE) -C matlab clean
