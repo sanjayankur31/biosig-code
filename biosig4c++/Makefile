@@ -146,8 +146,10 @@ ifeq (Darwin,$(shell uname))
 	TAR	       = gtar
 	CFLAGS        += -I$(prefix)/include
 	CFLAGS        += -mmacosx-version-min=10.7
-	LDLIBS        += -liconv -lstdc++
-	LDFLAGS       += -dylib -arch x86_64 -macosx_version_min 10.7
+	LDLIBS        += -liconv -lstdc++ -lm
+	LDFLAGS       += -dylib
+	LDFLAGS       += -arch x86_64
+	#LDFLAGS       += -macosx_version_min 10.7
 	LDFLAGS       += -L$(prefix)/lib/
 	DLEXT          = dylib
 	FULLDLEXT      = ${BIOSIG_VERSION}.dylib
