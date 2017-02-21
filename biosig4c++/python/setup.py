@@ -4,7 +4,7 @@ module1 = Extension('biosig',
                     define_macros = [('MAJOR_VERSION', '1'),
                                      ('MINOR_VERSION', '8')],
                     include_dirs = ['./..','/usr/local/include'],
-                    libraries = ['biosig'],
+                    libraries = ['biosig2'],
                     library_dirs = ['./..','/usr/local/lib'],
                     sources = ['biosigmodule.c'])
 

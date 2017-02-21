@@ -2,7 +2,7 @@
 #include <numpy/arrayobject.h>
 #define array_data(a)          (((PyArrayObject *)a)->data)
 
-#include <biosig-dev.h>
+#include <biosig2.h>
 
 #define BIOSIG_MODULE
 #include "biosigmodule.h"
@@ -56,8 +56,8 @@ static int PyBiosig_Data(const char *filename, PyObject **D) {
 
 	const int nd=2;
 	npy_intp dims[nd];
-	dims[0] = (int)(hdr->NRec*hdr->SPR);
-	dims[1] = (int)(NumberOfChannels(hdr));
+	dims[0] = (int)biosig_get_number_of_samples(hdr);
+	dims[1] = (int)biosig_get_number_of_channels(hdr);
 	int type_num;
 
 	switch (sizeof(biosig_data_type)) {
@@ -81,7 +81,7 @@ static int PyBiosig_Data(const char *filename, PyObject **D) {
 	*D = PyArray_New(&PyArray_Type, nd, dims, type_num, NULL, NULL, 0, NPY_ARRAY_CARRAY, NULL);
 	hdr->FLAG.ROW_BASED_CHANNELS = 0;
 	*/
-	size_t count = sread((double*)(((PyArrayObject *)(*D))->data), 0, hdr->NRec, hdr);
+	size_t count = sread((double*)(((PyArrayObject *)(*D))->data), 0, biosig_get_number_of_records(hdr), hdr);
 
 	hdr->data.block = NULL;
 	destructHDR(hdr);
