@@ -1,6 +1,6 @@
 ######## Makefile for "BioSig for C/C++" #####################
 ###
-###  Copyright (C) 2006-2015 Alois Schloegl <alois.schloegl@ist.ac.at>
+###  Copyright (C) 2006-2017 Alois Schloegl <alois.schloegl@ist.ac.at>
 ###  This file is part of the "BioSig for C/C++" repository
 ###  (biosig4c++) at http://biosig.sf.net/
 ###
@@ -376,7 +376,6 @@ SOURCES      += biosig.c \
 		gdftime.c \
 		mdc_ecg_codes.c \
 		physicalunits.c \
-		biosig-network.c \
 		save2gdf.c \
 		biosig_client.c \
 		biosig_server.c
@@ -390,8 +389,8 @@ ifeq (,$(findstring WITH_LIBXML2, $(DEFINES)))
 endif
 
 OBJECTS      += \
-		crc4scp.o \
 		biosig.o \
+		crc4scp.o \
 		sopen_cfs_read.o \
 		sopen_heka_read.o \
 		sopen_igor.o \
@@ -401,7 +400,6 @@ OBJECTS      += \
 		sopen_axg_read.o \
 		sopen_scp_write.o \
 		sopen_hl7aecg.o \
-		biosig-network.o \
 		gdftime.o \
 		mdc_ecg_codes.o \
 		physicalunits.o \
@@ -409,8 +407,8 @@ OBJECTS      += \
 		xgethostname.o
 
 MinGWOBJECTS  = \
-		win32/crc4scp.obj \
 		win32/biosig.obj \
+		win32/crc4scp.obj \
 		win32/getlogin.obj \
 		win32/sopen_cfs_read.obj \
 		win32/sopen_heka_read.obj \
@@ -421,7 +419,6 @@ MinGWOBJECTS  = \
 		win32/sopen_axg_read.obj \
 		win32/sopen_scp_write.obj \
 		win32/sopen_hl7aecg.obj \
-		win32/biosig-network.obj \
 		win32/gdftime.obj \
 		win32/physicalunits.obj \
 		win32/sandbox.obj \
@@ -446,6 +443,13 @@ ifneq (,$(findstring WITH_FEF, $(DEFINES)))
 endif
 ifneq (,$(findstring WITH_FEF, $(MinGWDEF)))
   MinGWOBJECTS += win32/sopen_tdms_read.obj
+endif
+
+ifeq (,$(findstring WITHOUT_NETWORK, $(DEFINES)))
+  OBJECTS      += biosig-network.o
+endif
+ifeq (,$(findstring WITHOUT_NETWORK, $(MinGWDEF)))
+  MinGWOBJECTS += win32/biosig-network.obj
 endif
 
 ifeq (,$(findstring WITHOUT_SCP_DECODE, $(DEFINES)))
@@ -535,9 +539,9 @@ win64/%.obj: win32/%.c
 #	eventcodes and units: conversion from ascii to C code
 #############################################################
 
-biosig.o win32/biosig.obj win64/biosig.obj: eventcodes.i eventcodegroups.i 11073-10102-AnnexB.i biosig.c biosig.h biosig-dev.h
+biosig.c: eventcodes.i eventcodegroups.i 11073-10102-AnnexB.i biosig.h biosig-dev.h
 
-physicalunits.o win32/physicalunits.obj win64/physicalunits.obj: units.i physicalunits.h 
+physicalunits.c: units.i physicalunits.h
 
 eventcodes.i eventcodegroups.i : $(EXTERN)/eventcodes.txt
 	gawk -f eventcodes.awk "$<"
