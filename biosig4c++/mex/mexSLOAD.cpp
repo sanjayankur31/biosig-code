@@ -16,7 +16,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
-
+#ifdef WITH_CHOLMOD
+#include <suitesparse/cholmod.h>
+#endif
 #include <biosig.h>
 
 #ifdef NDEBUG
@@ -208,7 +210,9 @@ void mexFunction(
 		mexPrintf("   Usage of mexSLOAD:\n");
 		mexPrintf("\t[s,HDR]=mexSLOAD(f)\n");
 		mexPrintf("\t[s,HDR]=mexSLOAD(f,chan)\n\t\tchan must be sorted in ascending order\n");
+#ifdef CHOLMOD_H
 		mexPrintf("\t[s,HDR]=mexSLOAD(f,ReRef)\n\t\treref is a (sparse) matrix for rerefencing\n");
+#endif
 		mexPrintf("\t[s,HDR]=mexSLOAD(f,chan,'...')\n");
 		mexPrintf("\t[s,HDR]=mexSLOAD(f,chan,'OVERFLOWDETECTION:ON')\n");
 		mexPrintf("\t[s,HDR]=mexSLOAD(f,chan,'OVERFLOWDETECTION:OFF')\n");
@@ -254,11 +258,13 @@ void mexFunction(
 			mexPrintf("arg[%i] IsStruct\n",k);
 #endif
 		}
-#ifdef CHOLMOD_H
 		else if ((k==1) && mxIsSparse(arg)) {
+#ifdef CHOLMOD_H
 			rr = sputil_get_sparse(arg,&RR,&dummy,0);
-		}
+#else
+			mexErrMsgTxt("This version of mexSLOAD does not support re-referencing matrix - recompile with -DWITH_CHOLMOD -lcholmod \n");
 #endif 
+		}
 		else if ((k==1) && mxIsNumeric(arg)) {
 #ifdef DEBUG		
 			mexPrintf("arg[%i] IsNumeric\n",k);
@@ -292,7 +298,7 @@ void mexFunction(
 		else {
 #ifndef mexSOPEN
 			mexPrintf("mexSLOAD: argument #%i is invalid.",k+1);	
-			mexErrMsgTxt("mexSLOAD failes because of unknown parameter\n");	
+			mexErrMsgTxt("mexSLOAD fails because of unknown parameter\n");
 #else
 			mexPrintf("mexSOPEN: argument #%i is invalid.",k+1);	
 			mexErrMsgTxt("mexSOPEN fails because of unknown parameter\n");	
