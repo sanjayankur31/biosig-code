@@ -870,11 +870,11 @@ mex: mex4o mex4m mexw32 mexw64
 mex4m: $(patsubst mex/%.cpp, mex/%.$(MEX_EXT), $(MEX_OBJECTS))
 
 ifneq (Darwin,$(shell uname))
-mex/%.$(MEX_EXT): mex/%.cpp
-	$(MEX) -I./ $(MEX_OPTION) $(shell $(PKGCONF) --cflags libbiosig) "$<" -L./ -lbiosig -output "$@"
+mex/%.$(MEX_EXT): mex/%.cpp libbiosig.a
+	$(MEX) -I./ $(MEX_OPTION) $(shell $(PKGCONF) --cflags libbiosig) "$<" libbiosig.a $(LDLIBS) -output "$@"
 else
-mex/%.$(MEX_EXT): mex/%.cpp
-	$(MEX) -I./ $(shell $(PKGCONF) --cflags libbiosig) -outdir mex "$<" -L./ -lbiosig
+mex/%.$(MEX_EXT): mex/%.cpp libbiosig.a
+	$(MEX) -I./ $(shell $(PKGCONF) --cflags libbiosig) -outdir mex "$<" libbiosig.a $(LDLIBS)
 endif
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
@@ -883,11 +883,11 @@ mex: mex4o mexw32 mexw64
 endif
 
 mex/%.mex: mex/%.cpp
-	$(OCT) -I./ $(shell $(PKGCONF) --cflags libbiosig) -v -g --mex "$<" -L./ -lbiosig -o "$@"
+	$(OCT) -I./ $(shell $(PKGCONF) --cflags libbiosig) -v -g --mex "$<" libbiosig.a $(LDLIBS) -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
 mex/%.oct: mex/%.cpp
-	$(OCT) -I./ $(shell $(PKGCONF) --cflags libbiosig) "$<" -L./ -lbiosig -o "$@"
+	$(OCT) -I./ $(shell $(PKGCONF) --cflags libbiosig) "$<" libbiosig.a $(LDLIBS) -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
 mex/%.mexw32: mex/%.cpp Makefile biosig.h biosig-dev.h
