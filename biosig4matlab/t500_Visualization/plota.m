@@ -336,11 +336,11 @@ elseif strcmp(X.datatype,'MVAR'),
                         R = GPDC;
                         YTICK = 0:.5:1;
                         YTICKLABEL = {'0','0.5',[]};
-                elseif strcmpi(Mode,'Coherence') || strcmpi(Mode,'COH'),
+                elseif strcmpi(Mode,'Coherence') || strcmp(Mode,'COH'),
                         R = abs(COH);
                         YTICK = 0:.5:1;
                         YTICKLABEL = {'0','0.5',[]};
-                elseif strcmpi(Mode,'iCOH') || strcmpi(Mode,'imagCOH'),
+                elseif strcmp(Mode,'iCOH') || strcmp(Mode,'imagCOH'),
                         R = imag(COH);
                         range = [-1,1];
                         YTICK = -1:.5:1;
@@ -353,11 +353,11 @@ elseif strcmp(X.datatype,'MVAR'),
                         R = abs(pCOH2);
                         YTICK = 0:.5:1;
                         YTICKLABEL = {'0','0.5',[]};
-                elseif strcmpi(Mode,'coh'),
+                elseif strcmp(Mode,'coh'),
                         R = abs(coh);
                         YTICK = 0:.5:1;
                         YTICKLABEL = {'0','0.5',[]};
-                elseif strcmpi(Mode,'icoh'),
+                elseif strcmp(Mode,'icoh'),
                         R = imag(coh);
                         range = [-1,1];
                         YTICK = -1:.5:1;
