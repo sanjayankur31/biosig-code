@@ -1,8 +1,8 @@
 #! /bin/sh
 
 CURDIR=`pwd`
-cd ~/macports
-svn update
+cd ~/macports/dports
+git pull origin master
 cd $CURDIR
 TARGET="science/libbiosig"
 
