@@ -1840,6 +1840,10 @@ HDRTYPE* getfiletype(HDRTYPE* hdr)
 	    	hdr->TYPE = OpenXDF;
     	else if (!memcmp(Header1,"PLEX",4))
 	    	hdr->TYPE = PLEXON;
+	else if (!memcmp(Header1,"\x02\x27\x91\xC6",4)) {
+		hdr->TYPE = RHD2000;	// Intan RHD2000 format
+		hdr->FILE.LittleEndian = 1;
+	}
     	else if (!memcmp(Header1,"\x55\xAA\x00\xb0",2)) {
 	    	hdr->TYPE = RDF;	// UCSD ERPSS aquisition system
 	    	hdr->FILE.LittleEndian = 1;
@@ -2140,6 +2144,7 @@ const struct FileFormatStringTable_t FileFormatStringTable[] = {
 	{ OGG,    	"OGG" },
 	{ PDP,    	"PDP" },
 	{ RDF,    	"RDF" },
+	{ RHD2000,    	"RHD2000" },
 	{ RIFF,    	"RIFF" },
 	{ SASXPT,    	"SAS_XPORT" },
 	{ SCP_ECG,    	"SCP" },
@@ -10230,8 +10235,32 @@ if (VERBOSE_LEVEL>2)
 			strncpy(hc->Label,(char*)(hdr->AS.Header+32+24+8*k),8);
 			hc->LeadIdCode = 0; 
 		}
-
     		biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "Format RDF (UCSD ERPSS) not supported");
+	}
+
+	else if (hdr->TYPE==RHD2000) {
+		float minor = leu16p(hdr->AS.Header+6);
+		minor      *= (minor < 10) ? 0.1 : 0.01;
+		hdr->VERSION = leu16p(hdr->AS.Header+4) + minor;
+
+		hdr->NS = 1;
+		hdr->SampleRate = lef32p(hdr->AS.Header+8);
+
+		float HighPass = ( leu16p(hdr->AS.Header+12) ? 0.0 : lef32p(hdr->AS.Header+14) );
+		      HighPass = max( HighPass, lef32p(hdr->AS.Header+18) );
+		float LowPass = lef32p(hdr->AS.Header+22);
+		const int ListNotch[] = {0,50,60};
+		uint16_t tmp = leu16p(hdr->AS.Header+34);
+		if (tmp>2) tmp=0;
+		float Notch = ListNotch[tmp];
+		float fZ    = lef32p(hdr->AS.Header+40);
+
+		biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "Format Intan RHD2000 not supported");
+
+		/*
+		hdr->CHANNEL = (CHANNEL_TYPE*)realloc(hdr->CHANNEL, hdr->NS * sizeof(CHANNEL_TYPE));
+		CHANNEL_TYPE *hc = hdr->CHANNEL;
+		*/
 	}
 
 	else if (hdr->TYPE==SCP_ECG) {
