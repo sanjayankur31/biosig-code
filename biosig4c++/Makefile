@@ -147,15 +147,12 @@ ifeq (Darwin,$(shell uname))
 	CFLAGS        += -I$(prefix)/include
 	CFLAGS        += -mmacosx-version-min=10.7
 	LDLIBS        += -liconv -lstdc++ -lm
-	LDFLAGS       += -dylib
-	LDFLAGS       += -arch x86_64
-	#LDFLAGS       += -macosx_version_min 10.7
+	SHAREDLIB      = -dylib -arch x86_64 -macosx_version_min 10.7
 	LDFLAGS       += -L$(prefix)/lib/
 	DLEXT          = dylib
 	FULLDLEXT      = ${BIOSIG_VERSION}.dylib
 	SONAME_PREFIX  = -install_name # the last space character is crucial
 	SONAME_POSTFIX = .${MAJOR_VERSION}.${MINOR_VERSION}.$(DLEXT)
-	SHAREDLIB      =
 
 else ifneq (,$(findstring MINGW, $(shell uname)))
 	## add gnulib's getlogin
