@@ -17,7 +17,11 @@
 #include <string.h>
 #include <strings.h>
 #ifdef WITH_CHOLMOD
-#include <suitesparse/cholmod.h>
+#  if !defined(__APPLE__)
+#    include <suitesparse/cholmod.h>
+#  else
+#    include <cholmod.h>
+#  endif
 #endif
 #include <biosig.h>
 
