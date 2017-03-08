@@ -189,6 +189,8 @@ DEFINES      += $(DEFINES_ALL)
 #DEFINES      += -D=WITHOUT_SCP_DECODE
 #DEFINES      += -D=WITH_TIMESTAMPEVENT
 #DEFINES      += -D=WITH_TIMESTAMPCHANNEL
+### Mingw,MXE, etc. must avoid name space conflict concerning SOPEN ###
+DEFINES      += -D=NO_OLDNAMES
 
 ifeq (,$(findstring MINGW, $(shell uname)))
              ### MXE_OCTAVE does not provid ZLIB
@@ -611,24 +613,6 @@ win64/sigviewer.exe: win64/libbiosig.a win64/libbiosig.dll
 #	other language bindings (on Linux)
 #############################################################
 
-ifdef SWIG_BIOSIG4PYTHON
-## this is the deprecated, swig-based interface definition
-biosig4python : python/_biosig.so python/biosig.py python/_biosig2.so python/biosig2.py
-
-python/biosig.py python/swig_wrap.cxx: python/biosig.i
-	$(SWIG) -python  -I/usr/include/python$(PYTHONVER)/ -I$(NUMPY_INC) -o python/swig_wrap.cxx python/biosig.i
-python/_biosig.so : python/swig_wrap.cxx  libbiosig.$(LIBEXT)
-	$(CXX) -c $(DEFINES) $(CXXFLAGS) -I$(PYTHON_INCPATH) -I$(NUMPY_INC) python/swig_wrap.cxx -o python/swig_wrap.o
-	$(CXX) $(SHAREDLIB) python/swig_wrap.o $(LDFLAGS) $(LDLIBS) -lbiosig -lphysicalunits -l$(PYTHON_LIB) -o python/_biosig.so
-python/biosig2.py python/biosig2_wrap.cxx: python/biosig2.i
-	$(SWIG) -python  -I/usr/include/python$(PYTHONVER)/ -I$(NUMPY_INC) -o python/biosig2_wrap.cxx python/biosig2.i
-python/_biosig2.so : python/biosig2_wrap.cxx  libbiosig2.$(LIBEXT)
-	$(CXX) -c $(DEFINES) $(CXXFLAGS) -I$(PYTHON_INCPATH) -I$(NUMPY_INC) python/biosig2_wrap.cxx -o python/biosig2_wrap.o
-	$(CXX) $(SHAREDLIB) python/biosig2_wrap.o $(LDFLAGS) $(LDLIBS) -lbiosig2 -l$(PYTHON_LIB) -o python/_biosig2.so
-
-python: libbiosig.$(LIBEXT) libbiosig2.$(LIBEXT) python/biosig.i python/biosig2.i
-	$(MAKE) -C python 
-else
 ## biosig4python based on module extensions
 biosig4python : python
 
@@ -637,8 +621,6 @@ python:
 
 install_python: libbiosig.$(LIBEXT) libbiosig2.$(LIBEXT)
 	(cd  python && $(PYTHON) setup.py install)
-
-endif
 
 
 java: libbiosig.$(LIBEXT) java/biosig.i
@@ -721,38 +703,6 @@ libphysicalunits.${FULLDLEXT}: physicalunits.o
 	ln -sf "$(*F).${FULLDLEXT}"	"$(*F)${SONAME_POSTFIX}"
 	ln -sf "$(*F)${SONAME_POSTFIX}" "$@"
 
-#############################################################
-#	MacOSX: Shared Libaries
-#############################################################
-libbiosig.dylib: $(OBJECTS) biosig.o t240/libcnsfef.a
-	# CC:      $(CC)
-	# CXX:     $(CXX)
-	# LD:      $(LD)
-	# CFLAGS:  $(CFLAGS)
-	# CPPFLAGS:$(CPPFLAGS)
-	# CXXFLAGS:$(CXXFLAGS)
-	# LFLAGS:  $(LFLAGS)
-	# LDFLAGS: $(LDFLAGS)
-	# LDLIBS:  $(LDLIBS)
-	# FULLDLEXT:  $(FULLDLEXT)
-	$(LD) $(OBJECTS) t240/*.o $(LDFLAGS) $(LDLIBS) -lm -o "$@"
-	ln -sf libbiosig.${FULLDLEXT}  libbiosig${SONAME_POSTFIX}
-
-libbiosig2.dylib: $(OBJECTS)  biosig2.o t240/libcnsfef.a
-	$(LD) $(OBJECTS) biosig2.o t240/*.o $(LDFLAGS) $(LDLIBS) -o "$@"
-	ln -sf libbiosig2.${FULLDLEXT} libbiosig2${SONAME_POSTFIX}
-
-libgdf.dylib: gdf.o getlogin.o gdftime.o physicalunits.o
-	$(LD) $? $(LDFLAGS) $(LDLIBS) -o "$@"
-
-#libgdftime.dylib: gdftime.o
-#	$(LD) $? $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
-libphysicalunits.dylib: physicalunits.o
-	$(LD) $? $(LDFLAGS) $(LDLIBS) -o "$@"
-
-%.${DLEXT}: %.${FULLDLEXT}
-	ln -sf "$(*F).${FULLDLEXT}"	"$(*F)${SONAME_POSTFIX}"
-
 
 #############################################################
 #	Static Libaries
@@ -795,7 +745,7 @@ libbiosig.pc :
 	echo "Version: ${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING}" >>"$@"
 	echo "URL: http://biosig.sf.net"    >>"$@"
 	#echo "Libs: -L$(LIB) -lbiosig $(LDLIBS)"  >>"$@"
-	echo "Libs: $(LDFLAGS) $(LDLIBS)"  >>"$@"
+	echo "Libs: $(LDLIBS)"  >>"$@"
 	#echo "Libs.private: -liconv"  >>"$@"
 	echo "Cflags: $(DEFINES) -I$(INC)" >>"$@"
 	#echo "Cflags: -I$(INC)" >>"$@"
