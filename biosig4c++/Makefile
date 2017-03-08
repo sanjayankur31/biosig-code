@@ -926,10 +926,10 @@ bin/ttl2trig : src/ttl2trig.c gdf.o physicalunits.o
 
 ###	FLOWMON
 flowmon.o: src/flowmon2.c 
-	$(CC)  -c $(DEFINES) $(CFLAGS) -o "$@" "$<"
+	$(CC) -c $(DEFINES) $(CFLAGS) -o "$@" "$<"
         
 bin/flowmon: flowmon.o gdf.o physicalunits.o
-	$(CC) "$^" -lpthread -lm -o "$@"
+	$(CC) "$^" $(LDLIBS) -o "$@"
 
 
 #############################################################
