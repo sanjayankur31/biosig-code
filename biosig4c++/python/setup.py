@@ -1,9 +1,11 @@
 from distutils.core import setup, Extension
 
+import numpy.distutils.misc_util as mu
+
 module1 = Extension('biosig',
                     define_macros = [('MAJOR_VERSION', '1'),
                                      ('MINOR_VERSION', '8')],
-                    include_dirs = ['./..','/usr/local/include'],
+                    include_dirs = ['./..','/usr/local/include',mu.get_numpy_include_dirs()[0]],
                     libraries = ['biosig2'],
                     library_dirs = ['./..','/usr/local/lib'],
                     sources = ['biosigmodule.c'])

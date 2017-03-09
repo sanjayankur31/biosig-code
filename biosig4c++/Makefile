@@ -305,14 +305,9 @@ OCT           := mkoctfile$(OCTAVE_VERSION)
 
 ##########################################################
 ## set variables for Python
-SWIG           := swig
 PYTHON         ?= python
 PYTHONVER      := $(shell $(PYTHON) -c "import sys; print(sys.version[:3])")
-NUMPY_INC      := $(shell $(PYTHON) -c "import numpy.distutils.misc_util as mu; print(' -I'.join(mu.get_numpy_include_dirs()))")
-PYTHON_INCPATH := /usr/include/python$(PYTHONVER)/
-PYTHON_LIB     := python$(PYTHONVER)
 
- 
 ##########################################################
 ## set variables for MinGW Crosscompiler: compile on linux binaries for windows
 ##
