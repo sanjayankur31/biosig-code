@@ -473,10 +473,15 @@ MinGW64OBJECTS  = $(patsubst win32/%.obj, win64/%.obj, $(MinGWOBJECTS))
 LIB_OBJECTS = libbiosig.a libbiosig2.a libgdf.a libphysicalunits.a libbiosig.$(DLEXT) libbiosig2.$(DLEXT) libgdf.$(DLEXT) libphysicalunits.$(DLEXT) libbiosig.pc
 
 first: $(IO_H_FILE2) lib
-tools: save2gdf${BINEXT} pu${BINEXT} biosig_fhir${BINEXT}
+# biosig_fhir not available on MacOSX because libb64 required
+ifneq (Darwin,$(shell uname))
+  tools: save2gdf${BINEXT} pu${BINEXT} biosig_fhir${BINEXT}
+else
+  tools: save2gdf${BINEXT} pu${BINEXT}
+endif
 all:   first mex4o biosig4python sigviewer win32 win64 win32/sigviewer.exe win64/sigviewer.exe #biosig_client biosig_server mma java tcl perl php ruby #sigviewer 
 
-.PHONY : libbiosig lib
+.PHONY : libbiosig lib python mex4m mex4o
 
 libbiosig lib: $(LIB_OBJECTS)
 
@@ -1022,14 +1027,14 @@ install_libbiosig.$(DLEXT): libbiosig2.$(FULLDLEXT) libbiosig.$(FULLDLEXT) libph
 
 install: install_libbiosig.$(DLEXT) install_libbiosig.a install_headers install_tools
 
-install_tools: pu${BINEXT} save2gdf${BINEXT} biosig_fhir${BINEXT} doc/save2gdf.1
+install_tools: tools doc/save2gdf.1
 	install -d 			$(BIN)
 	install save2gdf${BINEXT}	$(BIN)
 	install heka2itx  		$(BIN)
 	install save2aecg 		$(BIN)
 	install save2scp  		$(BIN)
 	install pu${BINEXT}		$(BIN)
-	install biosig_fhir${BINEXT}	$(BIN)
+	-install biosig_fhir${BINEXT}	$(BIN)   # not available on MacOSX because libb64 required
 	mkdir -p  			$(DESTDIR)$(prefix)/share/man/man1
 	install doc/*.1  		$(DESTDIR)$(prefix)/share/man/man1
 	#install libbiosig.man 		$(DESTDIR)$(prefix)/share/
