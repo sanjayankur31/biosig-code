@@ -6,7 +6,7 @@ option (USE_SUITESPARSE "Add support for automatic re-referencing." OFF)
 
 # Version number
 set (libbiosig_VERSION_MAJOR 1)
-set (libbiosig_VERSION_MINOR 6)
+set (libbiosig_VERSION_MINOR 8)
 set (libbiosig_VERSION_PATCH 4)
 
 find_program (GAWK NAMES gawk)
@@ -87,6 +87,7 @@ set_target_properties(biosigstatic PROPERTIES OUTPUT_NAME biosig)
 add_library (biosig2static STATIC
   ${headers}
   biosig2.h
+  biosig-dev.h
   ${sources}
   biosig2.c
 )
@@ -106,6 +107,7 @@ endif ()
 add_library (biosig2shared SHARED
   ${headers}
   biosig2.h
+  biosig-dev.h
   ${sources}
   biosig2.c
 )
@@ -158,4 +160,5 @@ install (TARGETS biosig2static DESTINATION lib)
 install (TARGETS biosig2shared DESTINATION lib)
 install (FILES  biosig.h DESTINATION include)
 install (FILES  biosig2.h DESTINATION include)
+install (FILES  biosig-dev.h DESTINATION include)
 install (FILES  gdftime.h DESTINATION include)
