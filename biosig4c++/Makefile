@@ -56,7 +56,9 @@
 
 #export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 DPKG_EXPORT_BUILDFLAGS = 1
--include /usr/share/dpkg/buildflags.mk
+ifeq (,$(findstring mingw,$(TARGET)))
+    -include /usr/share/dpkg/buildflags.mk
+endif
 
 ###############################
 # whether dynamic or static linking is used, can be controlled with
@@ -131,7 +133,7 @@ else
 		SOURCES += win32/getlogin.c win32/getline.c win32/getdelim.c
 		OBJECTS += getlogin.o getline.o getdelim.o
 		LDLIBS  += -lssp
-		LDLIBS  += -liconv -liberty -lws2_32
+		LDLIBS  += -liconv -liberty -lstdc++ -lws2_32
 		BINEXT   = .exe
 	endif
 endif
@@ -190,13 +192,9 @@ DEFINES      += $(DEFINES_ALL)
 #DEFINES      += -D=WITH_TIMESTAMPEVENT
 #DEFINES      += -D=WITH_TIMESTAMPCHANNEL
 ### Mingw,MXE, etc. must avoid name space conflict concerning SOPEN ###
-DEFINES      += -D=NO_OLDNAMES
+#DEFINES      += -D=NO_OLDNAMES
 
-ifeq (,$(findstring MINGW, $(shell uname)))
-             ### MXE_OCTAVE does not provid ZLIB
 DEFINES      += -D=WITH_ZLIB
-endif
-
 #DEFINES      += -D=WITH_PTHREAD
 #DEFINES      += -D=WITH_CURL
 DEFINES      += -D=__4HAERTEL__
@@ -465,7 +463,10 @@ endif
 
 MinGW64OBJECTS  = $(patsubst win32/%.obj, win64/%.obj, $(MinGWOBJECTS))
 
-LIB_OBJECTS = libbiosig.a libbiosig2.a libgdf.a libphysicalunits.a libbiosig.$(DLEXT) libbiosig2.$(DLEXT) libgdf.$(DLEXT) libphysicalunits.$(DLEXT) libbiosig.pc
+LIB_OBJECTS  = libbiosig.a libbiosig2.a libgdf.a libphysicalunits.a libbiosig.pc
+ifeq (,$(findstring mingw,$(TARGET)))
+    LIB_OBJECTS += libbiosig.$(DLEXT) libbiosig2.$(DLEXT) libgdf.$(DLEXT) libphysicalunits.$(DLEXT)
+endif
 
 first: $(IO_H_FILE2) lib
 # biosig_fhir not available on MacOSX because libb64 required
@@ -712,7 +713,7 @@ libphysicalunits.a: physicalunits.o
 	-$(DELETE) "$@"
 	$(AR) "$@" "$<"
 libphysicalunits.def: physicalunits.o
-	$(CXX) -o libphysicalunits.dll -s -shared -fPIC "$<" $(LDLIBS) -Wl,--subsystem,windows,--output-def,libphysicalunits.def,--out-implib,libphysicalunits.dll.a
+	$(LD) -o libphysicalunits.dll -s -shared -fPIC "$<" $(LDLIBS) -Wl,-subsystem,windows,--output-def,libphysicalunits.def,--out-implib,libphysicalunits.dll.a
 
 #libgdftime.a: gdftime.o
 #	-$(DELETE) "$@"
@@ -724,13 +725,13 @@ libgdf.a: gdf.o getlogin.o gdftime.o physicalunits.o
 	-$(DELETE) "$@"
 	$(AR) "$@" gdf.o getlogin.o gdftime.o physicalunits.o
 libgdf.def: gdf.o getlogin.o gdftime.o physicalunits.o
-	$(CXX) -s -shared -fPIC -o libgdf.dll gdf.o getlogin.o gdftime.o physicalunits.o $(LDLIBS) -Wl,--subsystem,windows,--output-def,libgdf.def,--out-implib,libgdf.dll.a
+	$(LD) -s -shared -fPIC -o libgdf.dll gdf.o getlogin.o gdftime.o physicalunits.o $(LDLIBS) -Wl,-subsystem,windows,--output-def,libgdf.def,--out-implib,libgdf.dll.a
 
 libbiosig.a: $(OBJECTS) t240/libcnsfef.a libbiosig.pc
 	-$(DELETE) libbiosig.a
 	$(AR) libbiosig.a $(OBJECTS) t240/*.o
 libbiosig.def: $(OBJECTS) t240/libcnsfef.a libbiosig.pc
-	$(CXX) -o libbiosig.dll -s -shared -fPIC  $(OBJECTS) t240/libcnsfef.a $(LDLIBS) -Wl,--subsystem,windows,--output-def,libbiosig.def,--out-implib,libbiosig.dll.a
+	$(LD) -o libbiosig.dll -s -shared -fPIC  $(OBJECTS) t240/libcnsfef.a $(LDLIBS) -Wl,-subsystem,windows,--output-def,libbiosig.def,--out-implib,libbiosig.dll.a
 
 libbiosig.pc :
 	mkdir -p pkgconfig
@@ -754,18 +755,18 @@ libbiosig2.a: $(OBJECTS) biosig2.o t240/libcnsfef.a
 	-$(DELETE) libbiosig2.a
 	$(AR) libbiosig2.a $(OBJECTS) biosig2.o t240/*.o
 libbiosig2.def: $(OBJECTS) biosig2.o t240/libcnsfef.a
-	$(LD) -o libbiosig2.dll -s -shared -fPIC  $(OBJECTS) biosig2.o t240/libcnsfef.a $(LDLIBS) -Wl,--subsystem,windows,--output-def,libbiosig2.def,--out-implib,libbiosig2.dll.a
+	$(LD) -o libbiosig2.dll -s -shared -fPIC  $(OBJECTS) biosig2.o t240/libcnsfef.a $(LDLIBS) -Wl,-subsystem,windows,--output-def,libbiosig2.def,--out-implib,libbiosig2.dll.a
 
 
 ## save2gdf, pdp2gdf
 %${BINEXT}: %.c
-	$(CC) $(DEFINES) $(CFLAGS) "$<" $(LDFLAGS) -L. -lbiosig -lm -o "$@"
+	$(CC) $(DEFINES) $(CFLAGS) "$<" $(LDFLAGS) -L. -lbiosig -lm $(LDLIBS) -o "$@"
 
 pu${BINEXT} : pu.c physicalunits.o
-	$(CC) $(DEFINES) $(CFLAGS) $^ $(LDFLAGS) -o "$@"
+	$(CC) $(DEFINES) $(CFLAGS) $^ $(LDFLAGS) $(LDLIBS) -o "$@"
 
 biosig_fhir${BINEXT}: biosig_fhir.c
-	$(CC) $(DEFINES) $(CFLAGS) "$<" $(LDFLAGS) -L. -lbiosig -lb64  -o "$@"
+	$(CC) $(DEFINES) $(CFLAGS) "$<" $(LDFLAGS) -L. -lbiosig -lb64  $(LDLIBS) -o "$@"
 
 bscs: biosig_client${BINEXT} biosig_server${BINEXT} sandbox.o biosig.o
 biosig_client${BINEXT}: biosig_client.c libbiosig.$(LIBEXT) biosig-network.o
