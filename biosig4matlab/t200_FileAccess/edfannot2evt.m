@@ -37,9 +37,19 @@ if isfield(HDR,'EDFplus') && isfield(HDR.EDFplus,'ANNONS'),
 			[t1,t] = strtok(t, 0);
 
 			ix = find(t1==20);
+			if isempty(ix)
+				t0 = str2double(t1);
+				N        = N + 1;
+				tt0      = t0(1);
+				POS(N,1) = HDR.SPR * (k-1) + 1;
+				DUR(N,1) = 0;
+				TYP(N,1) = hex2dec('7ffe');
+				TimeStamp(N,1) = datenum(HDR.T0) + t0/(24*60);
+				continue;
+			end
+
 			s1 = t1(      1:ix(1)-1);
 			s2 = t1(ix(1)+1:ix(2)-1);
-
 			s1(s1==21)=0;
 			t0 = str2double(s1);
 			if ((length(ix)>=2) && ((ix(1)+1)==ix(2)) && strcmp(HDR.reserved1(2:5),'DF+D') ) 
@@ -65,15 +75,16 @@ if isfield(HDR,'EDFplus') && isfield(HDR.EDFplus,'ANNONS'),
 			end;
 		end; 
 	end; 
-	ix = find(TYP < 256);
 
+	HDR.EVENT.POS = POS(:);
+	HDR.EVENT.DUR = DUR(:);
+	HDR.EVENT.TYP = TYP(:);
+	HDR.EVENT.CHN = zeros(N,1);
+	HDR.EVENT.TimeStamp = TimeStamp;
+
+	ix = find(TYP < 256);
 	if any(ix),
 		[HDR.EVENT.CodeDesc, CodeIndex, TYP(ix)] = unique(Desc(ix)');
-		HDR.EVENT.POS = POS(:);
-		HDR.EVENT.DUR = DUR(:);
-		HDR.EVENT.TYP = TYP(:);
-		HDR.EVENT.CHN = zeros(N,1);
-		HDR.EVENT.TimeStamp = TimeStamp;
 	end;
 
         %% TODO: use eventcodes.txt for predefined event types e.g. QRS->0x501
