@@ -424,6 +424,7 @@ int ftoa8(char* buf, double num)
 int is_nihonkohden_signature(char *str) 
 {
   return (!(
+	strncmp(str, "EEG-1200A V01.00", 16) &&
 	strncmp(str, "EEG-1100A V01.00", 16) &&
 	strncmp(str, "EEG-1100B V01.00", 16) &&
 	strncmp(str, "EEG-1100C V01.00", 16) &&
@@ -1680,9 +1681,10 @@ HDRTYPE* getfiletype(HDRTYPE* hdr)
 	}
 
 	/* Nihon Kohden */
-	else if (is_nihonkohden_signature((char*)Header1) && is_nihonkohden_signature((char*)(Header1+0x81)))
+	else if (is_nihonkohden_signature((char*)Header1) && is_nihonkohden_signature((char*)(Header1+0x81))) {
 	    	hdr->TYPE = EEG1100;
-
+		hdr->VERSION = strtod((char*)Header1+11,NULL);
+	}
     	else if (!memcmp(Header1, "RIFF",4) && !memcmp(Header1+8, "CNT ",4))
 	    	hdr->TYPE = EEProbe;
     	else if (!memcmp(Header1, "EEP V2.0",8))
@@ -6769,8 +6771,9 @@ if (VERBOSE_LEVEL>8)
 				count = 0;
 
 			 	while (!feof(fid)) {
-					LOG = (char*) realloc(LOG,count+1025);
-					count += fread(LOG+count,1,1024,fid);
+					size_t r = max(count*2,1024);
+					LOG = (char*) realloc(LOG,r+1);
+					count += fread(LOG+count,1,r-count,fid);
 			 	}
 				fclose(fid);
 
