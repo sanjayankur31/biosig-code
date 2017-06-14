@@ -39,12 +39,6 @@ add support for zlib-compressed (gzipped) XML data
 
 #include <ctype.h>
 #include <iconv.h>
-#if !defined(__APPLE__) && defined(_LIBICONV_H)
- #define iconv		libiconv
- #define iconv_open	libiconv_open
- #define iconv_close	libiconv_close
-#endif
-
 
 #ifdef TIXML_USE_STL
 #include <sstream>
