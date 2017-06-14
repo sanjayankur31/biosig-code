@@ -937,7 +937,7 @@ bin/flowmon: flowmon.o gdf.o physicalunits.o
 #	INSTALL and DE-INSTALL
 #############################################################
 
-.PHONY: clean distclean install remove install_sigviewer asc bin testscp testhl7 testbin test test6 zip
+.PHONY: clean distclean install install_libbiosig remove install_sigviewer asc bin testscp testhl7 testbin test test6 zip
 
 distclean: clean
 	-$(DELETE) -r autom4te.cache
@@ -1010,6 +1010,8 @@ install_ttl2trig: bin/ttl2trig
 install_headers: biosig-dev.h biosig.h biosig2.h gdftime.h physicalunits.h
 	install -d 			$(INC)
 	install $?		    	$(INC)
+
+install_libbiosig: install_libbiosig.$(DLEXT) install_libbiosig.a
 
 install_libbiosig.a: libbiosig.a libbiosig2.a libphysicalunits.a
 	install -d 			$(LIB)/pkgconfig/
