@@ -65,11 +65,17 @@
 0x0143	response code 3
 0x0144	Go, or response code 4
 0x0145	NoGo, or response code 5
-### 0x02__	Neural spikes, and spike trains
+### 0x02__	Neural activity, patch clamp
+### 0x020_	Neural spikes, and spike trains
 0x0201	Spike, action potential (fiducial point)
 0x0202	Burst 
 0x0203	maximum slope time
 0x0204	peak time of spike
+### 0x021_	miniature post-synaptic events
+0x0211	EPSP - Excitatory Post-Synaptic Potentials
+0x0212	IPSP - Inhibitory Post-Synaptic Potentials
+0x0213	EPSC - Excitatory Post-Synaptic Currents
+0x0214	IPSC - Inhibitory Post-Synaptic Currents
 ### 0x03__	BCI: Trigger, cues, classlabels
 0x0300	Start of Trial, Trigger at t=0s
 0x0301	class1, Left hand	- cue onset (BCI experiment)
