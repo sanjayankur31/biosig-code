@@ -51,7 +51,7 @@ CADDSDIR  = ${MLINKDIR}/SystemFiles/Links/MathLink/DeveloperKit/${SYS}/CompilerA
 INCDIR    = -I${CADDSDIR} -I${MLINKDIR}/SystemFiles/IncludeFiles/C/
 LIBDIR   += -L${CADDSDIR}
 
-EXTRALIBS += -lm -ldl -luuid # Set these with appropriate libs for your system.
+EXTRALIBS += -lm -ldl -luuid -lstdc++ # Set these with appropriate libs for your system.
 
 ifeq (Darwin,$(shell uname))
 MLLIB   = MLi${MLIVER} # ML32i3 # Set this to ML64i3 if using a 64-bit system
