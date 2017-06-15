@@ -20,7 +20,12 @@ History:
   The third attempt is using "module extensions". 
   Currently, two functions, one for reading the header
   information (in JSON format) and one for reading the 
-  data samples is provided. 
+  data samples is provided.
+
+Installation:
+--------------------------------------------------
+  sudo python setup.py install
+  sudo python3 setup.py install
 
 Usage: 
 --------------------------------------------------
@@ -30,10 +35,4 @@ Usage:
   print HDR
   Data=biosig.data("filename.gdf")
      
-Installation: 
---------------------------------------------------
-  make module 
-  sudo make install 
-  export PYTHONPATH=/usr/local/lib/python$(PYVER)/dist-packages/
-  
 
