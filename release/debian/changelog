@@ -1,3 +1,18 @@
+biosig4c++ (1.8.5-1) experimental; urgency=low
+
+  update upstream release
+  * the following codes for Post-Synaptic Events are now defined
+	### 0x021_     miniature post-synaptic events
+	0x0211 EPSP - Excitatory Post-Synaptic Potentials
+	0x0212 IPSP - Inhibitory Post-Synaptic Potentials
+	0x0213 EPSC - Excitatory Post-Synaptic Currents
+	0x0214 IPSC - Inhibitory Post-Synaptic Currents
+
+  *  build scripts are improved
+  *  language bindings to Octave, Python, R
+     are now easier to build
+
+
 biosig4c++ (1.8.4-2) experimental; urgency=low
 
   improve debian packaging
