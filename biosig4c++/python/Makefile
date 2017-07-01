@@ -18,9 +18,13 @@ biosig4python:
 # new interface, using so-called "extension modules", this still experimental
 module:
 	$(PYTHON) setup.py build
+	-python2 setup.py build
+	-python3 setup.py build
 
 install: module
 	$(PYTHON) setup.py install
+	-python2 setup.py install
+	-python3 setup.py install
 
 test:
 	## get ../data/Newtest17-256.bdf
@@ -30,4 +34,5 @@ test:
 	(cd .. && PYTHONPATH=/usr/local/lib/python$(PYVER)/dist-packages/ $(PYTHON) -c 'import biosig; print biosig.data("data/Newtest17-256.bdf")')
 	(cd .. && PYTHONPATH=/usr/local/lib/python$(PYVER)/dist-packages/ python$(PYVER) < python/demo2.py)
 
-
+clean:
+	rm -rf build/*

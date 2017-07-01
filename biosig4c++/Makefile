@@ -156,6 +156,15 @@ ifeq (Darwin,$(shell uname))
 	SONAME_PREFIX  = -install_name # the last space character is crucial
 	SONAME_POSTFIX = .${MAJOR_VERSION}.${MINOR_VERSION}.$(DLEXT)
 
+else ifneq (,$(findstring CYGWIN, $(shell uname)))
+	DLEXT = dll
+	TAR	       = tar
+	LD	       = $(CXX)
+	LDLIBS        += -liconv -lstdc++
+	FULLDLEXT      = ${MAJOR_VERSION}${MINOR_VERSION}.dll
+	SONAME_PREFIX  = -Wl,-soname=
+	SONAME_POSTFIX = .$(DLEXT).${MAJOR_VERSION}.${MINOR_VERSION}
+
 else ifneq (,$(findstring MINGW, $(shell uname)))
 	## add gnulib's getlogin
 	SOURCES += win32/getlogin.c win32/getline.c win32/getdelim.c
@@ -170,7 +179,7 @@ else ifneq (,$(findstring MINGW, $(shell uname)))
 	FULLDLEXT      = ${MAJOR_VERSION}${MINOR_VERSION}.dll
 	SONAME_PREFIX  = -Wl,-soname=
 	SONAME_POSTFIX = ${MAJOR_VERSION}${MINOR_VERSION}.$(DLEXT)
-	LDLIBS  += -lssp
+	LDLIBS  += -lstdc++
 	LDLIBS  += -liconv -lws2_32
 	LDFLAGS += -Wl,-subsystem,windows
 	LDFLAGS += -L$(prefix)/lib/
@@ -258,10 +267,10 @@ ifneq (,$(findstring WITH_MATIO, $(DEFINES)))
 endif
 ifneq (,$(findstring stack-protector, $(CFLAGS)))
 ifneq (,$(findstring CYGWIN, $(shell uname)))
-  LDLIBS     += -lssp -liconv
+  LDLIBS     += -lssp
 endif 
 ifneq (,$(findstring MINGW, $(shell uname)))
-  LDLIBS     += -lssp -liconv
+  LDLIBS     += -lssp
 endif
 endif
 
@@ -618,10 +627,10 @@ win64/sigviewer.exe: win64/libbiosig.a win64/libbiosig.dll
 biosig4python : python
 
 python:
-	(cd  python && $(PYTHON) setup.py build)
+	make -C python build
 
 install_python: libbiosig.$(LIBEXT) libbiosig2.$(LIBEXT)
-	(cd  python && $(PYTHON) setup.py install)
+	make -C python install
 
 
 java: libbiosig.$(LIBEXT) java/biosig.i
@@ -962,8 +971,9 @@ distclean: clean
 	-$(MAKE) -C java clean
 	-$(MAKE) -C matlab clean
 	-$(MAKE) -C mma clean
-	-$(MAKE) -C php clean
 	-$(MAKE) -C perl clean
+	-$(MAKE) -C php clean
+	-$(MAKE) -C python clean
 	-$(MAKE) -C R clean
 	-$(MAKE) -C ruby clean
 	-$(MAKE) -C tcl clean
