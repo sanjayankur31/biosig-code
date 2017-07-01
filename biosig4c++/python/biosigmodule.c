@@ -1,12 +1,26 @@
-#include <python2.7/Python.h>
+#include <Python.h>
 #include <numpy/arrayobject.h>
-#define array_data(a)          (((PyArrayObject *)a)->data)
 
 #include <biosig2.h>
 
 #define BIOSIG_MODULE
 #include "biosigmodule.h"
 
+#if PY_MAJOR_VERSION >= 3
+  #define MOD_ERROR_VAL NULL
+  #define MOD_SUCCESS_VAL(val) val
+  #define MOD_INIT(name) PyMODINIT_FUNC PyInit_##name(void)
+  #define MOD_DEF(ob, name, doc, methods) \
+          static struct PyModuleDef moduledef = { \
+            PyModuleDef_HEAD_INIT, name, doc, -1, methods, }; \
+          ob = PyModule_Create(&moduledef);
+#else
+  #define MOD_ERROR_VAL
+  #define MOD_SUCCESS_VAL(val)
+  #define MOD_INIT(name) void init##name(void)
+  #define MOD_DEF(ob, name, doc, methods) \
+          ob = Py_InitModule3(name, methods, doc);
+#endif
 
 static PyObject *BiosigError;
 
@@ -82,6 +96,7 @@ static int PyBiosig_Data(const char *filename, PyObject **D) {
 	hdr->FLAG.ROW_BASED_CHANNELS = 0;
 	*/
 	size_t count = sread((double*)(((PyArrayObject *)(*D))->data), 0, biosig_get_number_of_records(hdr), hdr);
+//	size_t count = sread((double*)(PyArray_Data(D)), 0, biosig_get_number_of_records(hdr), hdr);
 
 	hdr->data.block = NULL;
 	destructHDR(hdr);
@@ -115,18 +130,35 @@ static PyMethodDef BiosigMethods[] = {
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
+const char module___doc__[] = "biosig tools for loading signal data";
 
-PyMODINIT_FUNC initbiosig(void) {
+#if PY_MAJOR_VERSION >= 3
+    static struct PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        "biosig",     /* m_name */
+        module___doc__,      /* m_doc */
+        -1,                  /* m_size */
+        BiosigMethods,       /* m_methods */
+        NULL,                /* m_reload */
+        NULL,                /* m_traverse */
+        NULL,                /* m_clear */
+        NULL,                /* m_free */
+    };
+#endif
+
+MOD_INIT(biosig) {
     import_array();
 
-    PyObject *m = Py_InitModule("biosig", BiosigMethods);
-    if (m == NULL) return;
+    PyObject *m;
+    MOD_DEF(m, "biosig", module___doc__, BiosigMethods);
+    if (m == NULL) return MOD_ERROR_VAL;
 
     BiosigError = PyErr_NewException("biosig.error", NULL, NULL);
     Py_INCREF(BiosigError);
     PyModule_AddObject(m, "error", BiosigError);
 
      /* additional initialization can happen here */
-}
 
+   return MOD_SUCCESS_VAL(m);
+}
 
