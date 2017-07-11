@@ -74,18 +74,17 @@ elseif (Mode==1)
 		k     = find(onset > stop, 1, 'first');
 		if isempty(k) break; end
 		start = onset(k);
-		if ~any(start < onset) break; end
 
 		ix = find((start < offset) & (offset < (start+winlen)));
 		if ~isempty(ix)
-			stop = offset(ix(end))-1;
+			stop = offset(ix(end));
 		else
 			stop = offset(k);
 		end;
 
-		[tmp,ix]=max(data(start:stop));
+		[tmp,ix]=max(data(start:stop-1));
 
-		pos(end+1,1)=start+ix;
+		pos(end+1,1)=start+ix-1;
 	end;
 	return;
 else
