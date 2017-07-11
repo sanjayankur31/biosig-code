@@ -74,7 +74,6 @@ elseif (Mode==1)
 		k     = find(onset > stop, 1, 'first');
 		if isempty(k) break; end
 		start = onset(k);
-		if ~any(start < onset) break; end
 
 		ix = find((start < offset) & (offset < (start+winlen)));
 		if ~isempty(ix)
