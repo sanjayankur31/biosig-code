@@ -1,3 +1,4 @@
 # as mentioned in README.source, tinyxml did not accept the patch (yet)
 # so libbiosig comes with its own patched (supports compression) copy
-libbiosig1.8 binary: embedded-library usr/lib/libbiosig.so.*: tinyxml
+libbiosig1.8: embedded-library usr/lib/libbiosig2.so.1.8.5: tinyxml
+libbiosig1.8: embedded-library usr/lib/libbiosig.so.1.8.5: tinyxml

@@ -1,3 +1,5 @@
 # as mentioned in README.source, tinyxml did not accept the patch (yet)
 # so libbiosig comes with its own patched (supports compression) copy
-libbiosig18 binary: embedded-library usr/lib/libbiosig.so.*: tinyxml
+octave-biosig: embedded-library usr/lib/x86_64-linux-gnu/octave/site/oct/x86_64-pc-linux-gnu/biosig/mexSLOAD.mex: tinyxml
+octave-biosig: embedded-library usr/lib/x86_64-linux-gnu/octave/site/oct/x86_64-pc-linux-gnu/biosig/mexSOPEN.mex: tinyxml
+octave-biosig: embedded-library usr/lib/x86_64-linux-gnu/octave/site/oct/x86_64-pc-linux-gnu/biosig/mexSSAVE.mex: tinyxml
