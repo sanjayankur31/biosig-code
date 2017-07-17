@@ -1,4 +1,3 @@
-##TODO: UODATE##
 
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: biosig4c++
@@ -11,7 +10,7 @@ Copyright: 2003-2007, Lev Walkin <vlm@lionet.info>
            2003,2004, X/IO Labs (xiolabs.com)
            2003,2004,2006, Eugenio Cervesato
            2005,2006, Franco Chiarugi
-           2005-2017, Alois Schloegl <a.schloegl@ieee.org>
+           2005-2017, Alois Schloegl <alois.schloegl@gmail.com>
            2007, Elias Apostolopoulos
 License: GPL-3.0+
 
@@ -19,7 +18,7 @@ Files: XMLParser/tiny*
 Copyright: 2000-2007, Lee Thomason <leethomason@mindspring.com>
            2002-2004, Yves Berquin <yvesb@users.sourceforge.net>
            2005, Tyge Lovset
-           2007-2010, Alois Schloegl <a.schloegl@ieee.org>
+           2007-2010, Alois Schloegl <alois.schloegl@gmail.com>
 License: ZLIB
   This software is provided 'as-is', without any express or implied
   warranty. In no event will the authors be held liable for any

@@ -11,10 +11,14 @@ biosig4c++ (1.8.5-1) experimental; urgency=low
   *  build scripts are improved
   *  language bindings to Octave, Python, R
      are now easier to build
+  * The python interface has been completely replaced,
+     the header structure is now returned in JSON format
+     and can be obtained with
+        HDR=json.loads(biosig.header("filename"))
 
- -- Alois Schloegl <alois.schloegl@ist.ac.at>  Sun, 25 Jun 2017 08:15:02 +0200
+ -- Alois Schloegl <alois.schloegl@ist.ac.at>  Mon, 17 Jul 2017 07:15:02 +0200
 
-biosig4c++ (1.8.4-2) experimental; urgency=low
+biosig4c++ (1.8.4-2) UNRELEASED; urgency=low
 
   improve debian packaging
   * add many lintian issues
@@ -24,7 +28,7 @@ biosig4c++ (1.8.4-2) experimental; urgency=low
 
  -- Alois Schloegl <alois.schloegl@ist.ac.at>  Wed, 15 Feb 2017 08:15:02 +0200
 
-biosig4c++ (1.8.4-1) experimental; urgency=low
+biosig4c++ (1.8.4-1) UNRELEASED; urgency=low
 
   * update upstream release
 
