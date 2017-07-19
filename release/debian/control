@@ -15,11 +15,10 @@ Homepage: http://biosig.sf.net/
 Vcs-Git: git://git.code.sf.net/p/biosig/code
 Vcs-Browser: http://sourceforge.net/p/biosig/code/ci/master/tree/biosig4c++/
 
-Package: libbiosig1.8
+Package: libbiosig2
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, zlib1g, libcholmod2.1.2 | libsuitesparse | libcholmod3
-Replaces: libbiosig1 (<< 1.8)
 Description: I/O library for biomedical data - dynamic library
  BioSig is a library for accessing files in several biomedical data formats
  (including EDF, BDF, GDF, BrainVision, BCI2000, CFWB, HL7aECG,
@@ -32,7 +31,8 @@ Description: I/O library for biomedical data - dynamic library
 Package: libbiosig-dev
 Section: libdevel
 Architecture: any
-Depends: libbiosig1.8 (= ${binary:Version}), ${misc:Depends}, zlib1g-dev, libsuitesparse-dev
+Depends: libbiosig2 (= ${binary:Version}), ${misc:Depends}, zlib1g-dev, libsuitesparse-dev
+Replaces: libbiosig1 (<< 1.8)
 Description: I/O library for biomedical data - development files
  BioSig is a library for accessing files in several biomedical data formats
  (including EDF, BDF, GDF, BrainVision, BCI2000, CFWB, HL7aECG,
@@ -45,7 +45,7 @@ Description: I/O library for biomedical data - development files
 Package: biosig-tools
 Section: science
 Architecture: any
-Depends: libbiosig1.8 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, libbiosig-dev (= ${binary:Version})
 Description: format conversion tools for biomedical data formats
  Based on BioSig library, this package provides command line
  tools, such as
@@ -86,7 +86,7 @@ Description: Python3 bindings for BioSig library
 
 Package: octave-biosig
 Architecture: any
-Depends: libbiosig1.8 (= ${binary:Version}), ${octave:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Depends: ${octave:Depends}, ${shlibs:Depends}, ${misc:Depends}, libbiosig-dev (= ${binary:Version})
 Description: Octave bindings for BioSig library
  This package provides Octave bindings for BioSig library. It provides
  the functions mexSOPEN (reads metainformation like header information
