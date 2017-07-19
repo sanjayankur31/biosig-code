@@ -7,20 +7,22 @@ This library is called "BioSig for C/C++" and is complementary to "BioSig for Oc
 BioSig4C++ provides several tools:  
 
 (1) = LIBRARIES = 
-(1a) "libbiosig" provides a library for accessing different dataformats. 
-The supported data formats are listed here: 
-http://pub.ist.ac.at/~schloegl/biosig/TESTED
-(1b) "libgdf" is a lightweight version of libbiosig, supporting only the GDF format. 
+(1a) "libbiosig" provides a library for accessing different dataformats.
+The supported data formats are listed here:
+   http://pub.ist.ac.at/~schloegl/biosig/TESTED
+A disadvantages is the direct access to internal data structure, which makes it
+difficult to maintain ABI combatibility. External applications should use libbiosig2 instead.
+(1b) "libgdf" is a lightweight version of libbiosig, supporting only the GDF format.
 it requires only GCC not G++ for linking, has potentially much less security loopholes (XML) and bugs, 
 and a much smaller memory footprint, which might be especially useful for embedded devices. 
 It's interface is the same than for libbiosig, namely biosig.h
-(1c) "libbiosig2" is a level two interface for managing multiple files, 
-it resembles the interface of edflib. It's interface is defined in biosig2.h.
-It ca be used to link libbiosig2 compiled with GCC to software compiled with
-MSVisualC++.
-(1d) "libphysicalunits" provides conversion tools for physical units from 
-ascii text to 16bit integers according to ISO/IEEE 11073-10101:2004 Table A.6.3: Vital signs units of measurements 
-text strings are cached for performance reasons, and can be used in a multi-threaded application. 
+(1c) "libbiosig2" is a level 2 interface for managing multiple files,
+It's interface is defined in biosig2.h. It can be used to link libbiosig2 compiled with GCC to software compiled with
+MSVisualC++. ABI compatibility is easier to maintain because access to internal data
+structures can be applied only through functions calls and not through pointers.
+(1d) "libphysicalunits" provides conversion tools for physical units from
+ascii text to 16bit integers according to ISO/IEEE 11073-10101:2004 Table A.6.3: Vital signs units of measurements
+text strings are cached for performance reasons, and can be used in a multi-threaded application.
 
 The following DEFINES are recommended and require:
  -D=WITH_CHOLMOD        used for re-referencing of data, REQUIREMENT: cholmod from libsuitesparse
