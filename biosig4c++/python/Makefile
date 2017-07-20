@@ -14,9 +14,8 @@ PYVER  := $(shell $(PYTHON) -c "import sys; print(sys.version[:3])")
 biosig4python:
 	make -C .. biosig4python
 
-
 # new interface, using so-called "extension modules", this still experimental
-module:
+build:
 	$(PYTHON) setup.py build
 	-python2 setup.py build
 	-python3 setup.py build

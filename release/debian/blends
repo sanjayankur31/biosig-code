@@ -9,7 +9,7 @@ Published-DOI: 10.1109/MC.2008.407
 Published-URL: http://pub.ist.ac.at/~schloegl/publications/Schloegl2007_BCI_Software.pdf
 
 Tasks: debian-med/imaging-dev
-Depends: libbiosig1.8-dev
+Depends: libbiosig-dev
 
 Tasks: debian-med/imaging
 Depends: biosig-tools

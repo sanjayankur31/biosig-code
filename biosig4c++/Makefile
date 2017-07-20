@@ -138,6 +138,7 @@ else
 	endif
 endif
 
+SONAMEVERSION := 2
 ifeq (Darwin,$(shell uname))
 	## Homebrew:
 	##	brew install gawk
@@ -152,7 +153,7 @@ ifeq (Darwin,$(shell uname))
 	SHAREDLIB      = -dylib -arch x86_64 -macosx_version_min 10.7
 	LDFLAGS       += -L$(prefix)/lib/
 	DLEXT          = dylib
-	FULLDLEXT      = ${BIOSIG_VERSION}.dylib
+	FULLDLEXT      = ${SONAMEVERSION}.dylib
 	SONAME_PREFIX  = -install_name # the last space character is crucial
 
 else ifneq (,$(findstring CYGWIN, $(shell uname)))
@@ -160,7 +161,7 @@ else ifneq (,$(findstring CYGWIN, $(shell uname)))
 	TAR	       = tar
 	LD	       = $(CXX)
 	LDLIBS        += -liconv -lstdc++
-	FULLDLEXT      = ${MAJOR_VERSION}${MINOR_VERSION}.dll
+	FULLDLEXT      = ${SONAMEVERSION}.dll
 	SONAME_PREFIX  = -Wl,-soname=
 
 else ifneq (,$(findstring MINGW, $(shell uname)))
@@ -174,7 +175,7 @@ else ifneq (,$(findstring MINGW, $(shell uname)))
 	TAR	 = tar
 	LD	 = $(CXX)
 	DLEXT    = dll
-	FULLDLEXT      = ${MAJOR_VERSION}${MINOR_VERSION}.dll
+	FULLDLEXT      = ${SONAMEVERSION}.dll
 	SONAME_PREFIX  = -Wl,-soname=
 	LDLIBS  += -lstdc++
 	LDLIBS  += -liconv -lws2_32
@@ -185,7 +186,7 @@ else
 	TAR	       = tar
 	LD	       = $(CXX)
 	DLEXT          = so
-	FULLDLEXT      = so.${BIOSIG_VERSION}
+	FULLDLEXT      = so.${SONAMEVERSION}
 	SONAME_PREFIX  = -Wl,-soname=
 endif
 
@@ -354,6 +355,7 @@ SHARE	      = $(DESTDIR)$(prefix)/share
 
 ####### Files
 SOURCES      += biosig.c \
+		biosig2.c \
 		t210/sopen_cfs_read.c \
 		t210/sopen_heka_read.c \
 		t210/sopen_igor.c \
@@ -387,6 +389,7 @@ endif
 
 OBJECTS      += \
 		biosig.o \
+		biosig2.o \
 		crc4scp.o \
 		sopen_cfs_read.o \
 		sopen_heka_read.o \
@@ -405,6 +408,7 @@ OBJECTS      += \
 
 MinGWOBJECTS  = \
 		win32/biosig.obj \
+		win32/biosig2.obj \
 		win32/crc4scp.obj \
 		win32/getlogin.obj \
 		win32/sopen_cfs_read.obj \
@@ -471,9 +475,9 @@ endif
 
 MinGW64OBJECTS  = $(patsubst win32/%.obj, win64/%.obj, $(MinGWOBJECTS))
 
-LIB_OBJECTS  = libbiosig.a libbiosig2.a libgdf.a libphysicalunits.a libbiosig.pc
+LIB_OBJECTS  = libbiosig.a libgdf.a libphysicalunits.a libbiosig.pc
 ifeq (,$(findstring mingw,$(TARGET)))
-    LIB_OBJECTS += libbiosig.$(DLEXT) libbiosig2.$(DLEXT) libgdf.$(DLEXT) libphysicalunits.$(DLEXT)
+    LIB_OBJECTS += libbiosig.$(DLEXT) libgdf.$(DLEXT) libphysicalunits.$(DLEXT)
 endif
 
 first: $(IO_H_FILE2) lib tools
@@ -628,7 +632,7 @@ biosig4python : python
 python:
 	make -C python build
 
-install_python: libbiosig.$(LIBEXT) libbiosig2.$(LIBEXT)
+install_python: libbiosig.$(LIBEXT)
 	make -C python install
 
 
@@ -682,23 +686,21 @@ win64: mexw64
 #	GNU/Linux - Shared Libaries
 #############################################################
 
-libbiosig.${FULLDLEXT}: $(OBJECTS) biosig.o
+libbiosig.so.${SONAMEVERSION}: $(OBJECTS)
 	$(LD) ${SONAME_PREFIX}"$@" $(OBJECTS) $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
+libbiosig.so: libbiosig.so.${SONAMEVERSION}
+	ln -sf $< $@
 
-libbiosig2.${FULLDLEXT}: $(OBJECTS) biosig2.o
-	$(LD) ${SONAME_PREFIX}"$@" $(OBJECTS) biosig2.o $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
+#libbiosig.${DLEXT}: $(OBJECTS)
+#	$(LD) ${SONAME_PREFIX}"$@" $(OBJECTS) $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
 
-libgdf.${FULLDLEXT}: gdf.o getlogin.o gdftime.o physicalunits.o
+libgdf.${DLEXT}: gdf.o getlogin.o gdftime.o physicalunits.o
 	$(LD) ${SONAME_PREFIX}"$@" $? $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
 
-#libgdftime.${FULLDLEXT}: gdftime.o
+#libgdftime.${DLEXT}: gdftime.o
 #	$(LD) ${SONAME_PREFIX}"$@" $? $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
-libphysicalunits.${FULLDLEXT}: physicalunits.o
+libphysicalunits.${DLEXT}: physicalunits.o
 	$(LD) ${SONAME_PREFIX}"$@" $? $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
-
-%.${DLEXT}: %.${FULLDLEXT}
-	ln -sf "$(*F).${FULLDLEXT}"	"$(*F).${DLEXT}.${MAJOR_VERSION}.${MINOR_VERSION}"
-	ln -sf "$(*F).${DLEXT}.${MAJOR_VERSION}.${MINOR_VERSION}" "$@"
 
 
 #############################################################
@@ -727,7 +729,7 @@ libbiosig.a: $(OBJECTS) libbiosig.pc
 	-$(DELETE) libbiosig.a
 	$(AR) libbiosig.a $(OBJECTS)
 libbiosig.def: $(OBJECTS) libbiosig.pc
-	$(LD) -o libbiosig.dll -s -shared -fPIC  $(OBJECTS) $(LDLIBS) -Wl,-subsystem,windows,--output-def,libbiosig.def,--out-implib,libbiosig.dll.a
+	$(LD) -o libbiosig.dll -s -shared -fPIC $(OBJECTS) $(LDLIBS) -Wl,-subsystem,windows,--output-def,libbiosig.def,--out-implib,libbiosig.dll.a
 
 libbiosig.pc :
 	mkdir -p pkgconfig
@@ -746,12 +748,6 @@ libbiosig.pc :
 	#echo "Libs.private: -liconv"  >>"$@"
 	echo "Cflags: $(DEFINES) -I$(INC)" >>"$@"
 	#echo "Cflags: -I$(INC)" >>"$@"
-
-libbiosig2.a: $(OBJECTS) biosig2.o
-	-$(DELETE) libbiosig2.a
-	$(AR) libbiosig2.a $(OBJECTS) biosig2.o
-libbiosig2.def: $(OBJECTS) biosig2.o
-	$(LD) -o libbiosig2.dll -s -shared -fPIC $(OBJECTS) biosig2.o $(LDLIBS) -Wl,-subsystem,windows,--output-def,libbiosig2.def,--out-implib,libbiosig2.dll.a
 
 
 ## save2gdf, pdp2gdf
@@ -874,8 +870,8 @@ mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz: mex/*.cpp
 
 R: R/sload.so
 
-R/sload.so: R/sload.c libbiosig2.so
-	(cd R; R CMD SHLIB sload.c -L.. -lbiosig2)
+R/sload.so: R/sload.c libbiosig.so
+	(cd R; R CMD SHLIB sload.c -L.. -lbiosig)
 
 
 #############################################################
@@ -1010,15 +1006,16 @@ install_headers: biosig-dev.h biosig.h biosig2.h gdftime.h physicalunits.h
 
 install_libbiosig: install_libbiosig.$(DLEXT) install_libbiosig.a
 
-install_libbiosig.a: libbiosig.a libbiosig2.a libphysicalunits.a
+install_libbiosig.a: libbiosig.a libphysicalunits.a libbiosig.pc
 	install -d 			$(LIB)/pkgconfig/
-	install $?			$(LIB)
+	install libbiosig.a		$(LIB)
+	install libphysicalunits.a 	$(LIB)
 	install libbiosig.pc		$(LIB)/pkgconfig/
 
-install_libbiosig.$(DLEXT): libbiosig2.$(FULLDLEXT) libbiosig.$(FULLDLEXT) libphysicalunits.$(DLEXT) libbiosig.pc
+install_libbiosig.$(DLEXT): libbiosig.$(FULLDLEXT) libbiosig.$(DLEXT)
 	install -d 			$(LIB)/pkgconfig/
-	install libbiosig.pc		$(LIB)/pkgconfig/
-	install $?			$(LIB)
+	install libbiosig.$(FULLDLEXT)  $(LIB)
+	ln -sf  $(LIB)/libbiosig.$(FULLDLEXT) $(LIB)/libbiosig.$(DLEXT)
 
 install: install_libbiosig.$(DLEXT) install_libbiosig.a install_headers install_tools
 

@@ -1,0 +1,1 @@
+python3-biosig: embedded-library usr/lib/python3/dist-packages/biosig.cpython-35m-x86_64-linux-gnu.so: tinyxml

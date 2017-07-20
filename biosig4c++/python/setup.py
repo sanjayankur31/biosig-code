@@ -4,11 +4,11 @@ import numpy.distutils.misc_util as mu
 import platform
 
 if platform.system() == 'Linux' :
-     LIBS = ['biosig2']
+     LIBS = ['biosig']
 elif platform.system() == 'Windows' :
-     LIBS = ['biosig2','stdc++','iconv','z','cholmod']
+     LIBS = ['biosig','stdc++','iconv','z','cholmod']
 else:
-     LIBS = ['biosig2','stdc++','iconv','z','cholmod']
+     LIBS = ['biosig','stdc++','iconv','z','cholmod']
 
 module1 = Extension('biosig',
                     define_macros = [('MAJOR_VERSION', '1'),
