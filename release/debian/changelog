@@ -1,4 +1,12 @@
-biosig4c++ (1.8.5-1) experimental; urgency=low
+biosig4c++ (1.8.6-1) experimental; urgency=low
+
+  * libbiosig and libbiosig2 are now combined in
+    libbiosig.so.2
+  * new upstream release
+
+ -- Alois Schloegl <alois.schloegl@ist.ac.at>  Sun, 23 Jul 2017 21:55:02 +0200
+
+biosig4c++ (1.8.5-1) UNRELEASED; urgency=low
 
   update upstream release
   * the following codes for Post-Synaptic Events are now defined
