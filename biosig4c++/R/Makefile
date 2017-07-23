@@ -1,6 +1,6 @@
 
 sload.so: sload.c
-	R CMD SHLIB sload.c -L.. -lbiosig2
+	R CMD SHLIB sload.c -L.. -lbiosig
 
 clean:
 	rm *.o *.so

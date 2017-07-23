@@ -2,10 +2,10 @@
 all: test
 
 %:%.c 
-	$(CC) -DHL1 $< -lbiosig2 -lm -o $@.HL1
-	$(CC) -DHL2 $< -lbiosig2 -lm -o $@.HL2
-	$(CC) -DLL1 $< -lbiosig2 -lm -o $@.LL1
-	$(CC) -DLL2 $< -lbiosig2 -lm -o $@.LL2
+	$(CC) -DHL1 $< -lbiosig -lm -o $@.HL1
+	$(CC) -DHL2 $< -lbiosig -lm -o $@.HL2
+	$(CC) -DLL1 $< -lbiosig -lm -o $@.LL1
+	$(CC) -DLL2 $< -lbiosig -lm -o $@.LL2
 	
 	
 test: generate_gdf_file

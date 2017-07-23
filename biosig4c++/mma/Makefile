@@ -85,7 +85,7 @@ ${TARGET}tm.c: ${TARGET}.tm
 
 ${TARGET}.exe: ${TARGET}.o ${TARGET}tm.o
 	mkdir -p ${SYS}
-	${LD} ${LDFLAGS} ${TARGET}tm.o ${TARGET}.o ${LIBDIR} -l${MLLIB} ${EXTRALIBS} -lbiosig2 $(shell pkg-config --libs libbiosig) -o ${SYS}/"$@"
+	${LD} ${LDFLAGS} ${TARGET}tm.o ${TARGET}.o ${LIBDIR} -l${MLLIB} ${EXTRALIBS} -lbiosig $(shell pkg-config --libs libbiosig) -o ${SYS}/"$@"
 	ln -sf ${SYS}/"$@"
 
 
@@ -115,7 +115,7 @@ win32mma : ${SYSwin}/${TARGET}.exe
 
 ${SYSwin}/${TARGET}.exe : ${TARGET}.obj ${TARGET}tm.obj
 	mkdir -p ${SYSwin}
-	${CCw32} $^ -mwindows -static-libgcc -static-libstdc++ -lbiosig2 -lssp -L${LIBDIRwin} -l${MLLIBwin} ${EXTRALIBSwin} -o "$@"
+	${CCw32} $^ -mwindows -static-libgcc -static-libstdc++ -lbiosig -lssp -L${LIBDIRwin} -l${MLLIBwin} ${EXTRALIBSwin} -o "$@"
 	# copy to users directory if available
 	-cp -r ${SYSwin} ~/K/Software/MathematicaTools/${TARGET}
 
@@ -147,7 +147,7 @@ win64mma : ${SYSwin64}/${TARGET}.exe
 #${SYSwin64}/${TARGET}.exe : ${TARGET}.w64obj ${TARGET}tm.w64obj
 ${SYSwin64}/${TARGET}.exe : ${SYSwin}/${TARGET}.exe
 	mkdir -p ${SYSwin64}
-#	${CCw64} $^ -static-libgcc -static-libstdc++ -lbiosig2 -lssp -L${LIBDIRwin64} -l${MLLIBwin64} ${EXTRALIBSwin} -o "$@"
+#	${CCw64} $^ -static-libgcc -static-libstdc++ -lbiosig -lssp -L${LIBDIRwin64} -l${MLLIBwin64} ${EXTRALIBSwin} -o "$@"
 	-cp "$<" "$@"
 
 
