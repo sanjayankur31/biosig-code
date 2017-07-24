@@ -35,6 +35,304 @@
 extern "C" {
 #endif
 
+/****************************************************************************/
+/**                                                                        **/
+/**                     EXPORTED FUNCTIONS : Level 1                       **/
+/**                                                                        **/
+/****************************************************************************/
+
+uint32_t get_biosig_version ();
+/* 	returns the version number in hex-decimal representation
+	get_biosig_version() & 0x00ff0000 :  major version number
+	get_biosig_version() & 0x0000ff00 :  minor version number
+	get_biosig_version() & 0x000000ff :  patch level
+ --------------------------------------------------------------- */
+
+HDRTYPE* constructHDR(const unsigned NS, const unsigned N_EVENT);
+/* 	allocates memory initializes header HDR of type HDRTYPE
+	with NS channels an N_EVENT event elements
+ --------------------------------------------------------------- */
+
+
+void 	 destructHDR(HDRTYPE* hdr);
+/* 	destroys the header *hdr and frees allocated memory
+ --------------------------------------------------------------- */
+
+HDRTYPE* sopen(const char* FileName, const char* MODE, HDRTYPE* hdr);
+/*	FileName: name of file
+	Mode: "r" is reading mode, requires FileName
+	Mode: "w" is writing mode, hdr contains the header information
+		If the number of records is not known, set hdr->NRec=-1 and
+		sclose will fill in the correct number.
+	Mode: "a" is append mode,
+		if file exists, header and eventtable is read,
+		position pointer is set to end of data in order to add
+		more data. If file is successfully opened, the header structure
+		of the existing file is used, and any different specification in
+		hdr is discarded.
+		If file is not compressed, it can be used for read and write,
+		for compressed files, only appending at the end of file is possible.
+		Currently, append mode is supported only for the GDF format.
+
+	hdr should be generated with constructHDR, and the necessary fields
+	must be defined. In read-mode, hdr can be NULL; however,
+	hdr->FLAG... can be used to turn off spurious warnings. In write-mode,
+	the whole header information must be defined.
+	In append mode, it is recommended to provide whole header information,
+	which must be equivalent to the header info of an existing file.
+	After calling sopen, the file header is read or written, and
+	the position pointer points to the beginning of the data section
+	in append mode, the position pointer points to the end of the data section.
+ --------------------------------------------------------------- */
+
+int 	sclose(HDRTYPE* hdr);
+/* 	closes the file corresponding to hdr
+	file handles are closed, the position pointer becomes meaningless
+	Note: hdr is not destroyed; use destructHDR() to free the memory of hdr
+	if hdr was opened in writing mode, the event table is added to the file
+	and if hdr->NRec=-1, the number of records is obtained from the
+	    position pointer and written into the header,
+ --------------------------------------------------------------- */
+
+size_t	sread(biosig_data_type* DATA, size_t START, size_t LEN, HDRTYPE* hdr);
+/*	LEN data segments are read from file associated with hdr, starting from
+	segment START. The data is copied into DATA; if DATA == NULL, a
+	sufficient amount of memory is allocated, and the pointer to the data
+	is available in hdr->data.block.
+
+	In total, LEN*hdr->SPR*NS samples are read and stored in
+	data type of biosig_data_type (currently double).
+	NS is the number of channels with non-zero hdr->CHANNEL[].OnOff.
+	The number of successfully read data blocks is returned.
+
+	A pointer to the data block is also available from hdr->data.block,
+	the number of columns and rows is available from
+	hdr->data.size[0] and hdr->data.size[1] respectively.
+
+	Channels k with (hdr->CHANNEL[k].SPR==0) are interpreted as sparsely
+	sampled channels [for details see specification ofGDF v2 or larger].
+	The sample values are also returned in DATA the corresponding
+	sampling time, the values in between the sparse sampling times are
+	set to DigMin. (Applying the flags UCAL and OVERFLOWDETECTION will
+	convert this into PhysMin and NaN, resp. see below).
+
+	The following flags will influence the result.
+	hdr->FLAG.UCAL = 0 	scales the data to its physical values
+	hdr->FLAG.UCAL = 1 	does not apply the scaling factors
+
+	hdr->FLAG.OVERFLOWDETECTION = 0 does not apply overflow detection
+	hdr->FLAG.OVERFLOWDETECTION = 1: replaces all values that exceed
+		the dynamic range (defined by Phys/Dig/Min/Max)
+
+	hdr->FLAG.ROW_BASED_CHANNELS = 0 each channel is in one column
+	hdr->FLAG.ROW_BASED_CHANNELS = 1 each channel is in one row
+ --------------------------------------------------------------- */
+
+#ifdef __GSL_MATRIX_DOUBLE_H__
+size_t	gsl_sread(gsl_matrix* DATA, size_t START, size_t LEN, HDRTYPE* hdr);
+/*	same as sread but return data is of type gsl_matrix
+ --------------------------------------------------------------- */
+#endif
+
+size_t  swrite(const biosig_data_type *DATA, size_t NELEM, HDRTYPE* hdr);
+/*	DATA contains the next NELEM data segment(s) for writing.
+ *	hdr contains the definition of the header information and was generated by sopen
+ *	the number of successfully written segments is returned;
+ --------------------------------------------------------------- */
+
+
+int	seof(HDRTYPE* hdr);
+/*	returns 1 if end of file is reached.
+ --------------------------------------------------------------- */
+
+
+void	srewind(HDRTYPE* hdr);
+/*	postions file pointer to the beginning
+ *
+ *	Currently, this function is meaning less because sread requires always the start value
+ --------------------------------------------------------------- */
+
+
+int 	sseek(HDRTYPE* hdr, long int offset, int whence);
+/*	positions file pointer
+ *
+ *	Currently, this function is meaning less because sread requires always the start value
+ --------------------------------------------------------------- */
+
+
+long int stell(HDRTYPE* hdr);
+/*	returns position of file point in segments
+ --------------------------------------------------------------- */
+
+#ifndef  ONLYGDF
+ATT_DEPREC int serror();
+/*	handles errors; it reports whether an error has occured.
+ *	if yes, an error message is displayed, and the error status is reset.
+ * 	the return value is 0 if no error has occured, otherwise the error code
+ *	is returned.
+ *  IMPORTANT NOTE:
+ *	serror() uses the global error variables B4C_ERRNUM and B4C_ERRMSG,
+ *	which is not re-entrant, because two opened files share the same
+ *	error variables.
+ --------------------------------------------------------------- */
+#endif //ONLYGDF
+
+int 	serror2(HDRTYPE* hdr);
+/*	handles errors; it reports whether an error has occured.
+ *	if yes, an error message is displayed, and the error status is reset.
+ * 	the return value is 0 if no error has occured, otherwise the error code
+ *	is returned.
+ --------------------------------------------------------------- */
+
+int 	biosig_check_error(HDRTYPE *hdr);
+/* 	returns error status but does not handle/reset it.
+ * 	it can be used for checking whether some error status has been set
+ --------------------------------------------------------------- */
+char*   biosig_get_errormsg(HDRTYPE *hdr);
+/* 	returns error message but does not reset it.
+ * 	memory for the error message is allocated and need to be freed
+ *      by the calling application
+ --------------------------------------------------------------- */
+
+
+int 	sflush_gdf_event_table(HDRTYPE* hdr);
+/*	writes the event table of file hdr. hdr must define a file in GDF format
+ *  	and can be opened as read or write.
+ *	In case of success, the return value is 0.
+ --------------------------------------------------------------- */
+
+int 	cachingWholeFile(HDRTYPE* hdr);
+/*	caching: load data of whole file into buffer
+ *		 this will speed up data access, especially in interactive mode
+ --------------------------------------------------------------- */
+
+
+int RerefCHANNEL(HDRTYPE *hdr, void *ReRef, char rrtype);
+/* rerefCHAN
+        defines rereferencing of channels,
+        hdr->Calib defines the rereferencing matrix
+        hdr->rerefCHANNEL is defined.
+        hdr->rerefCHANNEL[.].Label is  by some heuristics from hdr->CHANNEL
+                either the maximum scaling factor
+        if ReRef is NULL, rereferencing is turned off (hdr->Calib and
+        hdr->rerefCHANNEL are reset to NULL).
+        if rrtype==1, Reref is a filename pointing to a MatrixMarket file
+        if rrtype==2, Reref must be a pointer to a cholmod sparse matrix (cholmod_sparse*)
+        In case of an error (mismatch of dimensions), a non-zero is returned,
+        and serror() is set.
+
+        rr is a pointer to a rereferencing matrix
+        rrtype determines the type of pointer
+        rrtype=0: no rereferencing, RR is ignored (NULL)
+               1: pointer to MarketMatrix file (char*)
+               2: pointer to a sparse cholmod matrix  (cholmod_sparse*)
+ ------------------------------------------------------------------------*/
+
+
+/* =============================================================
+	utility functions for handling of event table
+   ============================================================= */
+
+void sort_eventtable(HDRTYPE *hdr);
+/* sort event table with respect to hdr->EVENT.POS
+  --------------------------------------------------------------*/
+
+size_t reallocEventTable(HDRTYPE *hdr, size_t EventN);
+/*------------------------------------------------------------------------
+	re-allocates memory for Eventtable.
+	hdr->EVENT.N contains actual number of events
+	EventN determines the size of the allocated memory
+
+  return value:
+	in case of success, EVENT_N is returned
+	in case of failure SIZE_MAX is returned;
+  ------------------------------------------------------------------------*/
+
+void convert2to4_eventtable(HDRTYPE *hdr);
+/* converts event table from {TYP,POS} to [TYP,POS,CHN,DUR} format
+  -------------------------------------------------------------- */
+
+void convert4to2_eventtable(HDRTYPE *hdr);
+/* converts event table from [TYP,POS,CHN,DUR} to {TYP,POS} format
+	all CHN[k] must be 0
+  -------------------------------------------------------------- */
+
+const char* GetEventDescription(HDRTYPE *hdr, size_t n);
+/* returns clear text description of n-th event,
+   considers also user-defined events.
+  -------------------------------------------------------------- */
+
+void FreeTextEvent(HDRTYPE* hdr, size_t N, const char* annotation);
+/*  adds free text annotation to event table for the N-th event.
+	the EVENT.TYP[N] is identified from the table EVENT.CodeDesc
+	if annotations is not listed in CodeDesc, it is added to CodeDesc
+	The table is limited to 256 entries, because the table EventCodes
+	allows only codes 0-255 as user specific entry. If the description
+	table contains more than 255 entries, an error is set.
+  ------------------------------------------------------------------------*/
+
+/* =============================================================
+	utility functions for handling of physical dimensons
+   ============================================================= */
+
+uint16_t PhysDimCode(const char* PhysDim);
+/* Encodes  Physical Dimension as 16bit integer according to
+   ISO/IEEE 11073-10101:2004 Vital Signs Units of Measurement
+ --------------------------------------------------------------- */
+
+char* PhysDim(uint16_t PhysDimCode, char *PhysDimText);
+/* DEPRECATED: USE INSTEAD PhysDim3(uint16_t PhysDimCode)
+   It's included just for backwards compatibility
+   converts HDR.CHANNEL[k].PhysDimCode into a readable Physical Dimension
+   the memory for PhysDim must be preallocated, its maximum length is
+   defined by (MAX_LENGTH_PHYSDIM+1)
+ --------------------------------------------------------------- */
+
+const char* PhysDim3(uint16_t PhysDimCode);
+/* converts PhysDimCode into a readable Physical Dimension
+ --------------------------------------------------------------- */
+
+double PhysDimScale(uint16_t PhysDimCode);
+/* returns scaling factor of physical dimension
+	e.g. 0.001 for milli, 1000 for kilo etc.
+ --------------------------------------------------------------- */
+
+int biosig_set_hdr_ipaddr(HDRTYPE *hdr, const char *hostname);
+/* set the field HDR.IPaddr based on the IP address of hostname
+
+   Return value:
+	0: hdr->IPaddr is set
+	otherwise hdr->IPaddr is not set
+  ---------------------------------------------------------------*/
+
+
+/* =============================================================
+	printing of header information
+   ============================================================= */
+
+int	hdr2ascii(HDRTYPE* hdr, FILE *fid, int VERBOSITY);
+/*	writes the header information is ascii format the stream defined by fid
+ *	Typically fid is stdout. VERBOSITY defines how detailed the information is.
+ *	VERBOSITY=0 or 1 report just some basic information,
+ *	VERBOSITY=2 reports als the channel information
+ *	VERBOSITY=3 provides in addition the event table.
+ *	VERBOSITY=8 for debugging
+ *	VERBOSITY=9 for debugging
+ *	VERBOSITY=-1 header and event table is shown in JSON format
+ --------------------------------------------------------------- */
+
+ATT_DEPREC int hdr2json (HDRTYPE *hdr, FILE *fid);
+int fprintf_hdr2json(FILE *stream, HDRTYPE* hdr);
+/* prints header in json format into stream;
+   hdr2json is the old form and deprecated,
+   use fprintf_hdr2json instead
+ --------------------------------------------------------------- */
+
+int asprintf_hdr2json(char **str, HDRTYPE* hdr);
+/* prints header in json format into *str;
+   memory for str is automatically allocated and must be freed
+   after usage.
+ --------------------------------------------------------------- */
 HDRTYPE* constructHDR(const unsigned NS, const unsigned N_EVENT);
 /* 	allocates memory initializes header HDR of type HDRTYPE
 	with NS channels an N_EVENT event elements
@@ -42,6 +340,15 @@ HDRTYPE* constructHDR(const unsigned NS, const unsigned N_EVENT);
 void 	 destructHDR(HDRTYPE* hdr);
 /* 	destroys the header *hdr and frees allocated memory
  --------------------------------------------------------------- */
+
+
+
+/****************************************************************************/
+/**                                                                        **/
+/**                     EXPORTED FUNCTIONS : Level 2                       **/
+/**                                                                        **/
+/****************************************************************************/
+
 
 /* =============================================================
 	setter and getter functions for accessing fields of HDRTYPE

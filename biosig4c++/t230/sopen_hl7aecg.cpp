@@ -22,7 +22,7 @@
 #include <stdlib.h>	// for strtod(3)
 #include <strings.h>
 
-#include "../biosig-dev.h"
+#include "../biosig2.h"
 #ifdef WITH_LIBXML2
 #  include <libxml/parser.h>
 #  include <libxml/tree.h>

@@ -28,7 +28,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#include "../biosig-dev.h"
+#include "../biosig2.h"
 
 // these functions are stubs
 

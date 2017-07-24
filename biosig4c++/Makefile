@@ -333,9 +333,9 @@ MinGW64LINK    = $(MinGW64CXX)
 ##########################################################
 
 # Versioning
-MAJOR_VERSION  := $(word 3, $(shell grep '\#define BIOSIG_VERSION_MAJOR' biosig.h))
-MINOR_VERSION  := $(word 3, $(shell grep '\#define BIOSIG_VERSION_MINOR' biosig.h))
-STEPPING       := $(word 3, $(shell grep '\#define BIOSIG_PATCHLEVEL' biosig.h))
+MAJOR_VERSION  := $(word 3, $(shell grep '\#define BIOSIG_VERSION_MAJOR' biosig-dev.h))
+MINOR_VERSION  := $(word 3, $(shell grep '\#define BIOSIG_VERSION_MINOR' biosig-dev.h))
+STEPPING       := $(word 3, $(shell grep '\#define BIOSIG_PATCHLEVEL' biosig-dev.h))
 BIOSIG_VERSION := ${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING}
 TODAY          := $(shell date +%Y%m%d)
 
@@ -487,7 +487,7 @@ ifneq (Darwin,$(shell uname))
 else
   tools: save2gdf${BINEXT} pu${BINEXT}
 endif
-all:   first mex4o biosig4python R #win32 win64 #sigviewer #win32/sigviewer.exe win64/sigviewer.exe #biosig_client biosig_server mma java tcl perl php ruby #sigviewer
+all:   first mex4o python R #win32 win64 #sigviewer #win32/sigviewer.exe win64/sigviewer.exe #biosig_client biosig_server mma java tcl perl php ruby #sigviewer
 
 .PHONY : libbiosig lib python mex4m mex4o
 
@@ -504,12 +504,12 @@ vpath %.cpp ./:./t210:./t230:./XMLParser:./mex
 .SUFFIXES: .o .c .cpp .cc .cxx .C
 
 
-%.o: t240/%.c biosig.h biosig-dev.h gdftime.h physicalunits.h
+%.o: t240/%.c biosig-dev.h gdftime.h physicalunits.h
 	$(CC) -c $(DEFINES) $(CFLAGS) -I t240 $(INCPATH) -o "$@" "$<"
 
-%.c: %.h biosig.h biosig-dev.h gdftime.h physicalunits.h
+%.c: %.h biosig-dev.h gdftime.h physicalunits.h
 
-%.cpp: %.h  biosig.h biosig-dev.h gdftime.h physicalunits.h
+%.cpp: %.h biosig-dev.h gdftime.h physicalunits.h
 
 %.o: %.c
 	$(CC) -c $(DEFINES) $(CFLAGS)  $(INCPATH) -o "$@" "$<"
@@ -517,14 +517,14 @@ vpath %.cpp ./:./t210:./t230:./XMLParser:./mex
 %.o : win32/%.c
 	$(CC) -c $(DEFINES) $(CFLAGS)  $(INCPATH) -o "$@" "$<"
 
-%.o: %.cpp  biosig.h biosig2.h biosig-dev.h
+%.o: %.cpp biosig2.h biosig-dev.h
 	$(CXX) -c $(DEFINES) $(CXXFLAGS) $(INCPATH) -o "$@" "$<"
 
-sandbox.o: test0/sandbox.c  biosig.h biosig-dev.h
+sandbox.o: test0/sandbox.c biosig2.h
 	$(CXX) -c $(DEFINES) $(CXXFLAGS) $(INCPATH) -o "$@" "$<"
 
 
-win32/%.obj: t240/%.c  biosig-dev.h biosig.h 
+win32/%.obj: t240/%.c biosig-dev.h
 	$(MinGWCC) -c $(DEFINES) $(MinGWCFLAGS) -I t240 -o "$@" "$<"
 win32/%.obj: %.c
 	$(MinGWCC) -c $(DEFINES) $(MinGWCFLAGS) -o "$@" "$<"
@@ -535,7 +535,7 @@ win32/%.obj: win32/%.c
 	$(MinGWCC) -c $(DEFINES) $(MinGWCFLAGS) -I win32 -o "$@" "$<"
 
 
-win64/%.obj: t240/%.c  biosig-dev.h biosig.h 
+win64/%.obj: t240/%.c biosig-dev.h
 	$(MinGW64CC) -c $(DEFINES) $(MinGW64CFLAGS) -I t240 -o "$@" "$<"
 win64/%.obj: %.c
 	$(MinGW64CC) -c $(DEFINES) $(MinGW64CFLAGS) -o "$@" "$<"
@@ -551,7 +551,7 @@ win64/%.obj: win32/%.c
 #	eventcodes and units: conversion from ascii to C code
 #############################################################
 
-biosig.c: eventcodes.i eventcodegroups.i 11073-10102-AnnexB.i biosig.h biosig-dev.h
+biosig.c: eventcodes.i eventcodegroups.i 11073-10102-AnnexB.i biosig2.h biosig-dev.h
 
 physicalunits.c: units.i physicalunits.h
 
@@ -569,7 +569,7 @@ units.i : $(EXTERN)/units.csv
 #	Compilation: exceptions, explicit rules
 #############################################################
 
-gdf.o: biosig.c biosig-dev.h biosig.h eventcodes.i units.i 11073-10102-AnnexB.i
+gdf.o: biosig.c biosig-dev.h eventcodes.i units.i 11073-10102-AnnexB.i
 	$(CC) -c -D=ONLYGDF -D=WITHOUT_NETWORK $(DEFINES) $(CFLAGS) $(INCPATH) -o "$@" "$<"
 
 #getlogin_r.o: win32/getlogin_r.c
@@ -577,7 +577,7 @@ gdf.o: biosig.c biosig-dev.h biosig.h eventcodes.i units.i 11073-10102-AnnexB.i
 
 ########### WIN32 ##################
 
-win32/gdf.obj: biosig.c biosig-dev.h biosig.h
+win32/gdf.obj: biosig.c biosig-dev.h
 	$(MinGWCC) -c -D=ONLYGDF $(DEFINES) $(MinGWCFLAGS) -o "$@" "$<"
 
 $(PathToSigViewerWIN32): 
@@ -589,7 +589,7 @@ $(PathToSigViewerWIN32)/src/src.pro: $(PathToSigViewerWIN32)
 win32/sigviewer.exe: win32/libbiosig.a win32/libbiosig.dll
 	#-$(COPY) ../biosig/doc/eventcodes.txt $(PathToSigViewerWIN32)/src/
 	-$(DELETE) $(PathToSigViewerWIN32)/extern/include/*.h
-	-$(COPY) biosig.h physicalunits.h $(PathToSigViewerWIN32)/extern/include
+	-$(COPY) biosig2.h biosig-dev.h physicalunits.h $(PathToSigViewerWIN32)/extern/include
 	-$(DELETE) $(PathToSigViewerWIN32)/extern/lib/lib*
 	-$(COPY) win32/libbiosig.a $(PathToSigViewerWIN32)/extern/lib
 	$(SED) -i 's|\([[:space:]]*-lbiosig\)\([ #\\]*\)$$|\1 -lcholmod -lz -lcurl \2|' $(PathToSigViewerWIN32)/src/src.pro
@@ -600,7 +600,7 @@ win32/sigviewer.exe: win32/libbiosig.a win32/libbiosig.dll
 
 ########### WIN64 ##################
 
-win64/gdf.obj: biosig.c biosig-dev.h biosig.h
+win64/gdf.obj: biosig.c biosig-dev.h
 	$(MinGW64CC) -c -D=ONLYGDF $(DEFINES) $(MinGW64CFLAGS) -o "$@" "$<"
 
 $(PathToSigViewerWIN64): 
@@ -612,7 +612,7 @@ $(PathToSigViewerWIN64)/src/src.pro: $(PathToSigViewerWIN64)
 win64/sigviewer.exe: win64/libbiosig.a win64/libbiosig.dll 
 	#-$(COPY) ../biosig/doc/eventcodes.txt $(PathToSigViewerWIN64)/src/
 	-$(DELETE) $(PathToSigViewerWIN64)/extern/include/*.h
-	-$(COPY) biosig.h physicalunits.h $(PathToSigViewerWIN64)/extern/include
+	-$(COPY) biosig2.h biosig-dev.h physicalunits.h $(PathToSigViewerWIN64)/extern/include
 	-$(DELETE) $(PathToSigViewerWIN64)/extern/lib/lib*
 	-$(COPY) win64/libbiosig.a $(PathToSigViewerWIN64)/extern/lib
 	$(SED) -i 's|\([[:space:]]*-lbiosig\)\([ #\\]*\)$$|\1 -lcholmod -lz -lcurl\2|' $(PathToSigViewerWIN64)/src/src.pro
@@ -834,13 +834,13 @@ mex/%.oct: mex/%.cpp
 	$(OCT) -I./ $(shell $(PKGCONF) --cflags libbiosig) "$<" libbiosig.a $(LDLIBS) -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
-mex/%.mexw32: mex/%.cpp Makefile biosig.h biosig-dev.h
+mex/%.mexw32: mex/%.cpp Makefile biosig2.h biosig-dev.h
 	## $(CROSS)-g++ is used instead of $(CXX), so it can be called from biosig as well as mxe. 
 	$(CROSS)-g++ -shared $(GNUMEX)/mex.def -DMATLAB_MEX_FILE $(DEFINES) -x c++  \
 		-I$(W32MAT_INC) -O2 -o "$@" -L$(GNUMEX) -s "$<" -llibmx -llibmex -lbiosig -liconv -lssp $(LDLIBS) -lws2_32
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
-mex/%.mexw64: mex/%.cpp Makefile biosig.h biosig-dev.h
+mex/%.mexw64: mex/%.cpp Makefile biosig2.h biosig-dev.h
 	$(CROSS64)-g++ -shared $(GNUMEX64)/mex.def -DMATLAB_MEX_FILE $(DEFINES) -x c++  \
 		-I$(W64MAT_INC) -O2 -o "$@" -L$(GNUMEX64) -s "$<" -llibmx -llibmex -lbiosig -liconv -lssp $(LDLIBS) -lws2_32
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
@@ -888,9 +888,9 @@ $(PathToSigViewer):
 $(PathToSigViewer)/src/src.pro: $(PathToSigViewer) 
 	svn up -r 557 ../sigviewer
 
-$(PathToSigViewer)/bin/sigviewer: libbiosig.$(LIBEXT) biosig.h
+$(PathToSigViewer)/bin/sigviewer: libbiosig.$(LIBEXT) biosig-dev.h biosig2.h
 	-$(DELETE) $(PathToSigViewer)/extern/include/*
-	-$(COPY) biosig.h physicalunits.h $(PathToSigViewer)/extern/include
+	-$(COPY) biosig-dev.h biosig2.h physicalunits.h $(PathToSigViewer)/extern/include
 	-$(DELETE) $(PathToSigViewer)/extern/lib/lib*
 	-$(COPY) libbiosig.a $(PathToSigViewer)/extern/lib
 	$(SED) -i 's|\([[:space:]]*-lbiosig\)\([ #\\]*\)$$|\1 $(LDLIBS) \2|' $(PathToSigViewer)/src/src.pro
@@ -1000,7 +1000,7 @@ install_sigviewer: sigviewer
 install_ttl2trig: bin/ttl2trig
 	install bin/ttl2trig $(BIN)
 
-install_headers: biosig-dev.h biosig.h biosig2.h gdftime.h physicalunits.h
+install_headers: biosig-dev.h biosig2.h gdftime.h physicalunits.h
 	install -d 			$(INC)
 	install $?		    	$(INC)
 

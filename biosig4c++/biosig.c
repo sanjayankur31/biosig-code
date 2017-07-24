@@ -60,7 +60,7 @@
 
 int VERBOSE_LEVEL = 0;		// this variable is always available, but only used without NDEBUG 
 
-#include "biosig-dev.h"
+#include "biosig2.h"
 #include "biosig-network.h"
 
 
@@ -3301,7 +3301,7 @@ int RerefCHANNEL(HDRTYPE *hdr, void *arg2, char Mode)
 
                 switch (Mode) {
                 case 1: {
-                        HDRTYPE *RR = sopen((char*)arg2,"r",NULL);
+                        HDRTYPE *RR = sopen((const char*)arg2,"r",NULL);
                         ReRef       = RR->Calib;
                         if (RR->rerefCHANNEL != NULL) {
                                 flagLabelIsSet = 1; 

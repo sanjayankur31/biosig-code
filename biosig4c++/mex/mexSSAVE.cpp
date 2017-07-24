@@ -18,7 +18,9 @@
 #include <string.h>
 #include <time.h>
 
-#include <biosig.h>
+#include <biosig-dev.h>
+#include <biosig2.h>
+
 
 #ifdef NDEBUG
 #define VERBOSE_LEVEL 0 	// turn off debugging information, but its only used without NDEBUG
