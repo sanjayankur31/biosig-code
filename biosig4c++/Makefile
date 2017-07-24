@@ -914,15 +914,15 @@ save2aecg: save2gdf
 #############################################################
 
 ###	TTL2TRIG
-bin/ttl2trig : src/ttl2trig.c gdf.o physicalunits.o
-	$(CXX) -D=WITH_BIOSIG $(DEFINE) $(CFLAGS) "$^" -Wall -Wextra -lasound -o "$@"
+bin/ttl2trig : src/ttl2trig.c gdf.o gdftime.o physicalunits.o
+	$(CC) -D=WITH_BIOSIG $(DEFINE) $(CFLAGS) $^ -Wall -Wextra -lasound $(LDLIBS) -lm -o "$@"
 
 ###	FLOWMON
 flowmon.o: src/flowmon2.c 
 	$(CC) -c $(DEFINES) $(CFLAGS) -o "$@" "$<"
         
-bin/flowmon: flowmon.o gdf.o physicalunits.o
-	$(CC) "$^" $(LDLIBS) -o "$@"
+bin/flowmon: flowmon.o gdf.o gdftime.o physicalunits.o
+	$(CC) $^ $(LDLIBS) -lm -o "$@"
 
 
 #############################################################
