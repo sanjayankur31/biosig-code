@@ -686,15 +686,17 @@ win64: mexw64
 #	GNU/Linux - Shared Libaries
 #############################################################
 
+ifeq (${DLEXT},so)
 libbiosig.so.${SONAMEVERSION}: $(OBJECTS)
 	$(LD) ${SONAME_PREFIX}"$@" $(OBJECTS) $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
 libbiosig.so: libbiosig.so.${SONAMEVERSION}
 	ln -sf $< $@
+else
+libbiosig.${DLEXT}: $(OBJECTS)
+	$(LD) ${SONAME_PREFIX}"$@" $(OBJECTS) $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
+endif
 
-#libbiosig.${DLEXT}: $(OBJECTS)
-#	$(LD) ${SONAME_PREFIX}"$@" $(OBJECTS) $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
-
-libgdf.${DLEXT}: gdf.o getlogin.o gdftime.o physicalunits.o
+libgdf.${DLEXT}: gdf.o gdftime.o physicalunits.o getlogin.o
 	$(LD) ${SONAME_PREFIX}"$@" $? $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
 
 #libgdftime.${DLEXT}: gdftime.o
