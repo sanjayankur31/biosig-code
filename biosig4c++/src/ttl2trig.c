@@ -30,7 +30,7 @@
 
 
 #ifdef WITH_BIOSIG
-#include "../biosig.h" 
+#include "../biosig2.h"
 #ifdef NDEBUG
 #define VERBOSE_LEVEL 0		// turn off debugging information
 #else
