@@ -1840,8 +1840,14 @@ HDRTYPE* getfiletype(HDRTYPE* hdr)
 	    	hdr->TYPE = Persyst;
     	else if (!memcmp(Header1,"SXDF",4))
 	    	hdr->TYPE = OpenXDF;
-    	else if (!memcmp(Header1,"PLEX",4))
-	    	hdr->TYPE = PLEXON;
+	else if (!memcmp(Header1,"PLEX",4)) {
+		hdr->TYPE = PLEXON;
+		hdr->VERSION=1.0;
+	}
+	else if (!memcmp(Header1+10,"PLEXON",6)) {
+		hdr->TYPE = PLEXON;
+		hdr->VERSION=2.0;
+	}
 	else if (!memcmp(Header1,"\x02\x27\x91\xC6",4)) {
 		hdr->TYPE = RHD2000;	// Intan RHD2000 format
 		hdr->FILE.LittleEndian = 1;
@@ -2145,6 +2151,7 @@ const struct FileFormatStringTable_t FileFormatStringTable[] = {
 	{ Persyst,    	"Persyst" },
 	{ OGG,    	"OGG" },
 	{ PDP,    	"PDP" },
+	{ PLEXON,    	"PLEXON" },
 	{ RDF,    	"RDF" },
 	{ RHD2000,    	"RHD2000" },
 	{ RIFF,    	"RIFF" },
@@ -10173,6 +10180,11 @@ if (VERBOSE_LEVEL>2)
 
 	}
 
+	else if (hdr->TYPE==PLEXON) {
+		biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "Format PLEXON not supported");
+		return(hdr);
+
+	}
 	else if (hdr->TYPE==RDF) {
 
 		// UCSD ERPSS aquisition system
