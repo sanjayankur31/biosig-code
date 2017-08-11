@@ -32,6 +32,7 @@
 #include <string.h>
 #include <sys/param.h>
 #include <time.h>
+#include "physicalunits.h"
 
 #ifdef __cplusplus
 extern "C" {

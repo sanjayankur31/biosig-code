@@ -275,6 +275,7 @@ void FreeTextEvent(HDRTYPE* hdr, size_t N, const char* annotation);
 	utility functions for handling of physical dimensons
    ============================================================= */
 
+#ifndef __PHYSICALUNITS_H__
 uint16_t PhysDimCode(const char* PhysDim);
 /* Encodes  Physical Dimension as 16bit integer according to
    ISO/IEEE 11073-10101:2004 Vital Signs Units of Measurement
@@ -296,6 +297,7 @@ double PhysDimScale(uint16_t PhysDimCode);
 /* returns scaling factor of physical dimension
 	e.g. 0.001 for milli, 1000 for kilo etc.
  --------------------------------------------------------------- */
+#endif
 
 int biosig_set_hdr_ipaddr(HDRTYPE *hdr, const char *hostname);
 /* set the field HDR.IPaddr based on the IP address of hostname
