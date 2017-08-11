@@ -1402,7 +1402,9 @@ void destructHDR(HDRTYPE* hdr) {
 
 	if (VERBOSE_LEVEL>7)  fprintf(stdout,"destructHDR: free HDR.AS.rawdata @%p\n",hdr->AS.rawdata);
 
-	if (hdr->AS.rawdata != NULL) free(hdr->AS.rawdata);
+	// in case of SCPv3, rawdata can be loaded into Header
+	if ( (hdr->AS.rawdata < hdr->AS.Header) || (hdr->AS.rawdata > (hdr->AS.Header+hdr->HeadLen)) )
+		if (hdr->AS.rawdata != NULL) free(hdr->AS.rawdata);
 
 	if (VERBOSE_LEVEL>7)  fprintf(stdout,"destructHDR: free HDR.data.block @%p\n",hdr->data.block);
 
@@ -13629,6 +13631,11 @@ int sclose(HDRTYPE* hdr)
 			// compute CRC for Section 6
 			uint16_t crc = CRCEvaluate(hdr->AS.Header + aECG->Section6.StartPtr+2,aECG->Section6.Length-2); // compute CRC
 			leu16a(crc, hdr->AS.Header + aECG->Section6.StartPtr);
+		}
+		if ((aECG->Section12.Length>0) && (hdr->VERSION >2.5)){
+			// compute CRC for Section 12
+			uint16_t crc = CRCEvaluate(hdr->AS.Header + aECG->Section12.StartPtr+2,aECG->Section12.Length-2); // compute CRC
+			leu16a(crc, hdr->AS.Header + aECG->Section12.StartPtr);
 		}
 		// compute crc and len and write to preamble
 		ptr = hdr->AS.Header;

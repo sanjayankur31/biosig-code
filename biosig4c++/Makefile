@@ -208,7 +208,7 @@ DEFINES      += -D=WITH_FAMOS
 DEFINES      += -D=WITH_FIFF
 DEFINES      += -D=WITH_CHOLMOD
 DEFINES      += -D=WITHOUT_NETWORK
-#DEFINES      += -D=WITH_SCP3
+DEFINES      += -D=WITH_SCP3
 #DEFINES      += -D=WITH_HDF
 #DEFINES      += -D=WITH_MATIO
 #DEFINES      += -D=WITH_LIBXML2 
@@ -806,14 +806,14 @@ mex/mexSOPEN.cpp : mex/mexSLOAD.cpp
 
 MEX_OBJECTS = mex/mexSLOAD.cpp mex/mexSOPEN.cpp mex/mexSSAVE.cpp
 
-mex4o: $(patsubst mex/%.cpp, mex/%.mex, $(MEX_OBJECTS))
-oct: $(patsubst mex/%.cpp, mex/%.oct, $(MEX_OBJECTS))
+mex4o: $(patsubst mex/%.cpp, mex/%.mex, $(MEX_OBJECTS)) $(OBJECTS)
+oct: $(patsubst mex/%.cpp, mex/%.oct, $(MEX_OBJECTS)) $(OBJECTS)
 mexw32: $(patsubst mex/%.cpp, mex/%.mexw32, $(MEX_OBJECTS))
 mexw64: $(patsubst mex/%.cpp, mex/%.mexw64, $(MEX_OBJECTS))
 
 ifdef MEX_EXT
-mex: mex4o mex4m mexw32 mexw64
-mex4m: $(patsubst mex/%.cpp, mex/%.$(MEX_EXT), $(MEX_OBJECTS))
+mex: mex4o mex4m mexw32 mexw64 $(OBJECTS)
+mex4m: $(patsubst mex/%.cpp, mex/%.$(MEX_EXT), $(MEX_OBJECTS)) $(OBJECTS)
 
 ifneq (Darwin,$(shell uname))
 mex/%.$(MEX_EXT): mex/%.cpp libbiosig.a

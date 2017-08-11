@@ -35,9 +35,15 @@
 #include "physicalunits.h"
 
 #ifdef __cplusplus
-extern "C" {
+#define EXTERN_C extern "C"
+#else
+#define EXTERN_C
 #endif
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifdef NDEBUG
 #define VERBOSE_LEVEL 0 	// turn off debugging information, but its only used without NDEBUG
@@ -135,12 +141,6 @@ char *getlogin (void);
 
 #include "gdftime.h"
 
-#ifdef __cplusplus
-#define EXTERN_C extern "C"
-#else
-#define EXTERN_C
-#endif
-
 /*
  * pack structures to fullfil following requirements:
  * (1) Matlab v7.3+ requires 8 byte alignment
@@ -230,7 +230,8 @@ enum FileFormat {
 	SPSS, STATA, SVG, SXI, SYNERGY,
 	TDMS, TIFF, TMS32, TMSiLOG, TRC, UNIPRO, VRML, VTK,
 	WAV, WCP, WG1, WinEEG, WMF, XML, XPM,
-	Z, ZIP, ZIP2, RHD2000
+	Z, ZIP, ZIP2, RHD2000,
+	invalid=0xffff
 };
 
 /*
@@ -335,19 +336,15 @@ typedef struct HDR_STRUCT {
 	char* 	        FileName ATT_ALI;       /* FileName - dynamically allocated, local copy of file name */
 
 	union {
-#ifndef VERSION
-	// workaround in case VERSION is already defined as macro, kept for backwards compatibility
-	float 		VERSION;		/* GDF version number */
-#endif
-	float 		Version;		/* GDF version number */
+		// workaround for transition to cleaner fieldnames
+		float VERSION;		/* GDF version number */
+		float Version;		/* GDF version number */
 	} ATT_ALI;
 
 	union {
-#ifndef TYPE
-	// workaround in case TYPE is already defined as macro, kept for backwards compatibility
-	enum FileFormat TYPE;		 	/* type of file format */
-#endif
-	enum FileFormat Type; 			/* type of file format */
+		// workaround for transition to cleaner fieldnames
+		enum FileFormat TYPE;		 	/* type of file format */
+		enum FileFormat Type; 			/* type of file format */
 	} ATT_ALI;
 
 	struct {
@@ -921,12 +918,6 @@ static inline void bef64a(  double i, void* r) {
 	memcpy(r, &i64, sizeof(i64));
 }
 
-
-#ifdef __cplusplus
-}
-#endif
-
-
 #ifndef NAN
 # define NAN (0.0/0.0)        /* used for encoding of missing values */
 #endif
@@ -1063,6 +1054,10 @@ typedef struct aecg {
 		uint8_t	 NumberOfStatements;
 		char 	 **Statements;
         } Section11;
+        struct {
+		size_t   StartPtr;
+		size_t	 Length;
+        } Section12;
 
 } aECG_TYPE;
 
@@ -1071,10 +1066,6 @@ typedef struct aecg {
 /**                     INTERNAL FUNCTIONS                                 **/
 /**                                                                        **/
 /****************************************************************************/
-
-#ifdef __cplusplus
-EXTERN_C {
-#endif 
 
 /*
         file access wrapper: use ZLIB (if available) or STDIO

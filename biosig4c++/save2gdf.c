@@ -105,7 +105,11 @@ int main(int argc, char **argv){
 #endif
 		fprintf(stdout,"   -f=FMT  \n\tconverts data into format FMT\n");
 		fprintf(stdout,"\tFMT must represent a valid target file format\n");
-		fprintf(stdout,"\tCurrently are supported: HL7aECG, SCP_ECG (EN1064), GDF, EDF, BDF, CFWB, BIN, ASCII, ATF, BVA (BrainVision)\n\tas well as HEKA v2 -> ITX\n");
+#if defined(WITH_SCP3)
+		fprintf(stdout,"\tCurrently are supported: HL7aECG, SCP_ECG (EN1064:2005), SCP2, SCP3, GDF, EDF, BDF, CFWB, BIN, ASCII, ATF, BVA (BrainVision)\n\tas well as HEKA v2 -> ITX\n");
+#else
+		fprintf(stdout,"\tCurrently are supported: HL7aECG, SCP_ECG (EN1064:2005), GDF, EDF, BDF, CFWB, BIN, ASCII, ATF, BVA (BrainVision)\n\tas well as HEKA v2 -> ITX\n");
+#endif
 		fprintf(stdout,"   -CSV  \n\texports data into CSV file\n");
 		fprintf(stdout,"   -DYGRAPH, -f=DYGRAPH  \n\tproduces JSON output for presentation with dygraphs\n");
 		fprintf(stdout,"   -JSON  \n\tshows header and events in JSON format\n");
@@ -192,13 +196,19 @@ int main(int argc, char **argv){
     		else if (!strncmp(argv[k],"-f=MFER",7))
 			TARGET.TYPE=MFER;
 #if defined(WITH_SCP3)
-		else if (!strncmp(argv[k],"-f=SCP3",7) && (get_biosig_version() > 0x010703) ) {
+		else if (!strncmp(argv[k],"-f=SCP3",7) && (get_biosig_version() > 0x010806) ) {
 			TARGET.TYPE=SCP_ECG;
 			TARGET.VERSION=3.0;
+			fprintf(stderr,"WARNING %s: Specification of SCPv3 is not finalized, "
+				"\n\tand is subject to change without further notice. "
+				"\n\tSCP3 may be used only for experimental work"
+				"\n\tYou are warned !!!\n",__FILE__);
 		}
 #endif
-    		else if (!strncmp(argv[k],"-f=SCP",6))
+		else if (!strncmp(argv[k],"-f=SCP",6)) {
 			TARGET.TYPE=SCP_ECG;
+			TARGET.VERSION=2.0;
+		}
 //    		else if (!strncmp(argv[k],"-f=TMSi",7))
 //			TARGET.TYPE=TMSiLOG;
     		else if (!strncmp(argv[k],"-f=ITX",6))
@@ -532,8 +542,6 @@ int main(int argc, char **argv){
 		}
 
 		if (!hdr->FLAG.UCAL) {
-			if (PhysMaxValue0 < val) PhysMaxValue0 = val;
-			if (PhysMinValue0 > val) PhysMinValue0 = val;
 			MaxValueF = MaxValue;
 			MinValueF = MinValue;
 			MaxValueD = (MaxValue - hdr->CHANNEL[k].Off) / hdr->CHANNEL[k].Cal;
@@ -541,12 +549,12 @@ int main(int argc, char **argv){
 		} 
 		else {
 			MaxValueF = MaxValue * hdr->CHANNEL[k].Cal + hdr->CHANNEL[k].Off;
-			if (PhysMaxValue0 < MaxValueF) PhysMaxValue0 = MaxValueF;
 			MinValueF = MinValue * hdr->CHANNEL[k].Cal + hdr->CHANNEL[k].Off;
-			if (PhysMinValue0 > MinValue) PhysMinValue0 = MinValueF;
 			MaxValueD = MaxValue;
 			MinValueD = MinValue;
 		}
+		if (PhysMaxValue0 < MaxValueF) PhysMaxValue0 = MaxValueF;
+		if (PhysMinValue0 > MinValueF) PhysMinValue0 = MinValueF;
 
 		if ((SOURCE_TYPE==alpha) && (hdr->CHANNEL[k].GDFTYP==(255+12)) && (TARGET.TYPE==GDF))
 			// 12 bit into 16 bit 
