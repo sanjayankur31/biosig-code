@@ -23,7 +23,7 @@
 #include <strings.h>
 
 #include "../biosig-dev.h"
-#include "../biosig2.h"
+#include "../biosig.h"
 #ifdef WITH_LIBXML2
 #  include <libxml/parser.h>
 #  include <libxml/tree.h>

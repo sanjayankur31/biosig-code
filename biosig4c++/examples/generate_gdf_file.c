@@ -1,6 +1,6 @@
 /*
     Example how to generate GDF files as C/C++ code. 
-    This is only a rough outline, for details, please check biosig2.h. 
+    This is only a rough outline, for details, please check biosig.h. 
     
 
     Copyright (C) 2016 Alois Schloegl <alois.schloegl@ist.ac.at>
@@ -24,7 +24,7 @@
 */
 
 
-#include <biosig2.h>
+#include <biosig.h>
 #include <assert.h>
 #include <stdlib.h>
 

@@ -20,7 +20,7 @@
 
 #include <stdlib.h>
 #include "mathlink.h"
-#include <biosig2.h>
+#include <biosig.h>
 
 #ifdef NDEBUG
 #define VERBOSE_LEVEL 0 	// turn off debugging information, but its only used without NDEBUG

@@ -17,7 +17,7 @@ it requires only GCC not G++ for linking, has potentially much less security loo
 and a much smaller memory footprint, which might be especially useful for embedded devices. 
 It's interface is the same than for libbiosig, namely biosig.h
 (1c) "libbiosig2" is a level 2 interface for managing multiple files,
-It's interface is defined in biosig2.h. It can be used to link libbiosig2 compiled with GCC to software compiled with
+It's interface is defined in biosig.h. It can be used to link libbiosig2 compiled with GCC to software compiled with
 MSVisualC++. ABI compatibility is easier to maintain because access to internal data
 structures can be applied only through functions calls and not through pointers.
 (1d) "libphysicalunits" provides conversion tools for physical units from

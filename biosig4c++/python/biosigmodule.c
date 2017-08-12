@@ -1,7 +1,7 @@
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
-#include <biosig2.h>
+#include <biosig.h>
 
 #define BIOSIG_MODULE
 #include "biosigmodule.h"

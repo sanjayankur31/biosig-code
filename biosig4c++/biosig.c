@@ -1,6 +1,6 @@
 /*
 
-    Copyright (C) 2005-2016 Alois Schloegl <alois.schloegl@gmail.com>
+    Copyright (C) 2005-2017 Alois Schloegl <alois.schloegl@gmail.com>
     Copyright (C) 2011 Stoyan Mihaylov
     This file is part of the "BioSig for C/C++" repository
     (biosig4c++) at http://biosig.sf.net/
@@ -60,7 +60,7 @@
 
 int VERBOSE_LEVEL = 0;		// this variable is always available, but only used without NDEBUG 
 
-#include "biosig2.h"
+#include "biosig.h"
 #include "biosig-network.h"
 
 

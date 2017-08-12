@@ -33,7 +33,7 @@
 #include <strings.h>
 #include <time.h>
 #include "biosig-dev.h"
-#include "biosig2.h"
+#include "biosig.h"
 
 #ifdef __cplusplus
 extern "C" {

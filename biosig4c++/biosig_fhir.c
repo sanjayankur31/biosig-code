@@ -28,7 +28,7 @@ extern "C" {
 #include <string.h>
 #include <b64/cencode.h>
 #include "biosig-dev.h"
-#include "biosig2.h"
+#include "biosig.h"
 
 /*
   https://www.hl7.org/fhir/binary.html

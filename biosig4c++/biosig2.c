@@ -25,7 +25,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include "biosig2.h"
+#include "biosig.h"
 
 
 /* =============================================================

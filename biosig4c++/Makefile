@@ -517,10 +517,10 @@ vpath %.cpp ./:./t210:./t230:./XMLParser:./mex
 %.o : win32/%.c
 	$(CC) -c $(DEFINES) $(CFLAGS)  $(INCPATH) -o "$@" "$<"
 
-%.o: %.cpp biosig2.h biosig-dev.h
+%.o: %.cpp biosig.h biosig-dev.h
 	$(CXX) -c $(DEFINES) $(CXXFLAGS) $(INCPATH) -o "$@" "$<"
 
-sandbox.o: test0/sandbox.c biosig2.h
+sandbox.o: test0/sandbox.c biosig.h
 	$(CXX) -c $(DEFINES) $(CXXFLAGS) $(INCPATH) -o "$@" "$<"
 
 
@@ -551,7 +551,7 @@ win64/%.obj: win32/%.c
 #	eventcodes and units: conversion from ascii to C code
 #############################################################
 
-biosig.c: eventcodes.i eventcodegroups.i 11073-10102-AnnexB.i biosig2.h biosig-dev.h
+biosig.c: eventcodes.i eventcodegroups.i 11073-10102-AnnexB.i biosig.h biosig-dev.h
 
 physicalunits.c: units.i physicalunits.h
 
@@ -589,7 +589,7 @@ $(PathToSigViewerWIN32)/src/src.pro: $(PathToSigViewerWIN32)
 win32/sigviewer.exe: win32/libbiosig.a win32/libbiosig.dll
 	#-$(COPY) ../biosig/doc/eventcodes.txt $(PathToSigViewerWIN32)/src/
 	-$(DELETE) $(PathToSigViewerWIN32)/extern/include/*.h
-	-$(COPY) biosig2.h biosig-dev.h physicalunits.h $(PathToSigViewerWIN32)/extern/include
+	-$(COPY) biosig.h biosig2.h biosig-dev.h physicalunits.h $(PathToSigViewerWIN32)/extern/include
 	-$(DELETE) $(PathToSigViewerWIN32)/extern/lib/lib*
 	-$(COPY) win32/libbiosig.a $(PathToSigViewerWIN32)/extern/lib
 	$(SED) -i 's|\([[:space:]]*-lbiosig\)\([ #\\]*\)$$|\1 -lcholmod -lz -lcurl \2|' $(PathToSigViewerWIN32)/src/src.pro
@@ -612,7 +612,7 @@ $(PathToSigViewerWIN64)/src/src.pro: $(PathToSigViewerWIN64)
 win64/sigviewer.exe: win64/libbiosig.a win64/libbiosig.dll 
 	#-$(COPY) ../biosig/doc/eventcodes.txt $(PathToSigViewerWIN64)/src/
 	-$(DELETE) $(PathToSigViewerWIN64)/extern/include/*.h
-	-$(COPY) biosig2.h biosig-dev.h physicalunits.h $(PathToSigViewerWIN64)/extern/include
+	-$(COPY) biosig.h biosig2.h biosig-dev.h physicalunits.h $(PathToSigViewerWIN64)/extern/include
 	-$(DELETE) $(PathToSigViewerWIN64)/extern/lib/lib*
 	-$(COPY) win64/libbiosig.a $(PathToSigViewerWIN64)/extern/lib
 	$(SED) -i 's|\([[:space:]]*-lbiosig\)\([ #\\]*\)$$|\1 -lcholmod -lz -lcurl\2|' $(PathToSigViewerWIN64)/src/src.pro
@@ -836,13 +836,13 @@ mex/%.oct: mex/%.cpp
 	$(OCT) -I./ $(shell $(PKGCONF) --cflags libbiosig) "$<" libbiosig.a $(LDLIBS) -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
-mex/%.mexw32: mex/%.cpp Makefile biosig2.h biosig-dev.h
+mex/%.mexw32: mex/%.cpp Makefile biosig.h biosig-dev.h
 	## $(CROSS)-g++ is used instead of $(CXX), so it can be called from biosig as well as mxe. 
 	$(CROSS)-g++ -shared $(GNUMEX)/mex.def -DMATLAB_MEX_FILE $(DEFINES) -x c++  \
 		-I$(W32MAT_INC) -O2 -o "$@" -L$(GNUMEX) -s "$<" -llibmx -llibmex -lbiosig -liconv -lssp $(LDLIBS) -lws2_32
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
-mex/%.mexw64: mex/%.cpp Makefile biosig2.h biosig-dev.h
+mex/%.mexw64: mex/%.cpp Makefile biosig.h biosig-dev.h
 	$(CROSS64)-g++ -shared $(GNUMEX64)/mex.def -DMATLAB_MEX_FILE $(DEFINES) -x c++  \
 		-I$(W64MAT_INC) -O2 -o "$@" -L$(GNUMEX64) -s "$<" -llibmx -llibmex -lbiosig -liconv -lssp $(LDLIBS) -lws2_32
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
@@ -890,9 +890,9 @@ $(PathToSigViewer):
 $(PathToSigViewer)/src/src.pro: $(PathToSigViewer) 
 	svn up -r 557 ../sigviewer
 
-$(PathToSigViewer)/bin/sigviewer: libbiosig.$(LIBEXT) biosig-dev.h biosig2.h
+$(PathToSigViewer)/bin/sigviewer: libbiosig.$(LIBEXT) biosig-dev.h biosig.h
 	-$(DELETE) $(PathToSigViewer)/extern/include/*
-	-$(COPY) biosig-dev.h biosig2.h physicalunits.h $(PathToSigViewer)/extern/include
+	-$(COPY) biosig-dev.h biosig.h biosig2.h physicalunits.h $(PathToSigViewer)/extern/include
 	-$(DELETE) $(PathToSigViewer)/extern/lib/lib*
 	-$(COPY) libbiosig.a $(PathToSigViewer)/extern/lib
 	$(SED) -i 's|\([[:space:]]*-lbiosig\)\([ #\\]*\)$$|\1 $(LDLIBS) \2|' $(PathToSigViewer)/src/src.pro
@@ -1002,7 +1002,7 @@ install_sigviewer: sigviewer
 install_ttl2trig: bin/ttl2trig
 	install bin/ttl2trig $(BIN)
 
-install_headers: biosig-dev.h biosig2.h gdftime.h physicalunits.h
+install_headers: biosig-dev.h biosig.h biosig2.h gdftime.h physicalunits.h
 	install -d 			$(INC)
 	install $?		    	$(INC)
 

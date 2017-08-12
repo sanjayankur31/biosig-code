@@ -26,7 +26,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#include "../biosig2.h"
+#include "../biosig.h"
 
 /* TODO: 
 	- need to separate sopen_heka() and sread_heka()

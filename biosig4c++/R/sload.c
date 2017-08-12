@@ -21,7 +21,7 @@
 #include <Rdefines.h>
 #include <R_ext/Rdynload.h>
 
-#include "../biosig2.h"
+#include "../biosig.h"
 
 HDRTYPE *hdr=NULL;
 
