@@ -2,7 +2,6 @@ Introduction:
 ---------------
 
 The aim of this repository is providing a C/C++ software library for biomedical signal processing. 
-This library is called "BioSig for C/C++" and is complementary to "BioSig for Octave and Matlab". 
 
 BioSig4C++ provides several tools:  
 
@@ -24,6 +23,20 @@ structures can be applied only through functions calls and not through pointers.
 ascii text to 16bit integers according to ISO/IEEE 11073-10101:2004 Table A.6.3: Vital signs units of measurements
 text strings are cached for performance reasons, and can be used in a multi-threaded application.
 
+Static and dynamic libraries are build. The Application Programming Interface (API)
+is reasonable stable, changes are managed through marking the modified "deprecated".
+The appliction binary interface (ABI) depends also on external tools and libraries, especially
+access to interal data structures like structs can break ABI compatibility, even when the API is stable.
+Recompiling the application is on solution, but not always feasible. In order to avoid that need,
+it is strongly recommended to use only the level 2 interface, which provides access to the internal
+header data through functions. If only level 2 interface functions are used, it is reasonable
+save to dynamically link libbiosig2.
+
+The build rules are
+	make libbiosig
+which can be installed with
+	sudo make install_libbiosig
+
 The following DEFINES are recommended and require:
  -D=WITH_CHOLMOD        used for re-referencing of data, REQUIREMENT: cholmod from libsuitesparse
  -D=WITH_ZLIB	        used to handle gzip-ped files,  REQUIREMENT: zlib (http://zlib.net/)
@@ -36,48 +49,66 @@ There are some more defines to tweak your version.
  -D=__4HAERTEL__	support for special flavor of FAMOS format (experimental) 
  Other flags are used for experimental development 
  -D=WITH_DICOM, -D=WITH_GDCM 	experimental DICOM support 
- -D=WITH_LIBXML2	experimental: tinyxml is replaced by libxml2
+ -D=WITH_SCP3		experimental: testing next SCP version as discussed in PT-SCPECG
  -D=WITH_TIMESTAMPCHANNEL add an extra channel in HEKA format containing TIMESTAMPS
  -D=WITH_TIMESTAMPEVENT timestamps of sweep onset in HEKA format stored in EVENT.DUR with EVENT.TYP==0x7ffe 
  
 If some libraries are not available on your system, remove the corresponding DEFINES in Makefile. 
 
-(2) = save2gdf = is a converter between different file formats, 
-including but not limited to SCP-ECG(EN1064), HL7aECG (FDA-XML), GDF, EDF, BDF, CWFB.
-    save2gdf can be also used to upload or retrieve data from a bscs server, and to display 
-    the header information, in ascii and in JSON format. 
 
-(3) "mexSLOAD" is a MEX-interface for Octave and Matlab
-for details see mex/README
+(2) = converter and tools =
+contains several tools for data conversion,
+	save2gdf: is a converter between different file formats, including but not limited to
+		SCP-ECG(EN1064), HL7aECG (FDA-XML), GDF, EDF, BDF, CWFB and others
+		save2gdf can be also used to upload or retrieve data
+		from a bscs server, and to display the header information
+		in ascii and in JSON format.
+	biosig2fhir: is a tool than converts biosig data into a hl7/fhir binary template,
+		the header information is encoded in JSON format, the data is converted
+		into a base64-encoded GDF (OeNorm K2202:2015) formatted file.
+	pu	is a tool to show the encoding of physical units according to ISO/IEEE 11073
 
-(4a) "biosig4python" is an interface to python. 
-Requirement: python, python-dev, python-numpy, swig (http://www.swig.org/)
-for Debian/Ubuntu: 
- 	sudo apt-get install python python-dev python-numpy swig
-see ./python/example.py and ./python/demo.py for more information 
+These are statically linked and can be build with:
+   make tools
 
-(4b) "biosig4ruby" is an interface to ruby. 
-Requirement: ruby, ruby-dev, swig (http://www.swig.org/)
-for Debian/Ubuntu: 
- 	sudo apt-get install ruby ruby-dev swig
-see ./ruby/test.rb for more information 
 
-Interfaces to other languages (including Java, PHP, Perl and TCL) are also provided through 
-SWIG. However, these are very experimental
+(3) language bindings and foreign function interfaces:
+(3a) "mexSLOAD" is a MEX-interface for Octave and Matlab
+and is linked statically to libbiosig. It can be build with
+    make mex4o   # octave
+    make mex4m   # matlab
+for details see mex/README.
+
+(3b) "python" is an interface to python and dynamically linked to libbiosig.
+Requirement: python, python-dev, python-numpy
+for Debian/Ubuntu:
+	sudo apt-get install python python-dev python-numpy
+It can be build with any of the following commands:
+	make python
+	make -C python build
+Use of the interface is shown in ./python/demo2.py
+
+(3c) mathematica
+is linked dynamically to libbiosig and can be build with:
+	make mma
+see also mma/README, and mma/sload, mma/hdrinfo.nb, mma/mySLOAD.nb for more details.
+
+(3z) other language interfaces
+Interfaces to other languages (including Java, PHP, Perl and TCL) are considered,
+but these still need to be implemented and tested.
+
 
 (5) = SigViewer =
 Requirement: qmake, Qt4
    an important patch to overcome several limitations (event handling beyond 16.7 Mio samples)
    is applied. 
 
+
 (6) Precompiled binaries for Win32
    win32/save2gdf.exe  binary converter
    win32/libbiosig.{lib,dll}  static and dynamic library (requires zlib and libws2_32)
    mma/sload.exe     Mathematica binding through Mathlink interface
    mex/mexSLOAD.mexw32   Mex-file for Win32/Matlab
-
-(7) = MathLink interface to Mathematica =
-   see mma/sload, mma/hdrinfo.nb, mma/mySLOAD.nb for more details. 
 
 
 The internal data structure resemble the header structure similar to
@@ -117,29 +148,13 @@ File(s):
     src/*.c	applications: flowmon reads data from serial port, ttl2trig reads data from audio card	
 
 
-Open Issue(s) of the SCP-ECG <-> HL7aECG converter:
----------------------------------------------------
-The following fields of SCP-ECG are not converted to HL7. 
-= Mandatory fields (prEN1064:2007 p.18, chp 5.4.3.1) not propagated to HL7:  
-- time zone information, (tag34, section 1)
-- "ID of acquiring device" (tag14, section 1)
-= "Highly recommended" fields (prEN1064:2007 p.18, chp 5.4.3.1) not propagated to HL7:  
-- "ID of analysing device", Patient first name, 
-= Other fields of the SCP-ECG standard, 
-- section 1: blood pressure, medication, etc
-- section 4 (QRS location), 7 (global measurements), 8-11 (interpretative statements)
-The following fields of HL7aECG are not converted to SCP-ECG.
-- study, treatment group, clinical trial, clinical trial protocol, trial sponsor, investigator etc. 
-
-
 More information is available at http://biosig.sf.net/
 
 If you have any questions you can also contact the mailinglist  
 https://lists.sourceforge.net/lists/listinfo/biosig-general
 
 
-    $Id$
-    Copyright (C) 2005,2006,2007,2008,2009,2010,2012 Alois Schloegl <a.schloegl@ieee.org>
+    Copyright (C) 2005-2017 Alois Schloegl <alois.schloegl@gmail.com>
     This function is part of the "BioSig for C/C++" repository 
     (BioSig4C++) at http://biosig.sf.net/ 
 

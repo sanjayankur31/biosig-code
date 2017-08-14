@@ -1,3 +1,11 @@
+biosig4c++ (1.9.0-1) experimental; urgency=low
+
+  * new upstream release
+  * Experimental Support for next SCP
+  * structure of include files reorganized
+
+ -- Alois Schloegl <alois.schloegl@ist.ac.at>  Sat, 12 Aug 2017 21:55:02 +0200
+
 biosig4c++ (1.8.6-1) experimental; urgency=low
 
   * libbiosig and libbiosig2 are now combined in
