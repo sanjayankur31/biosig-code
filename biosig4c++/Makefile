@@ -864,9 +864,9 @@ mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz: mex/*.cpp
 #	R/sload
 #############################################################
 
-R: R/sload.so
+R: R/sload.$(DLEXT)
 
-R/sload.so: R/sload.c libbiosig.so
+R/sload.$(DLEXT): R/sload.c libbiosig.$(DLEXT)
 	(cd R; R CMD SHLIB sload.c -L.. -lbiosig)
 
 
