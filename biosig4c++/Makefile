@@ -186,7 +186,7 @@ else
 	TAR	       = tar
 	LD	       = $(CXX)
 	DLEXT          = so
-	FULLDLEXT      = so.${SONAMEVERSION}
+	FULLDLEXT      = .so.${SONAMEVERSION}
 	SONAME_PREFIX  = -Wl,-soname=
 endif
 
@@ -686,23 +686,17 @@ win64: mexw64
 #	GNU/Linux - Shared Libaries
 #############################################################
 
-ifeq (${DLEXT},so)
-libbiosig.so.${SONAMEVERSION}: $(OBJECTS)
-	$(LD) ${SONAME_PREFIX}"$@" $(OBJECTS) $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
-libbiosig.so: libbiosig.so.${SONAMEVERSION}
-	ln -sf $< $@
-else
 libbiosig.${DLEXT}: $(OBJECTS)
-	$(LD) ${SONAME_PREFIX}"$@" $(OBJECTS) $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
-endif
+	$(LD) ${SONAME_PREFIX}"$@" $(OBJECTS) $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o libbiosig${FULLDLEXT}
+	ln -sf libbiosig${FULLDLEXT} libbiosig.${DLEXT}
 
 libgdf.${DLEXT}: gdf.o gdftime.o physicalunits.o getlogin.o
-	$(LD) ${SONAME_PREFIX}"$@" $? $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
+	$(LD) ${SONAME_PREFIX}"$@" $^ $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
 
 #libgdftime.${DLEXT}: gdftime.o
-#	$(LD) ${SONAME_PREFIX}"$@" $? $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
+#	$(LD) ${SONAME_PREFIX}"$@" $^ $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
 libphysicalunits.${DLEXT}: physicalunits.o
-	$(LD) ${SONAME_PREFIX}"$@" $? $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
+	$(LD) ${SONAME_PREFIX}"$@" $^ $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
 
 
 #############################################################
@@ -1014,10 +1008,10 @@ install_libbiosig.a: libbiosig.a libphysicalunits.a libbiosig.pc
 	install libphysicalunits.a 	$(LIB)
 	install libbiosig.pc		$(LIB)/pkgconfig/
 
-install_libbiosig.$(DLEXT): libbiosig.$(FULLDLEXT) libbiosig.$(DLEXT)
+install_libbiosig.$(DLEXT): libbiosig$(FULLDLEXT) libbiosig.$(DLEXT)
 	install -d 			$(LIB)/pkgconfig/
-	install libbiosig.$(FULLDLEXT)  $(LIB)
-	ln -sf  $(LIB)/libbiosig.$(FULLDLEXT) $(LIB)/libbiosig.$(DLEXT)
+	install libbiosig$(FULLDLEXT)  $(LIB)
+	ln -sf  $(LIB)/libbiosig$(FULLDLEXT) $(LIB)/libbiosig.$(DLEXT)
 
 install: install_libbiosig.$(DLEXT) install_libbiosig.a install_headers install_tools
 
