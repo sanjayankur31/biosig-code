@@ -4,7 +4,7 @@ function HDR = edfannot2evt(HDR)
 %  
 % see also: SLOAD, SOPEN
 
-%	Copyright (C) 2012,2014,2016 by Alois Schloegl <alois.schloegl@gmail.com>
+%	Copyright (C) 2012-2017 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 %
 % This program is free software; you can redistribute it and/or
@@ -23,12 +23,17 @@ function HDR = edfannot2evt(HDR)
 
 if isfield(HDR,'EDFplus') && isfield(HDR.EDFplus,'ANNONS'),
 
-	warning('EDFANNOT2EVT.M is under construction and not well tested - You really should check the content of the event table!');
+	warning('EDFANNOT2EVT.M is currently not supported! If there are problems reading EDF files,');
+	warning('download and install mexSLOAD.mex* from https://pub.ist.ac.at/~schloegl/src/mexbiosig/')
 
 	sz = size(HDR.EDFplus.ANNONS);
 	N  = 0;
 	Desc = {};
 	TYP  = [];
+	POS  = [];
+	DUR  = [];
+	CHN  = [];
+	TimeStamp = [];
 	for k = 1:sz(2);
 		t     = HDR.EDFplus.ANNONS(:,k)';
 
