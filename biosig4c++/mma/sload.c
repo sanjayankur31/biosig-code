@@ -76,7 +76,7 @@ if (VERBOSE_LEVEL > 5)
 	biosig_reset_flag(hdr, BIOSIG_FLAG_ROW_BASED_CHANNELS);
 #else
 	numberChannels = hdr->NS;
-	numberSamples = hdr->NRec * hdr->SPR
+	numberSamples = hdr->NRec * hdr->SPR;
 	samplerate = hdr->SampleRate;
 	hdr->FLAG.ROW_BASED_CHANNELS = 0;
 #endif
