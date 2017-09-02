@@ -21,7 +21,8 @@ biosig4c++/mex/*.mex*
 # ignore intermediate files for biosig4python
 biosig4c++/python/biosig.py
 biosig4c++/python/swig_wrap.cxx
-# CMake output
+# Make output
+Makefile
 biosig4c++/CMakeCache.txt
 biosig4c++/CMakeFiles
 # 

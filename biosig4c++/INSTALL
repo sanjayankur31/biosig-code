@@ -4,20 +4,24 @@ INSTALLATION
 
 Quick start for Debian/Linux installing libbiosig:
 
+# Requirements:
+        apt-get install libb64-dev libsuitesparse-dev zlib1g-dev
 
 # compiling libbiosig
-   make 		# compile libbiosig
+   ./configure && make   # compile libbiosig
+
 # installing libbiosig in local directory
-   prefix=<DIR> make install 	# install libbiosig in <DIR>/lib and <DIR>/include
+   make install 	# install libbiosig in <DIR>/lib and <DIR>/include
 
 # installing in /usr/local (default prefix is "/usr/local/")
    sudo make install
-The default prefix is "/usr/local" , thus this will replace some files of the debian package biosig4c++,
-you might need to recompile your applications afterwards.
 
 # compiling of mexbiosig for Matlab and Octave
    MATLABDIR=/usr/local/MATLAB/R20##x/bin make mex4m
    make mex4o
+
+# Compiling for python
+   make python
 
 # Compiling save2gdf and biosig_fhir
    make tools
