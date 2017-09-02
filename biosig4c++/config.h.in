@@ -323,6 +323,12 @@
 #endif
 
 
+/* libcholmod is available. */
+#undef WITH_CHOLMOD
+
+/* zlib is available. */
+#undef WITH_ZLIB
+
 /* Define to 1 if on MINIX. */
 #undef _MINIX
 

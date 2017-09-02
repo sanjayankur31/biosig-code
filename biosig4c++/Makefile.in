@@ -200,13 +200,17 @@ DEFINES      += $(DEFINES_ALL)
 ### Mingw,MXE, etc. must avoid name space conflict concerning SOPEN ###
 #DEFINES      += -D=NO_OLDNAMES
 
-DEFINES      += -D=WITH_ZLIB
+ifneq (,@HAVE_ZLIB@)
+	DEFINES      += -D=WITH_ZLIB
+endif
 #DEFINES      += -D=WITH_PTHREAD
 #DEFINES      += -D=WITH_CURL
 DEFINES      += -D=__4HAERTEL__
 DEFINES      += -D=WITH_FAMOS
 DEFINES      += -D=WITH_FIFF
-DEFINES      += -D=WITH_CHOLMOD
+ifneq (,@HAVE_CHOLMOD@)
+	DEFINES      += -D=WITH_CHOLMOD
+endif
 DEFINES      += -D=WITHOUT_NETWORK
 DEFINES      += -D=WITH_SCP3
 #DEFINES      += -D=WITH_HDF
@@ -481,8 +485,7 @@ ifeq (,$(findstring mingw,$(TARGET)))
 endif
 
 first: $(IO_H_FILE2) lib tools
-# biosig_fhir not available on MacOSX because libb64 required
-ifneq (Darwin,$(shell uname))
+ifneq (,@HAVE_LIBB64@)
   tools: save2gdf${BINEXT} pu${BINEXT} biosig_fhir${BINEXT}
 else
   tools: save2gdf${BINEXT} pu${BINEXT}
@@ -753,8 +756,10 @@ libbiosig.pc :
 pu${BINEXT} : pu.c physicalunits.o
 	$(CC) $(DEFINES) $(CFLAGS) $^ $(LDFLAGS) $(LDLIBS) -o "$@"
 
+ifneq (,@HAVE_LIBB64@)
 biosig_fhir${BINEXT}: biosig_fhir.c libbiosig.a
 	$(CC) $(DEFINES) $(CFLAGS) "$<" libbiosig.a -lstdc++ -lm -lb64 $(LDLIBS) -o "$@"
+endif 
 
 bscs: biosig_client${BINEXT} biosig_server${BINEXT} sandbox.o biosig.o
 biosig_client${BINEXT}: biosig_client.c libbiosig.$(LIBEXT) biosig-network.o
