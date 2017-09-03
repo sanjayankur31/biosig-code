@@ -934,9 +934,9 @@ bin/flowmon: flowmon.o gdf.o gdftime.o physicalunits.o
 
 distclean: clean
 	-$(DELETE) -r autom4te.cache
-	-$(DELETE) aclocal.m4 config.guess config.h config.h.in config.log config.sub config.status depcomp missing stamp-h1
+	-$(DELETE) aclocal.m4 config.h config.log config.status depcomp missing stamp-h1
 	-$(DELETE) Makefile.am doc/Makefile.am mex/Makefile.am python/Makefile.am
-	-$(DELETE) install-sh ltmain.sh
+	-$(DELETE) ltmain.sh
 	-$(DELETE) *.lib
 	-$(DELETE) *.so *.dylib
 	-$(DELETE) *.so.*

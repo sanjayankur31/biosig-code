@@ -3,8 +3,7 @@
 
 AC_PREREQ([2.69])
 AC_INIT([biosig], [1.9.0])
-AC_CONFIG_SRCDIR([configure.ac])
-AC_CONFIG_SRCDIR([biosig-dev.h])
+AC_CONFIG_SRCDIR([biosig.c])
 AC_CONFIG_HEADERS([config.h])
 
 AC_USE_SYSTEM_EXTENSIONS
@@ -16,7 +15,6 @@ AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_CONFIG_MACRO_DIRS([m4])
 
 # Checks for libraries.
 AC_CHECK_LIB([asound], [snd_pcm_open])
