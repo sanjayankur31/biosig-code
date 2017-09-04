@@ -2,28 +2,6 @@ import biosig
 import numpy as S
 
 
-
-def load(fname):
-    HDR = biosig.constructHDR(0, 0)
-    HDR = biosig.sopen(fname, "r", HDR);
-
-#	turn off all channels 
-#    for i in range(HDR.NS):
-#        HDR.CHANNEL[i].OnOff = 0
-
-#	turn on specific channels 
-#    HDR.CHANNEL[0].OnOff = 1
-#    HDR.CHANNEL[1].OnOff = 1
-#    HDR.CHANNEL[HDR.NS-1].OnOff = 1
-
-    data = biosig.sread(0, HDR.NRec, HDR)
-
-    biosig.sclose(HDR)
-    biosig.destructHDR(HDR)
-    
-    return data
-
-
 def testsin(sig, sr, freq):
     quartper = int(sr / freq * .25)
     x = S.sqrt(sig[:-quartper] ** 2 + sig[quartper:] ** 2)
@@ -42,7 +20,9 @@ if len(sys.argv) < 3:
 fname = sys.argv[1]
 sr = int(sys.argv[2])
 print "\nexample.py\nchecking file %s" % fname
-sig = load(fname)
+sig=biosig.data(fname)
+HDR=biosig.header("filename.gdf")
+
 
 freq = 3
 print "Looking for sinusoidal signals at %f Hz" % freq
