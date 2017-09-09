@@ -30,6 +30,9 @@ extern "C" {
 #include "biosig-dev.h"
 #include "biosig.h"
 
+#define min(a,b)        (((a) < (b)) ? (a) : (b))
+#define max(a,b)        (((a) > (b)) ? (a) : (b))
+
 /*
   https://www.hl7.org/fhir/binary.html
   https://catalyze.io/learn/the-fhir-resource-object-the-core-building-block

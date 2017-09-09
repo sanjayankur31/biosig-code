@@ -931,11 +931,6 @@ static inline void bef64a(  double i, void* r) {
 # define isnan(a) ((a)!=(a))
 #endif
 
-
-#define min(a,b)	(((a) < (b)) ? (a) : (b))
-#define max(a,b)	(((a) > (b)) ? (a) : (b))
-
-
 /*
     The macro IS_SET() can be used to test for defines in 
 	if (IS_SET(...)) {

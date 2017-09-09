@@ -31,6 +31,8 @@
 #  include "../XMLParser/tinyxml.h"
 #endif
 
+#define min(a,b)        (((a) < (b)) ? (a) : (b))
+#define max(a,b)        (((a) > (b)) ? (a) : (b))
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
                 convert time in string format into gdf-time format

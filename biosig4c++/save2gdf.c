@@ -35,6 +35,9 @@
 #include "biosig-dev.h"
 #include "biosig.h"
 
+#define min(a,b)        (((a) < (b)) ? (a) : (b))
+#define max(a,b)        (((a) > (b)) ? (a) : (b))
+
 #ifdef __cplusplus
 extern "C" {
 #endif 
