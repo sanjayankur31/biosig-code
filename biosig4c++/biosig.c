@@ -97,7 +97,7 @@ ATT_DEPREC const char *B4C_ERRMSG;
 #endif
 
 
-#ifdef WITH_CHOLMOD
+#ifdef HAVE_CHOLMOD
     cholmod_common CHOLMOD_COMMON_VAR;
 void CSstop() {
 	cholmod_finish(&CHOLMOD_COMMON_VAR);

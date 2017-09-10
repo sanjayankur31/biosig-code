@@ -126,13 +126,10 @@ DEFINES      += $(DEFINES_ALL)
 #DEFINES      += -D=WITHOUT_SCP_DECODE
 #DEFINES      += -D=WITH_TIMESTAMPEVENT
 #DEFINES      += -D=WITH_TIMESTAMPCHANNEL
-DEFINES      += -D=WITH_ZLIB 
-#DEFINES      += -D=WITH_PTHREAD
 #DEFINES      += -D=WITH_CURL
 DEFINES      += -D=__4HAERTEL__
 DEFINES      += -D=WITH_FAMOS
 DEFINES      += -D=WITH_FIFF
-DEFINES      += -D=WITH_CHOLMOD
 DEFINES      += -D=WITHOUT_NETWORK
 #DEFINES      += -D=WITH_HDF
 #DEFINES      += -D=WITH_MATIO
@@ -156,15 +153,6 @@ DEFINES      += -D=MAKE_EDFLIB
 ifneq (,$(findstring WITH_GDCM, $(DEFINES)))
   INCPATH    += -I$(wildcard /usr/include/gdcm-2*/)
   LDLIBS     += -lgdcmCommon -lgdcmDSED -lgdcmMEXD -lgdcmMSFF -lgdcmDICT -lgdcmIOD
-endif
-ifneq (,$(findstring WITH_ZLIB, $(DEFINES)))
-  LDLIBS     += -lz
-endif
-ifneq (,$(findstring WITH_PTHREAD, $(DEFINES)))
-  LDLIBS     += -lpthread
-endif
-ifneq (,$(findstring WITH_CHOLMOD, $(DEFINES)))
-  LDLIBS     += -lcholmod
 endif
 ifneq (,$(findstring WITH_LIBXML2, $(DEFINES)))
   LDLIBS     += -lxml2

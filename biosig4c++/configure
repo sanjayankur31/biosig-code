@@ -4728,9 +4728,11 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_cholmod_cholmod_start" >&5
 $as_echo "$ac_cv_lib_cholmod_cholmod_start" >&6; }
 if test "x$ac_cv_lib_cholmod_cholmod_start" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBCHOLMOD 1
+_ACEOF
 
-$as_echo "#define WITH_CHOLMOD 1" >>confdefs.h
-
+  LIBS="-lcholmod $LIBS"
 
 fi
 
@@ -4771,11 +4773,14 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_z_gzopen" >&5
 $as_echo "$ac_cv_lib_z_gzopen" >&6; }
 if test "x$ac_cv_lib_z_gzopen" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBZ 1
+_ACEOF
 
-$as_echo "#define WITH_ZLIB 1" >>confdefs.h
-
+  LIBS="-lz $LIBS"
 
 fi
+
 
 # FIXME: Replace `main' with a function in `-ldcmdata':
 #AC_CHECK_LIB([dcmdata], [main])
@@ -5058,51 +5063,7 @@ _ACEOF
 
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Mat_Open in -lmatio" >&5
-$as_echo_n "checking for Mat_Open in -lmatio... " >&6; }
-if ${ac_cv_lib_matio_Mat_Open+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmatio  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char Mat_Open ();
-int
-main ()
-{
-return Mat_Open ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_matio_Mat_Open=yes
-else
-  ac_cv_lib_matio_Mat_Open=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_matio_Mat_Open" >&5
-$as_echo "$ac_cv_lib_matio_Mat_Open" >&6; }
-if test "x$ac_cv_lib_matio_Mat_Open" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBMATIO 1
-_ACEOF
-
-  LIBS="-lmatio $LIBS"
-
-fi
-
+#AC_CHECK_LIB([matio], [Mat_Open])
 
 # Wolfram/Mathematica Mathlink interface
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for MLPutRealArray in -lmathlink" >&5
@@ -5191,145 +5152,9 @@ _ACEOF
 fi
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_mutex_lock in -lpthread" >&5
-$as_echo_n "checking for pthread_mutex_lock in -lpthread... " >&6; }
-if ${ac_cv_lib_pthread_pthread_mutex_lock+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lpthread  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char pthread_mutex_lock ();
-int
-main ()
-{
-return pthread_mutex_lock ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_pthread_pthread_mutex_lock=yes
-else
-  ac_cv_lib_pthread_pthread_mutex_lock=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pthread_pthread_mutex_lock" >&5
-$as_echo "$ac_cv_lib_pthread_pthread_mutex_lock" >&6; }
-if test "x$ac_cv_lib_pthread_pthread_mutex_lock" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBPTHREAD 1
-_ACEOF
-
-  LIBS="-lpthread $LIBS"
-
-fi
-
+#AC_CHECK_LIB([pthread], [pthread_mutex_lock])
 # FIXME: Replace `main' with a function in `-lssp':
 #AC_CHECK_LIB([ssp], [main])
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for cholmod_sdmult in -lcholmod" >&5
-$as_echo_n "checking for cholmod_sdmult in -lcholmod... " >&6; }
-if ${ac_cv_lib_cholmod_cholmod_sdmult+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lcholmod  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char cholmod_sdmult ();
-int
-main ()
-{
-return cholmod_sdmult ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_cholmod_cholmod_sdmult=yes
-else
-  ac_cv_lib_cholmod_cholmod_sdmult=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_cholmod_cholmod_sdmult" >&5
-$as_echo "$ac_cv_lib_cholmod_cholmod_sdmult" >&6; }
-if test "x$ac_cv_lib_cholmod_cholmod_sdmult" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBCHOLMOD 1
-_ACEOF
-
-  LIBS="-lcholmod $LIBS"
-
-fi
-
-
-# FIXME: Replace `main' with a function in `-lz':
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for gzopen in -lz" >&5
-$as_echo_n "checking for gzopen in -lz... " >&6; }
-if ${ac_cv_lib_z_gzopen+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lz  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char gzopen ();
-int
-main ()
-{
-return gzopen ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_z_gzopen=yes
-else
-  ac_cv_lib_z_gzopen=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_z_gzopen" >&5
-$as_echo "$ac_cv_lib_z_gzopen" >&6; }
-if test "x$ac_cv_lib_z_gzopen" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBZ 1
-_ACEOF
-
-  LIBS="-lz $LIBS"
-
-fi
-
 
 # Checks for header files.
 ac_fn_c_check_type "$LINENO" "size_t" "ac_cv_type_size_t" "$ac_includes_default"

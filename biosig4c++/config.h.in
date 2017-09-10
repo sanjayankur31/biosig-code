@@ -90,12 +90,6 @@
 /* Define to 1 if you have the `mathlink' library (-lmathlink). */
 #undef HAVE_LIBMATHLINK
 
-/* Define to 1 if you have the `matio' library (-lmatio). */
-#undef HAVE_LIBMATIO
-
-/* Define to 1 if you have the `pthread' library (-lpthread). */
-#undef HAVE_LIBPTHREAD
-
 /* Define to 1 if you have the `uuid' library (-luuid). */
 #undef HAVE_LIBUUID
 
@@ -322,12 +316,6 @@
 # undef __EXTENSIONS__
 #endif
 
-
-/* libcholmod is available. */
-#undef WITH_CHOLMOD
-
-/* zlib is available. */
-#undef WITH_ZLIB
 
 /* Define to 1 if on MINIX. */
 #undef _MINIX

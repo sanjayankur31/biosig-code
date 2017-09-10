@@ -57,7 +57,7 @@ extern int VERBOSE_LEVEL; 	// used for debugging, variable is always defined
 	The output files can be zipped, too.
  */
 
-#ifdef WITH_ZLIB
+#ifdef HAVE_ZLIB
 #include <zlib.h>
 #ifndef ZLIB_H
     #if defined(__MINGW64__)
@@ -68,7 +68,7 @@ extern int VERBOSE_LEVEL; 	// used for debugging, variable is always defined
 #endif
 #endif
 
-#ifdef WITH_CHOLMOD
+#ifdef HAVE_CHOLMOD
     #ifdef __APPLE__
         #include <cholmod.h>
     #else

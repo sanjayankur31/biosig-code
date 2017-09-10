@@ -33,8 +33,8 @@ General remarks:
 ----------------
 
 The following DEFINES in 'Makefile" are recommended and required:
- -D=WITH_CHOLMOD        used for re-referencing of data, REQUIREMENT: cholmod from libsuitesparse
- -D=WITH_ZLIB	        used to handle gzip-ped files,  REQUIREMENT: zlib (http://zlib.net/)
+ -D=HAVE_CHOLMOD        used for re-referencing of data, REQUIREMENT: cholmod from libsuitesparse
+ -D=HAVE_ZLIB	        used to handle gzip-ped files,  REQUIREMENT: zlib (http://zlib.net/)
  -D=WITH_GSL	        provides interface to GSL, REQUIREMENT: GNU Scientific Library (GSL), 
  -D=WITH_FAMOS	        includes (partial) support for FAMOS format 
  -D=__4HAERTEL__	support for special flavor of FAMOS format (experimental) 

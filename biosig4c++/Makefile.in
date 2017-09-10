@@ -201,7 +201,10 @@ DEFINES      += $(DEFINES_ALL)
 #DEFINES      += -D=NO_OLDNAMES
 
 ifneq (,@HAVE_ZLIB@)
-	DEFINES      += -D=WITH_ZLIB
+	LDLIBS     += -lz
+endif
+ifneq (,@HAVE_PTHREAD@)
+	LDLIBS     += -lpthread
 endif
 #DEFINES      += -D=WITH_PTHREAD
 #DEFINES      += -D=WITH_CURL
@@ -209,8 +212,9 @@ DEFINES      += -D=__4HAERTEL__
 DEFINES      += -D=WITH_FAMOS
 DEFINES      += -D=WITH_FIFF
 ifneq (,@HAVE_CHOLMOD@)
-	DEFINES      += -D=WITH_CHOLMOD
+	LDLIBS     += -lcholmod
 endif
+
 DEFINES      += -D=WITHOUT_NETWORK
 DEFINES      += -D=WITH_SCP3
 #DEFINES      += -D=WITH_HDF
@@ -236,19 +240,10 @@ ifneq (,$(findstring WITH_GDCM, $(DEFINES)))
   INCPATH    += -I$(wildcard /usr/include/gdcm-2*/)
   LDLIBS     += -lgdcmCommon -lgdcmDSED -lgdcmMEXD -lgdcmMSFF -lgdcmDICT -lgdcmIOD
 endif
-ifneq (,$(findstring WITH_ZLIB, $(DEFINES)))
-  LDLIBS     += -lz
-endif
-ifneq (,$(findstring WITH_PTHREAD, $(DEFINES)))
-  LDLIBS     += -lpthread
-endif
 
-ifneq (,$(findstring WITH_CHOLMOD, $(DEFINES)))
-  LDLIBS     += -lcholmod
 ifeq (Darwin,$(shell uname))
   ## homebrew requires this in addition to cholmod
   LDLIBS     += -lsuitesparseconfig
-endif
 endif
 
 ifneq (,$(findstring WITH_LIBXML2, $(DEFINES)))

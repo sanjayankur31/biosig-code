@@ -53,7 +53,7 @@ Jan 2011: update to latest TinyXML
 #include <string.h>
 #include <assert.h>
 
-#ifdef WITH_ZLIB
+#ifdef HAVE_ZLIB
 #include <zlib.h>
 #ifndef ZLIB_H
     #if defined(__MINGW64__)

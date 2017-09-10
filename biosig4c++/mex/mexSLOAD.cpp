@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
-#ifdef WITH_CHOLMOD
+#ifdef HAVE_CHOLMOD
 #  if !defined(__APPLE__)
 #    include <suitesparse/cholmod.h>
 #  else

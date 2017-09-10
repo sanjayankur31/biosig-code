@@ -19,12 +19,9 @@ AC_PROG_MAKE_SET
 # Checks for libraries.
 AC_CHECK_LIB([asound], [snd_pcm_open])
 AC_CHECK_LIB([b64], [base64_encode_block])
-AC_CHECK_LIB([cholmod], [cholmod_start],
-        AC_DEFINE([WITH_CHOLMOD],[1],[libcholmod is available.])
-        )
-AC_CHECK_LIB([z], [gzopen],
-        AC_DEFINE([WITH_ZLIB],[1],[zlib is available.])
-        )
+AC_CHECK_LIB([cholmod], [cholmod_start])
+AC_CHECK_LIB([z], [gzopen])
+
 # FIXME: Replace `main' with a function in `-ldcmdata':
 #AC_CHECK_LIB([dcmdata], [main])
 # FIXME: Replace `main' with a function in `-lgdcmCommon':
@@ -53,20 +50,16 @@ AC_CHECK_LIB([libmex], [main])
 AC_CHECK_LIB([libmx], [main])
 
 AC_CHECK_LIB([m], [round])
-AC_CHECK_LIB([matio], [Mat_Open])
+#AC_CHECK_LIB([matio], [Mat_Open])
 
 # Wolfram/Mathematica Mathlink interface
 AC_CHECK_LIB([mathlink], [MLPutRealArray])
 # FIXME: Replace `main' with a function in `-luuid':
 AC_CHECK_LIB([uuid], [main])
 
-AC_CHECK_LIB([pthread], [pthread_mutex_lock])
+#AC_CHECK_LIB([pthread], [pthread_mutex_lock])
 # FIXME: Replace `main' with a function in `-lssp':
 #AC_CHECK_LIB([ssp], [main])
-AC_CHECK_LIB([cholmod], [cholmod_sdmult])
-
-# FIXME: Replace `main' with a function in `-lz':
-AC_CHECK_LIB([z], [gzopen])
 
 # Checks for header files.
 AC_FUNC_ALLOCA
