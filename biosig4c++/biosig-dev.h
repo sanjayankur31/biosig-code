@@ -234,18 +234,6 @@ enum FileFormat {
 	invalid=0xffff
 };
 
-/*
-   error handling should use error variables local to each HDR
-   otherwise, sopen() etc. is not re-entrant.
-
-   Therefore, use of variables B4C_ERRNUM and B4C_ERRMSG is deprecated;
-   Instead, use biosigERROR for setting error status, and
-   serror2(hdr), hdr->AS.B4C_ERRNUM, hdr->AS.B4C_ERRMSG for error handling.
-
- */
-ATT_DEPREC extern int B4C_ERRNUM;
-ATT_DEPREC extern const char *B4C_ERRMSG;
-
 
 /*
 This part has moved into biosig-dev.h in v1.4.1, because VERBOSE_LEVEL is just

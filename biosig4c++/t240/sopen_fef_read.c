@@ -149,10 +149,8 @@ if (VERBOSE_LEVEL>8) {
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"Number of TestSections %i\n",SAS->sessions.list.count);
 
 	size_t N = SAS->sessions.list.count; 
-	if (N>1) { 
-		B4C_ERRNUM = B4C_FORMAT_UNSUPPORTED;
-		B4C_ERRMSG = "FEF: multiple test sections are not supported, yet";
-	}			
+	if (N>1)
+		biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "Error SOPEN(FEF): multiple test sections are not supported, yet");
 
 	STS = SAS->sessions.list.array[0];
 //	asn_fprint(stdout, &asn_DEF_SessionTestSection, STS);
@@ -173,10 +171,9 @@ if (VERBOSE_LEVEL>8) {
 //	asn_fprint(stdout, &asn_DEF_SessionTestSection, SAS->sessions.list.array[0]);
 //	asn_fprint(stdout, &asn_DEF_SessionTestSection, SAS->sessions.list.array[k]);
 	N = STS->phases.list.count; 
-	if (N>1) { 
-		B4C_ERRNUM = B4C_FORMAT_UNSUPPORTED;
-		B4C_ERRMSG = "FEF: multiple phases sections are not supported, yet";
-	}			
+	if (N>1)
+		biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "Error SOPEN(FEF): multiple test sections are not supported, yet");
+
 	SPS = STS->phases.list.array[0];
 //	asn_fprint(stdout, &asn_DEF_SessionPhaseSection, SPS);
 //	asn_fprint(stdout, &asn_DEF_DescriptiveDataSection, &SPS->descriptivedata);
