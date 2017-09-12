@@ -17,10 +17,12 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
 # Checks for libraries.
-AC_CHECK_LIB([asound], [snd_pcm_open])
-AC_CHECK_LIB([b64], [base64_encode_block])
-AC_CHECK_LIB([cholmod], [cholmod_start])
-AC_CHECK_LIB([z], [gzopen])
+AC_CHECK_LIB([asound],  [snd_pcm_open])
+AC_CHECK_LIB([b64],     [base64_encode_block], AC_SUBST(HAVE_LIBB64,     "1") )
+AC_CHECK_LIB([cholmod], [cholmod_start],       AC_SUBST(HAVE_LIBCHOLMOD, "1") )
+AC_CHECK_LIB([hdf5],    [H5open],              AC_SUBST(HAVE_LIBHDF5,    "1") )
+AC_CHECK_LIB([matio],   [Mat_Open],            AC_SUBST(HAVE_LIBMATIO,   "1") )
+AC_CHECK_LIB([z],       [gzopen],              AC_SUBST(HAVE_LIBZ,       "1") )
 
 # FIXME: Replace `main' with a function in `-ldcmdata':
 #AC_CHECK_LIB([dcmdata], [main])
@@ -36,8 +38,6 @@ AC_CHECK_LIB([z], [gzopen])
 #AC_CHECK_LIB([gdcmMEXD], [main])
 # FIXME: Replace `main' with a function in `-lgdcmMSFF':
 #AC_CHECK_LIB([gdcmMSFF], [main])
-# FIXME: Replace `main' with a function in `-lhdf5':
-AC_CHECK_LIB([hdf5], [main])
 
 AC_CHECK_LIB([iberty], [getlogin])
 AC_CHECK_LIB([iconv], [iconv_open])
@@ -50,7 +50,6 @@ AC_CHECK_LIB([libmex], [main])
 AC_CHECK_LIB([libmx], [main])
 
 AC_CHECK_LIB([m], [round])
-#AC_CHECK_LIB([matio], [Mat_Open])
 
 # Wolfram/Mathematica Mathlink interface
 AC_CHECK_LIB([mathlink], [MLPutRealArray])

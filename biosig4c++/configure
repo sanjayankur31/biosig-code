@@ -633,6 +633,11 @@ build_cpu
 build
 LIBOBJS
 ALLOCA
+HAVE_LIBZ
+HAVE_LIBMATIO
+HAVE_LIBHDF5
+HAVE_LIBCHOLMOD
+HAVE_LIBB64
 SET_MAKE
 LN_S
 INSTALL_DATA
@@ -4683,11 +4688,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_b64_base64_encode_block" >&5
 $as_echo "$ac_cv_lib_b64_base64_encode_block" >&6; }
 if test "x$ac_cv_lib_b64_base64_encode_block" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBB64 1
-_ACEOF
-
-  LIBS="-lb64 $LIBS"
+  HAVE_LIBB64="1"
 
 fi
 
@@ -4728,11 +4729,89 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_cholmod_cholmod_start" >&5
 $as_echo "$ac_cv_lib_cholmod_cholmod_start" >&6; }
 if test "x$ac_cv_lib_cholmod_cholmod_start" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBCHOLMOD 1
-_ACEOF
+  HAVE_LIBCHOLMOD="1"
 
-  LIBS="-lcholmod $LIBS"
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for H5open in -lhdf5" >&5
+$as_echo_n "checking for H5open in -lhdf5... " >&6; }
+if ${ac_cv_lib_hdf5_H5open+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lhdf5  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char H5open ();
+int
+main ()
+{
+return H5open ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_hdf5_H5open=yes
+else
+  ac_cv_lib_hdf5_H5open=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_hdf5_H5open" >&5
+$as_echo "$ac_cv_lib_hdf5_H5open" >&6; }
+if test "x$ac_cv_lib_hdf5_H5open" = xyes; then :
+  HAVE_LIBHDF5="1"
+
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Mat_Open in -lmatio" >&5
+$as_echo_n "checking for Mat_Open in -lmatio... " >&6; }
+if ${ac_cv_lib_matio_Mat_Open+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lmatio  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char Mat_Open ();
+int
+main ()
+{
+return Mat_Open ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_matio_Mat_Open=yes
+else
+  ac_cv_lib_matio_Mat_Open=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_matio_Mat_Open" >&5
+$as_echo "$ac_cv_lib_matio_Mat_Open" >&6; }
+if test "x$ac_cv_lib_matio_Mat_Open" = xyes; then :
+  HAVE_LIBMATIO="1"
 
 fi
 
@@ -4773,11 +4852,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_z_gzopen" >&5
 $as_echo "$ac_cv_lib_z_gzopen" >&6; }
 if test "x$ac_cv_lib_z_gzopen" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBZ 1
-_ACEOF
-
-  LIBS="-lz $LIBS"
+  HAVE_LIBZ="1"
 
 fi
 
@@ -4796,46 +4871,6 @@ fi
 #AC_CHECK_LIB([gdcmMEXD], [main])
 # FIXME: Replace `main' with a function in `-lgdcmMSFF':
 #AC_CHECK_LIB([gdcmMSFF], [main])
-# FIXME: Replace `main' with a function in `-lhdf5':
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lhdf5" >&5
-$as_echo_n "checking for main in -lhdf5... " >&6; }
-if ${ac_cv_lib_hdf5_main+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lhdf5  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-int
-main ()
-{
-return main ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_hdf5_main=yes
-else
-  ac_cv_lib_hdf5_main=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_hdf5_main" >&5
-$as_echo "$ac_cv_lib_hdf5_main" >&6; }
-if test "x$ac_cv_lib_hdf5_main" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBHDF5 1
-_ACEOF
-
-  LIBS="-lhdf5 $LIBS"
-
-fi
-
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for getlogin in -liberty" >&5
 $as_echo_n "checking for getlogin in -liberty... " >&6; }
@@ -5063,7 +5098,6 @@ _ACEOF
 
 fi
 
-#AC_CHECK_LIB([matio], [Mat_Open])
 
 # Wolfram/Mathematica Mathlink interface
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for MLPutRealArray in -lmathlink" >&5

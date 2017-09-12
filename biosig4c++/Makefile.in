@@ -200,25 +200,12 @@ DEFINES      += $(DEFINES_ALL)
 ### Mingw,MXE, etc. must avoid name space conflict concerning SOPEN ###
 #DEFINES      += -D=NO_OLDNAMES
 
-ifneq (,@HAVE_ZLIB@)
-	LDLIBS     += -lz
-endif
-ifneq (,@HAVE_PTHREAD@)
-	LDLIBS     += -lpthread
-endif
-#DEFINES      += -D=WITH_PTHREAD
 #DEFINES      += -D=WITH_CURL
 DEFINES      += -D=__4HAERTEL__
 DEFINES      += -D=WITH_FAMOS
 DEFINES      += -D=WITH_FIFF
-ifneq (,@HAVE_CHOLMOD@)
-	LDLIBS     += -lcholmod
-endif
-
 DEFINES      += -D=WITHOUT_NETWORK
 DEFINES      += -D=WITH_SCP3
-#DEFINES      += -D=WITH_HDF
-#DEFINES      += -D=WITH_MATIO
 #DEFINES      += -D=WITH_LIBXML2 
 DEFINES      += -D=WITH_FEF
 #DEFINES      += -D=WITH_PDP
@@ -235,6 +222,21 @@ DEFINES      += -D=WITH_ATF
 #DEFINES      += -D=WITH_NEV
 DEFINES      += -D=MAKE_EDFLIB
 
+ifeq (1,@HAVE_LIBZ@)
+	LDLIBS     += -lz
+endif
+ifeq (1,@HAVE_LIBPTHREAD@)
+	LDLIBS     += -lpthread
+endif
+ifeq (1,@HAVE_LIBCHOLMOD@)
+	LDLIBS     += -lcholmod
+endif
+ifeq (1,@HAVE_LIBHDF5@)
+	LDLIBS     += -lhdf5
+endif
+ifeq (1,@HAVE_LIBMATIO@)
+	LDLIBS     += -lmatio
+endif
 
 ifneq (,$(findstring WITH_GDCM, $(DEFINES)))
   INCPATH    += -I$(wildcard /usr/include/gdcm-2*/)
@@ -252,14 +254,8 @@ endif
 ifneq (,$(findstring WITH_CURL, $(DEFINES)))
   LDLIBS     += -lcurl
 endif
-ifneq (,$(findstring WITH_HDF, $(DEFINES)))
-  LDLIBS     += -lhdf5
-endif
 ifneq (,$(findstring WITH_DCMTK, $(DEFINES)))
   LDLIBS     += -ldcmdata -loflog -lofstd
-endif
-ifneq (,$(findstring WITH_MATIO, $(DEFINES)))
-  LDLIBS     += -lmatio
 endif
 ifneq (,$(findstring stack-protector, $(CFLAGS)))
 ifneq (,$(findstring CYGWIN, $(shell uname)))
@@ -480,7 +476,7 @@ ifeq (,$(findstring mingw,$(TARGET)))
 endif
 
 first: $(IO_H_FILE2) lib tools
-ifneq (,@HAVE_LIBB64@)
+ifeq (1,@HAVE_LIBB64@)
   tools: save2gdf${BINEXT} pu${BINEXT} biosig_fhir${BINEXT}
 else
   tools: save2gdf${BINEXT} pu${BINEXT}
@@ -751,10 +747,8 @@ libbiosig.pc :
 pu${BINEXT} : pu.c physicalunits.o
 	$(CC) $(DEFINES) $(CFLAGS) $^ $(LDFLAGS) $(LDLIBS) -o "$@"
 
-ifneq (,@HAVE_LIBB64@)
 biosig_fhir${BINEXT}: biosig_fhir.c libbiosig.a
 	$(CC) $(DEFINES) $(CFLAGS) "$<" libbiosig.a -lstdc++ -lm -lb64 $(LDLIBS) -o "$@"
-endif 
 
 bscs: biosig_client${BINEXT} biosig_server${BINEXT} sandbox.o biosig.o
 biosig_client${BINEXT}: biosig_client.c libbiosig.$(LIBEXT) biosig-network.o
@@ -1012,6 +1006,7 @@ install_libbiosig.$(DLEXT): libbiosig$(FULLDLEXT) libbiosig.$(DLEXT)
 	install -d 			$(LIB)/pkgconfig/
 	install libbiosig$(FULLDLEXT)  $(LIB)
 	ln -sf  $(LIB)/libbiosig$(FULLDLEXT) $(LIB)/libbiosig.$(DLEXT)
+	ln -sf  $(LIB)/libbiosig$(FULLDLEXT) $(LIB)/libbiosig2.$(DLEXT)
 
 install: install_libbiosig.$(DLEXT) install_libbiosig.a install_headers install_tools
 

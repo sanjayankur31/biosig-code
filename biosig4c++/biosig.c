@@ -138,10 +138,10 @@ int sopen_fef_read(HDRTYPE* hdr);
 int sclose_fef_read(HDRTYPE* hdr);
 #endif
 void sopen_heka(HDRTYPE* hdr,FILE *fid);
-#ifdef WITH_HDF
+#ifdef HAVE_HDF
 int sopen_hdf5(HDRTYPE *hdr);
 #endif 
-#ifdef WITH_MATIO
+#ifdef HAVE_MATIO
 int sopen_matlab(HDRTYPE *hdr);
 #endif 
 #ifdef WITH_DICOM
@@ -8176,7 +8176,7 @@ if (VERBOSE_LEVEL>8)
 	}
 
     	else if (hdr->TYPE==Matlab) {
-#ifdef WITH_MATIO
+#ifdef HAVE_MATIO
                 if (sopen_matlab(hdr) != 0) {
         		biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "Error reading MATLAB file");
                 }

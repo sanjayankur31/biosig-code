@@ -76,7 +76,7 @@ extern int VERBOSE_LEVEL; 	// used for debugging, variable is always defined
     #endif
 #endif
 
-#ifdef WITH_HDF5
+#ifdef HAVE_HDF5
     #include <hdf5.h>
 #endif
 #ifdef WITH_NIFTI

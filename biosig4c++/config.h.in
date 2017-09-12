@@ -63,15 +63,6 @@
 /* Define to 1 if you have the `asound' library (-lasound). */
 #undef HAVE_LIBASOUND
 
-/* Define to 1 if you have the `b64' library (-lb64). */
-#undef HAVE_LIBB64
-
-/* Define to 1 if you have the `cholmod' library (-lcholmod). */
-#undef HAVE_LIBCHOLMOD
-
-/* Define to 1 if you have the `hdf5' library (-lhdf5). */
-#undef HAVE_LIBHDF5
-
 /* Define to 1 if you have the `iberty' library (-liberty). */
 #undef HAVE_LIBIBERTY
 
@@ -92,9 +83,6 @@
 
 /* Define to 1 if you have the `uuid' library (-luuid). */
 #undef HAVE_LIBUUID
-
-/* Define to 1 if you have the `z' library (-lz). */
-#undef HAVE_LIBZ
 
 /* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H
