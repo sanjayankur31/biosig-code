@@ -68,7 +68,7 @@ function [R,CC]=xval(D,classlabel,MODE,arg4)
 %       Towards Brain-Computer Interfacing, MIT Press, 2007, p.327-342
 
 %	$Id$
-%	Copyright (C) 2008,2009,2010 by Alois Schloegl <alois.schloegl@gmail.com>	
+%	Copyright (C) 2008,2009,2010 by Alois Schloegl <alois.schloegl@gmail.com>
 %       This function is part of the NaN-toolbox
 %       http://pub.ist.ac.at/~schloegl/matlab/NaN/
 

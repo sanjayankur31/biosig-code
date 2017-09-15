@@ -10,7 +10,7 @@ function [crit,t] = criteria2005IIIb(X)
 
 %    $Revision: 1.4 $
 %    $Id$
-%    Copyright (C) 2004,2005 by Alois Schloegl <a.schloegl@ieee.org>	
+%    Copyright (C) 2004,2005 by Alois Schloegl <alois.schloegl@gmail.com>
 %    This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 %    This program is free software; you can redistribute it and/or modify

@@ -114,7 +114,7 @@ function [R] = tfmvar(s,TRIG,T,MOP,f,Fs,cl)
 %	Statistics in Medicine, doi: 10.1002/sim.2935 
 
 %	$Id$
-%	Copyright (C) 2004,2005,2006,2007,2008,2009,2010,2011 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (C) 2004,2005,2006,2007,2008,2009,2010,2011 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 

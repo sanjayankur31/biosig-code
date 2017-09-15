@@ -31,8 +31,7 @@ function scptest(p,fid)
 % along with this program; if not, write to the Free Software
 % Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-%	$Id: scptest.m,v 1.3 2004/07/27 17:25:21 schloegl Exp $
-%	Copyright (C) 2004 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (C) 2004 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 if nargin<2, fid=1; end;

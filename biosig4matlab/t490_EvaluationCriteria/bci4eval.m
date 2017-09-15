@@ -68,7 +68,7 @@ function [o] = bci4eval(tsd,TRIG,cl,pre,post,Fs)
 
 
 %    $Id$
-%    Copyright (C) 2003,2008 by Alois Schloegl <a.schloegl@ieee.org>	
+%    Copyright (C) 2003,2008 by Alois Schloegl <alois.schloegl@gmail.com>
 %    This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % BioSig is free software; you can redistribute it and/or

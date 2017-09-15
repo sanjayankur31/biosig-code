@@ -33,7 +33,7 @@ function INI = tvaar(signal,arg2,arg3,arg4)
 %   Journal of neural engineering 2 (2005) 4, S. L14-L22
 
 %  	$Id$
-%	Copyright (c) 2003-2004,2007 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (c) 2003-2004,2007 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This program is free software; you can redistribute it and/or

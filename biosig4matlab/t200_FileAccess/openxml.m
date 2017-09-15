@@ -19,7 +19,7 @@ function [HDR]=openxml(arg1,CHAN,arg4,arg5,arg6)
 % of the License, or (at your option) any later version.
 
 %	$Id$
-%	Copyright 2006,2007,2008 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright 2006,2007,2008 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 if ischar(arg1); 
@@ -266,7 +266,7 @@ function y = radix64d(x);
 % Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 %	$Id$
-%	(C) 2006 by Alois Schloegl <a.schloegl@ieee.org>	
+%	(C) 2006 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 

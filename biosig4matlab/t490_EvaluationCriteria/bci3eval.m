@@ -28,9 +28,7 @@ function [o] = bci3eval(x1,x2,DIM)
 %  [4] BIOSIG.SF.NET
 
 
-%    $Revision: 1.3 $
-%    $Id$
-%    Copyright (C) 2003 by Alois Schloegl <a.schloegl@ieee.org>	
+%    Copyright (C) 2003 by Alois Schloegl <alois.schloegl@gmail.com>
 
 %    This program is free software; you can redistribute it and/or modify
 %    it under the terms of the GNU General Public License as published by
@@ -46,7 +44,7 @@ function [o] = bci3eval(x1,x2,DIM)
 %    along with this program; if not, write to the Free Software
 %    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-%    Copyright (C) 2000-2003 by  Alois Schloegl <a.schloegl@ieee.org>	
+%    Copyright (C) 2000-2003 by  Alois Schloegl <alois.schloegl@gmail.com>
 
 
 if nargin<3,

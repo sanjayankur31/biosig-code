@@ -16,7 +16,7 @@ function [xyz,code]=elpos3(Label);
 
 %	$Id$
 %	Copyright (c) 1997,1998,2004,2007,2010 by Alois Schloegl
-%	a.schloegl@ieee.org	
+%	alois.schloegl@gmail.com
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This library is free software; you can redistribute it and/or

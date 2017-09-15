@@ -9,7 +9,7 @@ function [hyp,g1,g2] = nk2hyp(fn)
 
 
 %	$Id$
-%	Copyright (C) 2010 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (C) 2010 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 

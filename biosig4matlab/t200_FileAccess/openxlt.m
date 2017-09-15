@@ -14,7 +14,7 @@ function [HDR]=openxlt(fn)
 % of the License, or (at your option) any later version.
 
 %	$Id$
-%	(C) 2004,2008 by Alois Schloegl <a.schloegl@ieee.org>	
+%	(C) 2004,2008 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 %
 %       Thanks to Andrey Vankov for his support. 

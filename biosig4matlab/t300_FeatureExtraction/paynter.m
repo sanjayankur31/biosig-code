@@ -29,7 +29,7 @@ function [B,A]=paynter(RC,fs,mode)
 %       available online:  http://jap.physiology.org/cgi/content/abstract/43/3/551
 
 %	$Id$
-%	Copyright (C) 2000, 2001, 2004, 2006 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (C) 2000, 2001, 2004, 2006 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This library is free software; you can redistribute it and/or

@@ -40,7 +40,7 @@ function [R]=hist2res(H,fun)
 % Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 %	$Id$
-%	Copyright (c) 1996-2002,2006 by Alois Schloegl <a.schloegl@ieee.org>
+%	Copyright (c) 1996-2002,2006 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 

@@ -10,7 +10,7 @@ function [HDR]=fefopen(arg1)
 % <A HREF="ftp://sigftp.cs.tut.fi/pub/eeg-data/standards/cenf060.zip ">About CEN/TC251</A> 
 
 %	$Id$
-%	Copyright (c) 1998,2004,2008  Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (c) 1998,2004,2008  Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This library is free software; you can redistribute it and/or

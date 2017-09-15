@@ -4,7 +4,7 @@ function varargout = sviewer_fileinfo(varargin)
 %
 % Version 1.0, November 2004
 % Copyright by (C) Franz Einspieler <znarfi5@hotmail.com> and
-%                  Alois Schloegl   <a.schloegl@ieee.org>
+%                  Alois Schloegl   <alois.schloegl@gmail.com>
 % University of Technology Graz, Austria
 %
 % This is part of the BIOSIG-toolbox http://biosig.sf.net/

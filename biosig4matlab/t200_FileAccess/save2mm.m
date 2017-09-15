@@ -25,7 +25,7 @@ function [HDR] = save2mm(fn,MM,montage);
 
 
 % 	$Id$
-%	Copyright (C) 2010 by Alois Schloegl <a.schloegl@ieee.org>		
+%	Copyright (C) 2010 by Alois Schloegl <alois.schloegl@gmail.com>
 %       This file is part of the biosig project http://biosig.sf.net/
 
 

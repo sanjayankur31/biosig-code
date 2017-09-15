@@ -15,7 +15,7 @@
 
 %       $Revision: 1.1 $
 %	$Id: demo6.m,v 1.1 2004-02-27 12:31:16 schloegl Exp $
-%	Copyright (C) 1999-2004 by Alois Schloegl <a.schloegl@ieee.org>
+%	Copyright (C) 1999-2004 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This program is free software; you can redistribute it and/or

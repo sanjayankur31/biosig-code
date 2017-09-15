@@ -71,7 +71,7 @@
 %% Macmillan Publishing Company.
 
 %% Author: Paul Kienzle <pkienzle@users.sf.net>
-%% Adapted for FreeMat by: AS <a.schloegl@ieee.org> Jan 2008 
+%% Adapted for FreeMat by: AS <alois.schloegl@gmail.com> Jan 2008
 
 function [Zz, Zp, Zg] = bilinear(Sz, Sp, Sg, T)
 

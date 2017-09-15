@@ -21,7 +21,7 @@ function [HDR]=srewind(HDR);
 %	$Revision: 1.1 $
 %	$Id$
 %	Copyright (c) 1997-2003 by Alois Schloegl
-%	a.schloegl@ieee.org	
+%	alois.schloegl@gmail.com
 
 
 HDR=sseek(HDR,0,'bof');

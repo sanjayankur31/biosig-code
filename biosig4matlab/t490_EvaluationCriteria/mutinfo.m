@@ -21,7 +21,7 @@ function [I,ERR,SNR]=mutinfo(d,c);
 %	$Revision: 1.2 $
 %	$Id$
 %	Copyright (c) 1997-2003 by  Alois Schloegl
-%	a.schloegl@ieee.org	
+%	alois.schloegl@gmail.com
 
 %
 % This library is free software; you can redistribute it and/or

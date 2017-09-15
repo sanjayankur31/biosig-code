@@ -27,7 +27,7 @@ function [HDR, s] = burstanalysis(fn, varargin)
 %
 % see also: DETECT_SPIKE_BURSTS, SPIKE2BURSTS
 
-%    Copyright (C) 2013 by Alois Schloegl <alois.schloegl@gmail.com>	
+%    Copyright (C) 2013 by Alois Schloegl <alois.schloegl@gmail.com>
 %    This is part of the BIOSIG-toolbox http://biosig.sf.net/
 %
 %    BioSig is free software: you can redistribute it and/or modify

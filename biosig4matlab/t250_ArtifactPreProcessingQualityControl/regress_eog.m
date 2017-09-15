@@ -58,7 +58,7 @@ function [R,S] = regress_eog(D,ny,nx)
 % Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 %	$Id$
-%	(C) 1997-2007,2008,2009 by Alois Schloegl <a.schloegl@ieee.org>	
+%	(C) 1997-2007,2008,2009 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 if ischar(D),

@@ -12,7 +12,7 @@ function [TLV] = tlvread(fid)
 % [3] http://asn1.elibel.tm.fr
 
 %	$Id$
-%	Copyright (C) 2004  Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (C) 2004  Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This library is free software; you can redistribute it and/or

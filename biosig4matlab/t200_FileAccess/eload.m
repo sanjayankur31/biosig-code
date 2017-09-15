@@ -17,7 +17,7 @@ function [HDR] = eload(filename,Fs)
 %	$Revision: 1.2 $
 %	$Id$
 %	Copyright (C) 1997-2004 by Alois Schloegl 
-%	a.schloegl@ieee.org	
+%	alois.schloegl@gmail.com
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This library is free software; you can redistribute it and/or

@@ -15,7 +15,7 @@ function c = cfm(s,arg2,arg3,arg4,mode)
 
 
 %	$Id$
-%	Copyright (C) 2009 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (C) 2009 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This program is free software; you can redistribute it and/or

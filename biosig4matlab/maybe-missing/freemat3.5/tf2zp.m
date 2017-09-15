@@ -28,7 +28,7 @@
 %% @end deftypefn
 
 %% Author: A. S. Hodel <a.s.hodel@eng.auburn.edu>
-%% Adapted for FreeMat by: AS <a.schloegl@ieee.org> Jan 2008 
+%% Adapted for FreeMat by: AS <alois.schloegl@gmail.com> Jan 2008
 
 function [zer, pol, k] = tf2zp (num, den)
 

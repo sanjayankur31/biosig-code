@@ -11,7 +11,7 @@ function [HDR]=sseek(HDR,offset,origin)
 % See also: SOPEN, SREAD, SWRITE, SCLOSE, SSEEK, SREWIND, STELL, SEOF
 
 %	$Id$
-%	(C) 1997-2005,2006,2007 by Alois Schloegl <a.schloegl@ieee.org>	
+%	(C) 1997-2005,2006,2007 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This program is free software; you can redistribute it and/or

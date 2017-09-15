@@ -17,10 +17,7 @@ function HDR = mat2sel(FileName,fnout);
 %  
 % see also: SLOAD
 
-%	$Revision: 1.1 $
-%	$Id$
-%	Copyright (C) 2004 by Alois Schloegl 
-%	a.schloegl@ieee.org	
+%	Copyright (C) 2004 by Alois Schloegl <alois.schloegl@gmail.com>
 
 % This library is free software; you can redistribute it and/or
 % modify it under the terms of the GNU Library General Public

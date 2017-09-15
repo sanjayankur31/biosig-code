@@ -26,7 +26,7 @@
 
 %% Author: FL <Friedrich.Leisch@ci.tuwien.ac.at>
 %% Description: Estimate the Hurst parameter
-%% Modified by Alois Schloegl <a.schloegl@ieee.org> 
+%% Modified by Alois Schloegl <alois.schloegl@gmail.com>
 %%  adapted for the use with Matlab: 
 %%  added support for data with missing samples (encoded with NaN)   
 

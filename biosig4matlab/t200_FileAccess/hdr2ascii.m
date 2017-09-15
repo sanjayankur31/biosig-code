@@ -13,7 +13,7 @@ function [argout,H1,h2] = hdr2ascii(source,dest)
 % see also: SLOAD, SOPEN
 
 %	$Id$
-%	Copyright (C) 2007,2008 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (C) 2007,2008 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 %
 % This program is free software; you can redistribute it and/or

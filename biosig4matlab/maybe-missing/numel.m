@@ -17,7 +17,7 @@ function [N] = numel(X)
 %% Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 %%	$Id: numel.m,v 1.1 2007-07-19 15:50:32 schloegl Exp $
-%%	Copyright (C) 2005 by Alois Schloegl <a.schloegl@ieee.org>	
+%%	Copyright (C) 2005 by Alois Schloegl <alois.schloegl@gmail.com>
 %%      This function is part of BIOSIG http://biosig.sf.net/
 
 N = prod(size(X));

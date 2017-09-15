@@ -19,7 +19,7 @@ function [HDR]=swrite(HDR,data)
 
 
 %	$Id$
-%	Copyright (c) 1997-2005,2011 by Alois Schloegl <alois.schloegl@gmail.com>	
+%	Copyright (c) 1997-2005,2011 by Alois Schloegl <alois.schloegl@gmail.com>
 %       This file is part of the biosig project http://biosig.sf.net/
 
 

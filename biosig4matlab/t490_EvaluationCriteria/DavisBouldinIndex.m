@@ -26,7 +26,7 @@ function [DBI]=DavisBouldinIndex(d,c,kk);
 % http://www.ucl.ac.uk/oncology/MicroCore/HTML_resource/distances_popup.htm
 
 %	$Id$
-%	Copyright (c) 2006 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (c) 2006 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This library is free software; you can redistribute it and/or

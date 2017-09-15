@@ -6,7 +6,7 @@
 
 %	$Revision: 1.4 $
 %	$Id: demo4.m,v 1.4 2008-01-23 22:04:41 schloegl Exp $
-%	Copyright (C) 2003 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (C) 2003 by Alois Schloegl <alois.schloegl@gmail.com>
 
 % This library is free software; you can redistribute it and/or
 % modify it under the terms of the GNU Library General Public

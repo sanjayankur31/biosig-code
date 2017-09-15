@@ -6,7 +6,7 @@ function [BKR,s]=bkropen(arg1,arg3,arg4,arg5,arg6)
 % see also: SOPEN, SREAD, SSEEK, STELL, SCLOSE, SWRITE, SEOF
 
 %	$Id$
-%	Copyright (c) 1997-2008 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (c) 1997-2008 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This program is free software; you can redistribute it and/or

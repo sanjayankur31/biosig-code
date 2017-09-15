@@ -42,7 +42,7 @@
 
 %% Author: KH <Kurt.Hornik@wu-wien.ac.at>
 %% Description: Sign test
-%% Adapted for the use with M*tlab by AS <a.schloegl@ieee.org> Dec 2006
+%% Adapted for the use with M*tlab by AS <alois.schloegl@gmail.com> Dec 2006
 
 function [pval, b, n] = signtest (x, y, alpha, alt)
 

@@ -35,7 +35,7 @@ function [HDR] = save2gdf(arg1,arg2,arg3);
 
 
 % 	$Id$
-%	Copyright (C) 2003-2005,2007,2008 by Alois Schloegl <a.schloegl@ieee.org>		
+%	Copyright (C) 2003-2005,2007,2008 by Alois Schloegl <alois.schloegl@gmail.com>
 %       This file is part of the biosig project http://biosig.sf.net/
 
 

@@ -22,7 +22,7 @@ function [signal,H] = tload(FILENAME,TI1,CHAN,EVENTFILE,TI2)
 
 
 %	$Id$
-%	Copyright (C) 2004-2005 by Alois Schloegl <a.schloegl@ieee.org>
+%	Copyright (C) 2004-2005 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This library is free software; you can redistribute it and/or

@@ -12,7 +12,7 @@ function [POS,HDR] = stell(HDR)
 
 
 %	$Id$
-%	(C) 1997-2005,2007 by Alois Schloegl <a.schloegl@ieee.org>	
+%	(C) 1997-2005,2007 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 

@@ -6,7 +6,7 @@ function [s,HDR]=loadlexi(filename);
 %
 
 %	$Id$
-%	Copyright (C) 2009 Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (C) 2009 Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % BioSig is free software; you can redistribute it and/or

@@ -8,7 +8,7 @@ function R = correlation_with_reference(fn)
 %
 
 %	$Id$
-%	Copyright (C) 2005 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (C) 2005 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This library is free software; you can redistribute it and/or

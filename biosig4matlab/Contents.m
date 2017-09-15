@@ -1,7 +1,7 @@
 % BIOSIG toolbox contains many useful functions for biomedical signal processing
 %     http://biosig.sf.net/
 %
-% Copyright (C) 2003,2004,2007,2008 by Alois Schloegl <a.schloegl@ieee.org>
+% Copyright (C) 2003,2004,2007,2008 by Alois Schloegl <alois.schloegl@gmail.com>
 % WWW: http://biosig.sf.net/
 % $Id: Contents.m,v 1.8 2008/01/23 22:04:41 schloegl Exp $
 % This is part of the BIOSIG-toolbox http://biosig.sf.net/

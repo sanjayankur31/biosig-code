@@ -34,7 +34,7 @@
 %	Computer (2008, In Press)	
 
 %	$Id$
-%	Copyright (C) 1999-2003,2006,2007,2008 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (C) 1999-2003,2006,2007,2008 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 

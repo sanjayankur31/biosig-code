@@ -13,7 +13,7 @@
 
 
 %	$Id: bench_biosig.m,v 1.7 2009/04/21 10:39:20 schloegl Exp $
-%	Copyright (C) 2005,2006 by Alois Schloegl <a.schloegl@ieee.org>
+%	Copyright (C) 2005,2006 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 

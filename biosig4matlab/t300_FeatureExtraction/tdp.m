@@ -56,7 +56,7 @@ function [F,G] = tdp(S,p,UC,A)
 %   http://dx.doi.org/10.1016/j.neunet.2009.07.020    
 
 % 	$Id$
-% 	Copyright (C) 2008,2009 by Alois Schloegl <a.schloegl@ieee.org>
+% 	Copyright (C) 2008,2009 by Alois Schloegl <alois.schloegl@gmail.com>
 % 	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This program is free software; you can redistribute it and/or

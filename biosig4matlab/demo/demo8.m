@@ -2,10 +2,12 @@
 % 
 % REFERENCES: 
 % [1] A. Schlögl, B. Kemp, T. Penzel, D. Kunz, S.-L. Himanen,A. Värri, G. Dorffner, G. Pfurtscheller.
-%   Quality Control of polysomnographic Sleep Data by Histogram and EntropyAnalysis. %   Clin. Neurophysiol. 1999, Dec; 110(12): 2165 - 2170.%   http://dx.doi.org/10.1016/S1388-2457(99)00172-8
+%   Quality Control of polysomnographic Sleep Data by Histogram and EntropyAnalysis.
+%   Clin. Neurophysiol. 1999, Dec; 110(12): 2165 - 2170.
+%   http://dx.doi.org/10.1016/S1388-2457(99)00172-8
 
 %	$Id: demo8.m,v 1.3 2008-10-13 13:06:41 schloegl Exp $
-%	Copyright (C) 2008 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (C) 2008 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This program is free software; you can redistribute it and/or

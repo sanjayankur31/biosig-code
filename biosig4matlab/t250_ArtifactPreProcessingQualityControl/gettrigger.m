@@ -12,7 +12,7 @@ function TRIG = gettrigger(s,TH,rfp);
 % see also: TRIGG
 
 % 	$Id$
-%	Copyright (C) 2002-2003,2008 by Alois Schloegl <a.schloegl@ieee.org>		
+%	Copyright (C) 2002-2003,2008 by Alois Schloegl <alois.schloegl@gmail.com>
 
 % This library is free software; you can redistribute it and/or
 % modify it under the terms of the GNU Library General Public

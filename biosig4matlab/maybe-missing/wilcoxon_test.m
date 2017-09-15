@@ -39,7 +39,7 @@
 
 %% Author: KH <Kurt.Hornik@wu-wien.ac.at>
 %% Description: Wilcoxon signed-rank test
-%% Adapted for the use with M*tlab by AS <a.schloegl@ieee.org> Dec 2006
+%% Adapted for the use with M*tlab by AS <alois.schloegl@gmail.com> Dec 2006
 
 function [pval, z] = wilcoxon_test (x, y, alpha, alt)
 

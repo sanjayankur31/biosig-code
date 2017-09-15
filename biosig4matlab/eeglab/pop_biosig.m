@@ -17,7 +17,7 @@
 % Note: BIOSIG toolbox must be installed. Download BIOSIG at 
 %       http://sourceforge.net/project/showfiles.php?group_id=7072
 %       (please let us know at eeglab@sccn.ucsd.edu if this link is outdated).
-%       Contact a.schloegl@ieee.org for troubleshooting using BIOSIG.
+%       Contact alois.schloegl@gmail.com for troubleshooting using BIOSIG.
 
 %123456789012345678901234567890123456789012345678901234567890123456789012
 
@@ -39,7 +39,7 @@
 
 %	$Revision: 1.3 $
 %	$Id: pop_biosig.m,v 1.3 2004-09-24 12:49:56 schloegl Exp $
-%	Modified (C) 2004 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Modified (C) 2004 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This file is hosted at the repository of BIOSIG http://biosig.sf.net/
 %       within the subdirectory biosig/eeglab/
 

@@ -11,8 +11,7 @@ function r=respdetect(S,fs);
 %   r       fiducial points of the respiration
 
 % Copyright (C) 2006 by Rupert Ortner
-%	$Id$
-%	Copyright (C) 2010 by Alois Schloegl <a.schloegl@ieee.org>
+%	Copyright (C) 2010 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 %% This program is free software; you can redistribute it and/or modify
@@ -32,7 +31,7 @@ function r=respdetect(S,fs);
 
 
 if 1, 
-%	Copyright (C) 2010 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (C) 2010 by Alois Schloegl <alois.schloegl@gmail.com>	
 	n = fs*1; 		%% defines window length 	
 	w = [-ones(n,1); ones(n,1)];
 

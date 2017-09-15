@@ -16,7 +16,7 @@ function [Q,D,R,ECM]=qcmahal(ECM,ECM2);
 % COV gives the suggested class definition
 %
 %	Copyright (c) 1999-2002 by Alois Schloegl
-%	a.schloegl@ieee.org	
+%	alois.schloegl@gmail.com
 %	28.02.2001 Version 1.13
 %	10.10.2001 Version 1.14
 %	30.12.2002 Version 1.15

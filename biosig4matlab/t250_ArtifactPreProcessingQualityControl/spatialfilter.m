@@ -1,21 +1,25 @@
 function [W,Label] = spatialfilter(arg1,Mode,s2)
 % Spatial filter provides different spatial filters. 
 %
-% W = spatialfilter(NS,...)	
-% W = spatialfilter(s,...)	
-% W = spatialfilter(HDR,...)% W = spatialfilter([.], Mode)% W = spatialfilter(s,'CSP',s2)	
+% W = spatialfilter(NS,...)
+% W = spatialfilter(s,...)
+% W = spatialfilter(HDR,...)
+% W = spatialfilter([.], Mode)
+% W = spatialfilter(s,'CSP',s2)
 % 
 % NS	number of channels
-% s	data matrix (one column per channel)	% Mode	'Mono': monopolar
+% s	data matrix (one column per channel)
+% Mode	'Mono': monopolar
 %	'CAR':	common average reference
 %	'Laplace': Hjorth's Laplacian
-%	'bipolar': all posible combinations of bipolar channels 
-%	'PCA': Principle Component Analysis 
+%	'bipolar': all posible combinations of bipolar channels
+%	'PCA': Principle Component Analysis
 %	'ICA': Independent Component Analysis
 %	'CSP': Common Spatial patterns
-%	'ALL': Combination of all 
+%	'ALL': Combination of all
 
-%	$Id$%	Copyright (C) 2008 by Alois Schloegl <a.schloegl@ieee.org>	%    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
+%	Copyright (C) 2008 by Alois Schloegl <alois.schloegl@gmail.com>
+%    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 %
 %    BioSig is free software: you can redistribute it and/or modify
 %    it under the terms of the GNU General Public License as published by

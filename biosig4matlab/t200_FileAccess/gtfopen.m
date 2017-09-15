@@ -23,7 +23,7 @@ function [HDR]=gtfopen(HDR,PERMISSION,arg3,arg4,arg5,arg6)
 % Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 %	$Id$
-%	(C) 2005 by Alois Schloegl <a.schloegl@ieee.org>	
+%	(C) 2005 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 

@@ -25,7 +25,7 @@ function y = demo7(arg1)
 %  [4] http://biosig.sf.net/
 
 %	$Id: demo7.m,v 1.3 2005/10/10 14:45:47 schloegl Exp $
-%	Copyright (C) 1999-2005 by Alois Schloegl <a.schloegl@ieee.org>
+%	Copyright (C) 1999-2005 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This program is free software; you can redistribute it and/or

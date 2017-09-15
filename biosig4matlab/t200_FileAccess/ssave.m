@@ -17,7 +17,7 @@ function [HDR] = ssave(FILENAME,DATA,TYPE,Fs,gdftyp)
 %
 
 % $Id$
-% Copyright (C) 2003,2004,2007 by Alois Schloegl <a.schloegl@ieee.org>	
+% Copyright (C) 2003,2004,2007 by Alois Schloegl <alois.schloegl@gmail.com>
 % This file is part of the biosig project http://biosig.sf.net/
 
 % This library is free software; you can redistribute it and/or

@@ -3,7 +3,7 @@
 % of BioSig with FreeMat
 
 %	$Id: Contents.m,v 1.2 2008-01-23 11:37:29 schloegl Exp $
-%	Copyright (C) 2008 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (C) 2008 by Alois Schloegl <alois.schloegl@gmail.com>
 %	This is part of the BIOSIG project http://biosig.sf.net/
 
 

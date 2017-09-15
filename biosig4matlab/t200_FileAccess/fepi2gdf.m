@@ -1,8 +1,7 @@
 %function [s,H]=fepi2gdf(fn);
 % FEPI2GDF Freiburger epilepsy database converted into GDF format 
 
-%	$Id$
-%	(C) 2005,2006,2008 by Alois Schloegl <a.schloegl@ieee.org>	
+%	(C) 2005,2006,2008 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This program is free software; you can redistribute it and/or

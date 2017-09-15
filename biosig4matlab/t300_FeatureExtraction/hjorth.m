@@ -31,7 +31,7 @@ function [ACTIVITY, MOBILITY, COMPLEXITY,m0,m1,m2] = hjorth(S,UC,A)
 
 
 %	$Id$
-%	Copyright (C) 2004,2008,2009 by Alois Schloegl <a.schloegl@ieee.org>
+%	Copyright (C) 2004,2008,2009 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This library is free software; you can redistribute it and/or

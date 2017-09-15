@@ -1,7 +1,7 @@
 % BATCH for data processing
 % this is a TEMPLATE 
 
-%	(C) 2004 by Alois Schloegl <a.schloegl@ieee.org>	
+%	(C) 2004 by Alois Schloegl <alois.schloegl@gmail.com>
 
 
 %--> get list of files:

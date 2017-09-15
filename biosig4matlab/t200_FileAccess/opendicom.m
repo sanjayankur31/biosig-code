@@ -27,7 +27,7 @@ function [HDR,H1,h2]=opendicom(arg1,arg2,arg3,arg4,arg5,arg6)
 
 %	$Revision: 1.5 $
 %	$Id$
-%	(C) 1997-2002,2004,2009 by Alois Schloegl <a.schloegl@ieee.org>	
+%	(C) 1997-2002,2004,2009 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 if nargin<2, 

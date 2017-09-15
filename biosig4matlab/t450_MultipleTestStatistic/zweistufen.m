@@ -16,7 +16,7 @@ function  [AaH,pup,adpval]= zweistufen(psu,indexsu,k,alpha)
 % [2]
 %
 % Copyright (C) 2006 Claudia Hemmelmann <claudia.hemmelmann@mti.uni-jena.de>
-% Adapted by A Schloegl <a.schloegl@ieee.org> Dec 2006 
+% Adapted by A Schloegl <alois.schloegl@gmail.com> Dec 2006
 %
 %***
 % This library is free software; you can redistribute it and/or

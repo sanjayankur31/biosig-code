@@ -24,7 +24,7 @@ function [B] = bitshift(A,k,N)
 
 %       $Revision: 1.1 $
 %       $Id: bitshift.m,v 1.1 2007-07-19 15:50:31 schloegl Exp $
-%	Copyright (C) 2004 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (C) 2004 by Alois Schloegl <alois.schloegl@gmail.com>
 %       This function is part of the NaN-toolbox
 %       http://www.dpmi.tu-graz.ac.at/~schloegl/matlab/NaN/
 

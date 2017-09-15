@@ -16,7 +16,7 @@ function pos = abp(x,fs);
 %     Computers in Cardiology, 2003
 %     Volume , Issue , 21-24 Sept. 2003 Page(s): 259 - 262
 
-%  Copyright (C) 2009 by Alois Schloegl <a.schloegl@ieee.org>	
+%  Copyright (C) 2009 by Alois Schloegl <alois.schloegl@gmail.com>
 %  This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % BioSig is free software; you can redistribute it and/or

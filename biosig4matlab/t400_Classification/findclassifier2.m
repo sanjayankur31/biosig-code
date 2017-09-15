@@ -28,7 +28,7 @@ function [CC,Q,tsd,md]=findclassifier2(D,TRIG,cl,T,t0,SWITCH)
 
 
 %   $Id$
-%   Copyright (C) 1999-2005 by Alois Schloegl <a.schloegl@ieee.org>	
+%   Copyright (C) 1999-2005 by Alois Schloegl <alois.schloegl@gmail.com>
 %   This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 

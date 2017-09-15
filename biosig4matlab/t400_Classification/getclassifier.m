@@ -23,10 +23,8 @@ function [CC]=getclassifier(d,c, Mode)
 % [1] A. Schloegl, Missing values and NaN-toolbox for Matlab, 2000-2003.
 % http://www.dpmi.tu-graz.ac.at/~schloegl/matlab/NaN/
 
-%	$Revision: 1.1 $
-%	$Id$
-%	Copyright (C) 1999-2003 by Alois Schloegl
-%	a.schloegl@ieee.org	
+%	Copyright (C) 1999-2003 by Alois Schloegl <alois.schloegl@gmail.com>
+
 
 % This program is free software; you can redistribute it and/or
 % modify it under the terms of the GNU General Public License

@@ -31,7 +31,7 @@ function [br,sef90,sef95,br2] = brainrate(s,Fs,UC,A)
 %     ISSN 0351-3254, UDK: 616.831-073.97
 
 %	$Id$
-%	Copyright (C) 2006,2007,2008 by Alois Schloegl <a.schloegl@ieee.org>
+%	Copyright (C) 2006,2007,2008 by Alois Schloegl <alois.schloegl@gmail.com>
 %	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This library is free software; you can redistribute it and/or

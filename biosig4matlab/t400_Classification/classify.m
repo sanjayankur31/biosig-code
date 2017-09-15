@@ -23,7 +23,7 @@ function [CLASS,ERR,POSTERIOR,LOGP,COEF]=classify(sample,training,classlabel,TYP
 %       John Wiley & Sons, 2001. 
 
 %	$Id$
-%	Copyright (C) 2008,2009 by Alois Schloegl <alois.schloegl@gmail.com>	
+%	Copyright (C) 2008,2009 by Alois Schloegl <alois.schloegl@gmail.com>
 %       This function is part of the NaN-toolbox
 %       http://pub.ist.ac.at/~schloegl/matlab/NaN/
 

@@ -35,7 +35,7 @@ function [cc3,cc0,cbp,cc4,cbp3]=make_cc7(fn,eegchan,trigchan,Fs)
 %
 
 %	$Id$
-%	Copyright (C) 1999-2004 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (C) 1999-2004 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 

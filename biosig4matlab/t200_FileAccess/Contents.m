@@ -39,6 +39,6 @@
 %
 
 %	$Id$
-%	CopyLeft (c) 1997-2006 by Alois Schloegl <a.schloegl@ieee.org>	
+%	CopyLeft (c) 1997-2006 by Alois Schloegl <alois.schloegl@gmail.com>
 %	This is part of the BIOSIG project http://biosig.sf.net/
 

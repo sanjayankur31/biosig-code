@@ -38,7 +38,7 @@ function [SIGMA,PHI,OMEGA,m0,m1,m2,cout] = wackermann(S,UC,A,cini)
 %	first-break schizophrenics. Society of Biological Psychiatry. 43:794–802.
 
 %	$Id$
-%	Copyright (C) 2004,2005,2008,2009 by Alois Schloegl <a.schloegl@ieee.org>
+%	Copyright (C) 2004,2005,2008,2009 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 %    BioSig is free software: you can redistribute it and/or modify

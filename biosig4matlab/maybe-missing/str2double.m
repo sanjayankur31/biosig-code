@@ -71,7 +71,7 @@ function [num,status,strarray] = str2double(s,cdelim,rdelim,ddelim)
 
 %%	$Revision: 1.2 $
 %%	$Id: str2double.m,v 1.2 2008-03-26 21:33:46 schloegl Exp $
-%%	Copyright (C) 2004 by Alois Schloegl <a.schloegl@ieee.org>	
+%%	Copyright (C) 2004 by Alois Schloegl <alois.schloegl@gmail.com>
 %%      This function is part of Octave-Forge http://octave.sourceforge.net/
 
 FLAG_OCTAVE = exist('OCTAVE_VERSION','builtin');

@@ -12,6 +12,6 @@
 
 %	$Id$
 %	Copyright (c) 2007 by Alois Schloegl
-%	a.schloegl@ieee.org	
+%	alois.schloegl@gmail.com
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 

@@ -68,7 +68,7 @@ function [p] = globtest(Input,n1,samp,varargin)
 %
 %
 % Copyright (C) 2006,2007 Claudia Hemmelmann <claudia.hemmelmann@mti.uni-jena.de>
-% Adapted by A Schloegl <a.schloegl@ieee.org> 2006,2007 
+% Adapted by A Schloegl <alois.schloegl@gmail.com> 2006,2007
 %
 %***
 % This library is free software; you can redistribute it and/or

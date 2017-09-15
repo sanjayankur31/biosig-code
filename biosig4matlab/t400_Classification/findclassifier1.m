@@ -26,7 +26,7 @@ function [CC,Q,tsd,md]=findclassifier1(D,TRIG,cl,T,t0,SWITCH)
 %	Proceedings of the 1st International IEEE EMBS Conference on Neural Engineering, Capri, Italy, Mar 20-22, 2003 
 
 
-%   Copyright (C) 1999-2004 by Alois Schloegl <a.schloegl@ieee.org>	
+%   Copyright (C) 1999-2004 by Alois Schloegl <alois.schloegl@gmail.com>
 %	$Id$
 
 

@@ -13,7 +13,7 @@ function [CC]=untrain_sc(CC,classlabel,x)
 % see also: TEST_SC, COVM, LDBC2, LDBC3, LDBC4, MDBC, GDBC
 
 %	$Id$
-%	Copyright (C) 2005 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (C) 2005 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This program is free software; you can redistribute it and/or

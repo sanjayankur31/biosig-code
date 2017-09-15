@@ -10,7 +10,7 @@ function [HDR]=scpopen(arg1,CHAN,arg4,arg5,arg6)
 
 
 %	$Id$
-%	(C) 2004,2006,2007,2008 by Alois Schloegl <a.schloegl@ieee.org>	
+%	(C) 2004,2006,2007,2008 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BioSig-toolbox http://biosig.sf.net/
 %
 %    BioSig is free software: you can redistribute it and/or modify
@@ -418,7 +418,7 @@ field,
                                         S2 = fread(fid,[HDR.N,HDR.NS],'int8');  
                                 else
                                         fprintf(HDR.FILE.stderr,'Warning SCPOPEN: codelength %i is not supported yet.',codelength);
-                                        fprintf(HDR.FILE.stderr,' Contact <a.schloegl@ieee.org>\n');
+                                        fprintf(HDR.FILE.stderr,' Contact <alois.schloegl@gmail.com>\n');
                                         return;
                                 end;
 				%S2 = S2(:,CHAN); 

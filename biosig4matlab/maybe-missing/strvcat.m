@@ -29,7 +29,7 @@
 %% Modified: Paul Kienzle <pkienzle@kienzle.powernet.co.uk> converted
 %%           str2mat to strvcat.  Same function except that strvcat
 %%           ignores empty strings.
-%% Modified by Alois Schloegl <a.schloegl@ieee.org> Mar 2005
+%% Modified by Alois Schloegl <alois.schloegl@gmail.com> Mar 2005
 %%	     added support for cell-strings 
 
 

@@ -39,7 +39,7 @@
 %% Author: KH <Kurt.Hornik@wu-wien.ac.at>
 %% Created: 13 June 1993
 %% Adapted-By: jwe
-%% Adapted for FreeMat by : AS <a.schloegl@ieee.org> 
+%% Adapted for FreeMat by : AS <alois.schloegl@gmail.com>
 
 function retval = beta (a, b)
 

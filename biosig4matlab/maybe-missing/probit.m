@@ -31,7 +31,7 @@ function [y]=probit(x,DIM)
 
 %	$Revision: 1.1 $
 %	$Id: probit.m,v 1.1 2007-07-19 15:50:32 schloegl Exp $
-%	Copyright (C) 2000-2003,2006 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (C) 2000-2003,2006 by Alois Schloegl <alois.schloegl@gmail.com>
 
 
 y = sqrt(2) * erfinv(2*x-1);

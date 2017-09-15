@@ -13,10 +13,7 @@ function [a0,A0] = getar0(S,P,NTR,NN);
 %    a0 average AR-parameters	
 %    A0 covariance 
 
-%	$Revision: 1.3 $
-%	$Id$
-%	Copyright (c) 1996-2003 by Alois Schloegl
-%	e-mail: a.schloegl@ieee.org	
+%	Copyright (c) 1996-2003 by Alois Schloegl <alois.schloegl@gmail.com>
 
 
 % This program is free software; you can redistribute it and/or
@@ -33,7 +30,6 @@ function [a0,A0] = getar0(S,P,NTR,NN);
 % along with this program; if not, write to the Free Software
 % Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-
 S  = S(:);
 tmp= floor(rand(1,NTR)*(length(S)-NN));
 z0 = zeros(NTR,NN);
@@ -48,7 +44,7 @@ for k=1:length(P),
 	        a0{k} = covm(a,'E');
         else	% OBSOLETE 
 		a0{k} = mean(a);
-    		A0{k} = covm(a,'D');
+		A0{k} = covm(a,'D');
 	end;
 end;	
 

@@ -1351,7 +1351,7 @@ if strcmp(H.TYPE,'GDF')
                                 if isfield(x,'header'),
                                         if isfield(x.header,'Paradigm')
                                                 fprintf(2,'Warning SLOAD (GDF): Obsolete feature is used (header information loaded from MAT-file %s).\n',H.FileName);
-                                                fprintf(2,'This feature will be removed in future. Contact <a.schloegl@ieee.org> if you need this.\n ');
+                                                fprintf(2,'This feature will be removed in future. Contact <alois.schloegl@gmail.com> if you need this.\n ');
                                                 H.BCI.Paradigm = x.header.Paradigm;
                                                 if isfield(H.BCI.Paradigm,'TriggerTiming');
                                                         H.TriggerOffset = H.BCI.Paradigm.TriggerTiming;
@@ -1414,7 +1414,7 @@ if STATE.FLAG_NUM_NAN,
 	end;
 
 	if ~STATE.FLAG_NUM_NAN && (H.SPR * H.NRec ~= size(signal,1))
-		warning('Undefined state: HDR.SPR*HDR.NRec does not match size of data - if you see this message contact <alois.schloegl@gmail.com> and provide the details %s', HDR.FileName); 
+		warning('Undefined state: HDR.SPR*HDR.NRec does not match size of data - if you see this message contact <alois.schloegl@gmail.com> and provide the details %s', HDR.FileName);
 	end; 
 	% [HDR.SPR, HDR.NRec, size(signal)]
 end;

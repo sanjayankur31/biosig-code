@@ -8,7 +8,7 @@ function [perm]=perm(x1,x2)
 %	$Revision: 1.1 $
 %	$Id$
 %	Copyright (c) 1998-2003 by Alois Schloegl
-%	a.schloegl@ieee.org	
+%	alois.schloegl@gmail.com
 
 
 % This program is free software; you can redistribute it and/or

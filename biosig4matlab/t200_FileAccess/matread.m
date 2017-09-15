@@ -12,10 +12,7 @@ function [HDR,data,t]=matread(HDR,arg2,idxlist)
 %
 % see also: EEGREAD, FREAD, EEGOPEN, EEGCLOSE  
 
-%	$Revision: 1.1 $
-%	$Id$
-%	Copyright (c) 1997-2003 by  Alois Schloegl
-%	a.schloegl@ieee.org	
+%	Copyright (c) 1997-2003 by  Alois Schloegl <alois.schloegl@gmail.com>
 
 % This library is free software; you can redistribute it and/or
 % modify it under the terms of the GNU Library General Public

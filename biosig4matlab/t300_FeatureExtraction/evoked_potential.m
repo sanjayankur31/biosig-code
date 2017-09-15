@@ -17,8 +17,7 @@ function R = evoked_potential(fn,CHAN,t1,t2,EventTyp)
 % 
 % see also: PLOTA
 
-%	$Id$
-%	Copyright (C) 2005,2008,2009,2010 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (C) 2005,2008,2009,2010 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This library is free software; you can redistribute it and/or

@@ -23,7 +23,7 @@ function [H2,HDR,s] = ap_detect(fn,arg2,arg3)
 %
 
 % $Id$
-% Copyright (C) 2011 by Alois Schloegl <alois.schloegl@gmail.com>	
+% Copyright (C) 2011 by Alois Schloegl <alois.schloegl@gmail.com>
 % This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % BIOSIG is free software; you can redistribute it and/or

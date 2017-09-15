@@ -22,7 +22,7 @@ function [d,ix] = maxdistance(s,Q1,Q2)
 % [2] http://www.mathworks.com/matlabcentral/newsreader/view_thread/164048
 % [3] http://www.mathworks.de/support/solutions/en/data/1-1BYSR/
 
-%    Copyright (C) 2013 by Alois Schloegl <alois.schloegl@gmail.com>	
+%    Copyright (C) 2013 by Alois Schloegl <alois.schloegl@gmail.com>
 %    This is part of the BIOSIG-toolbox http://biosig.sf.net/
 %
 %    BioSig is free software: you can redistribute it and/or modify

@@ -1515,7 +1515,7 @@ HDR.FLAG.TOGGLE = HDR.FLAG.TOGGLE+1;
 end; 
 
 if STATUS,
-        fprintf(HDR.FILE.stderr,'WARNING SREAD: something went wrong. Please send the files %s and BIOSIGCORE to <a.schloegl@ieee.org>',HDR.FileName);
+        fprintf(HDR.FILE.stderr,'WARNING SREAD: something went wrong. Please send the files %s and BIOSIGCORE to <alois.schloegl@gmail.com>',HDR.FileName);
         save biosigcore.mat 
 end;
 

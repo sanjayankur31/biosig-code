@@ -19,7 +19,7 @@ function [HDR,data] = iopen(HDR,PERMISSION,CHAN,MODE,arg5,arg6)
 % of the License, or (at your option) any later version.
 
 %	$Id$
-%	(C) 2005,2007,2008 by Alois Schloegl <a.schloegl@ieee.org>	
+%	(C) 2005,2007,2008 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 data = [];

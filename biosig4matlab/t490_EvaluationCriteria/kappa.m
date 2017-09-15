@@ -33,7 +33,7 @@ function [kap,se,H,z,p0,SA,R]=kappa(d,c,arg3,w);
 %  
 
 %	$Id$
-%	Copyright (c) 1997-2006,2008,2009 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright (c) 1997-2006,2008,2009 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 %
 %    BioSig is free software: you can redistribute it and/or modify

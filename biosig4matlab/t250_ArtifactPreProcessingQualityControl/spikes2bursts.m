@@ -53,7 +53,7 @@ function [H, s] = spikes2bursts(fn, varargin)
 %
 
 %	$Id: detect_spikes_bursts.m 2739 2011-07-13 15:42:05Z schloegl $
-%	Copyright (C) 2011 by Alois Schloegl <alois.schloegl@gmail.com>	
+%	Copyright (C) 2011 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 %
 %    BioSig is free software: you can redistribute it and/or modify

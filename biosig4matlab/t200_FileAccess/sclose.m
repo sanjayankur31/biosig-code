@@ -12,7 +12,7 @@ function [HDR] = sclose(HDR)
 % of the License, or (at your option) any later version.
 
 %	$Id$
-%	(C) 1997-2005,2006,2008 by Alois Schloegl <a.schloegl@ieee.org>	
+%	(C) 1997-2005,2006,2008 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 

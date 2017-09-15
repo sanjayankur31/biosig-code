@@ -29,7 +29,7 @@
 %% @seealso{findstr, strmatch, strcmp, strncmp, strcmpi, strncmpi}
 %% @end deftypefn
 
-%% Author: alois schloegl <a.schloegl@ieee.org>
+%% Author: alois schloegl <alois.schloegl@gmail.com>
 %% Created: 1 November 2004
 %% Adapted-By: William Poetra Yoga Hadisoeseno <williampoetra@gmail.com>
 
