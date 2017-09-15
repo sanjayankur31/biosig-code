@@ -16,8 +16,7 @@ function HDR=bv2biosig_events(EVENT)
 % 
 % see also: doc/eventcodes.txt
 
-%	$Id$
-%	Copyright (C) 2006,2007 by Alois Schloegl <a.schloegl@ieee.org>	
+%	Copyright(C)2006,2007,2017 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This library is free software; you can redistribute it and/or
@@ -34,7 +33,6 @@ function HDR=bv2biosig_events(EVENT)
 % License along with this library; if not, write to the
 % Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 % Boston, MA  02111-1307, USA.
-
 
 HDR.EVENT.Desc = []; 
 if isfield(EVENT,'EVENT')
@@ -72,15 +70,16 @@ if (HDR.NS==128)
 end;
 FLAG_ARTERAWDATA = strncmp(HDR.FILE.Name,'arte',4);
 
-for k1 = 1:length(HDR.EVENT.POS)
-	if isfield(HDR.EVENT,'Desc')
-		tmp = HDR.EVENT.Desc{k1};
-	elseif isfield(HDR.EVENT,'CodeDesc') && (HDR.EVENT.TYP(k1)<=length(HDR.EVENT.CodeDesc))
-		tmp = HDR.EVENT.CodeDesc{HDR.EVENT.TYP(k1)};
-	else 
-		continue; 
-	end;
+if isfield(HDR.EVENT,'CodeDesc') && ~isfield(HDR.EVENT,'Desc')
+	for k1 = 1:length(HDR.EVENT.POS)
+		if (HDR.EVENT.TYP(k1)<=length(HDR.EVENT.CodeDesc))
+			HDR.EVENT.Desc{k1} = HDR.EVENT.CodeDesc{HDR.EVENT.TYP(k1)};
+		end;
+	end
+end
 
+for k1 = 1:length(HDR.EVENT.POS)
+	tmp = HDR.EVENT.Desc{k1};
 	if 0,
 
 	elseif strncmp(tmp,'TargetCode',10)
@@ -123,7 +122,7 @@ for k1 = 1:length(HDR.EVENT.POS)
         	HDR.EVENT.TYP(k1) = hex2dec('8444'); 
         elseif strcmp(tmp,'Kiefer anspannen')
         	HDR.EVENT.TYP(k1) = hex2dec('0446'); 
-        elseif strcmp(tmp,'beißen') | strcmp(tmp,'beissen') | strcmp(tmp,['bei',223,'en']),
+        elseif strcmp(tmp,'beißen') || strcmp(tmp,'beissen') || strcmp(tmp,['bei',223,'en']),
         	HDR.EVENT.TYP(k1) = hex2dec('0446'); 
         elseif strcmp(tmp,'EMG fuss')
 		HDR.EVENT.TYP(k1) = hex2dec('0447'); 
@@ -131,7 +130,7 @@ for k1 = 1:length(HDR.EVENT.POS)
 		HDR.EVENT.TYP(k1) = hex2dec('0449'); 
 
 % encoding der season2-arte* rawdata records
-	elseif strncmp(tmp,'S',1) & (FLAG_SEASON2_ARTERAWDATA | FLAG_ARTERAWDATA), 
+	elseif strncmp(tmp,'S',1) && (FLAG_SEASON2_ARTERAWDATA || FLAG_ARTERAWDATA),
 		n = str2double(tmp(2:end));
 		if n==11,	% EMG left
 			HDR.EVENT.TYP(k1) = hex2dec('0441'); 
@@ -164,7 +163,7 @@ for k1 = 1:length(HDR.EVENT.POS)
 		end;
 
 % hits and misses, feedback
-	elseif strncmp(tmp,'S',1) | strncmp(tmp,'R',1) 
+	elseif strncmp(tmp,'S',1) || strncmp(tmp,'R',1)
 		HDR.EVENT.CHN(k1) = (tmp(1)=='R')*64+1;  %%% hack to distinguish Player 1 and 2 in SEASON2 data
 		n = str2double(tmp(2:end)); 
 		if n==11,	% hit (left)
@@ -188,7 +187,7 @@ for k1 = 1:length(HDR.EVENT.POS)
 		end; 
 
 % end of segment        	
-        elseif strcmp(tmp,'s') | strcmp(tmp,'stop') | strcmp(tmp,'stopp'),
+        elseif strcmp(tmp,'s') || strcmp(tmp,'stop') || strcmp(tmp,'stopp'),
         	HDR.EVENT.TYP(k1) = bitxor(hex2dec('8000'),HDR.EVENT.TYP(k1-1)); 
 
         elseif ~isempty(tmp)
