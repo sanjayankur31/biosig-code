@@ -633,6 +633,7 @@ build_cpu
 build
 LIBOBJS
 ALLOCA
+HAVE_LIBM
 HAVE_LIBZ
 HAVE_LIBMATIO
 HAVE_LIBHDF5
@@ -4971,7 +4972,6 @@ fi
 
 
 
-
 # FIXME: Replace `main' with a function in `-llibmex':
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -llibmex" >&5
 $as_echo_n "checking for main in -llibmex... " >&6; }
@@ -5090,11 +5090,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_m_round" >&5
 $as_echo "$ac_cv_lib_m_round" >&6; }
 if test "x$ac_cv_lib_m_round" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBM 1
-_ACEOF
-
-  LIBS="-lm $LIBS"
+  HAVE_LIBM="1"
 
 fi
 

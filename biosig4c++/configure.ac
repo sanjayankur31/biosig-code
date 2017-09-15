@@ -43,13 +43,12 @@ AC_CHECK_LIB([iberty], [getlogin])
 AC_CHECK_LIB([iconv], [iconv_open])
 AC_CHECK_HEADER([iconv.h], ,[AC_MSG_ERROR([can not find iconv.h])])
 
-
 # FIXME: Replace `main' with a function in `-llibmex':
 AC_CHECK_LIB([libmex], [main])
 # FIXME: Replace `main' with a function in `-llibmx':
 AC_CHECK_LIB([libmx], [main])
 
-AC_CHECK_LIB([m], [round])
+AC_CHECK_LIB([m],       [round],               AC_SUBST(HAVE_LIBM,       "1") )
 
 # Wolfram/Mathematica Mathlink interface
 AC_CHECK_LIB([mathlink], [MLPutRealArray])

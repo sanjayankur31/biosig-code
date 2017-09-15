@@ -149,7 +149,7 @@ ifeq (Darwin,$(shell uname))
 	TAR	       = gtar
 	CFLAGS        += -I$(prefix)/include
 	CFLAGS        += -mmacosx-version-min=10.7
-	LDLIBS        += -liconv -lstdc++ -lm
+	LDLIBS        += -liconv -lstdc++
 	SHAREDLIB      = -dylib -arch x86_64 -macosx_version_min 10.7
 	LDFLAGS       += -L$(prefix)/lib/
 	DLEXT          = dylib
@@ -236,6 +236,9 @@ ifeq (1,@HAVE_LIBHDF5@)
 endif
 ifeq (1,@HAVE_LIBMATIO@)
 	LDLIBS     += -lmatio
+endif
+ifeq (1,@HAVE_LIBM@)
+	LDLIBS     += -lm
 endif
 
 ifneq (,$(findstring WITH_GDCM, $(DEFINES)))
@@ -742,13 +745,13 @@ libbiosig.pc :
 
 ## save2gdf, pdp2gdf
 %${BINEXT}: %.c libbiosig.a
-	$(CC) $(DEFINES) $(CFLAGS) "$<" libbiosig.a -lstdc++ -lm $(LDLIBS) -o "$@"
+	$(CC) $(DEFINES) $(CFLAGS) "$<" libbiosig.a -lstdc++ $(LDLIBS) -o "$@"
 
 pu${BINEXT} : pu.c physicalunits.o
 	$(CC) $(DEFINES) $(CFLAGS) $^ $(LDFLAGS) $(LDLIBS) -o "$@"
 
 biosig_fhir${BINEXT}: biosig_fhir.c libbiosig.a
-	$(CC) $(DEFINES) $(CFLAGS) "$<" libbiosig.a -lstdc++ -lm -lb64 $(LDLIBS) -o "$@"
+	$(CC) $(DEFINES) $(CFLAGS) "$<" libbiosig.a -lstdc++ -lb64 $(LDLIBS) -o "$@"
 
 bscs: biosig_client${BINEXT} biosig_server${BINEXT} sandbox.o biosig.o
 biosig_client${BINEXT}: biosig_client.c libbiosig.$(LIBEXT) biosig-network.o
@@ -904,15 +907,17 @@ save2aecg: save2gdf
 #############################################################
 
 ###	TTL2TRIG
+ttltrig: bin/ttltrig
 bin/ttl2trig : src/ttl2trig.c gdf.o gdftime.o physicalunits.o
-	$(CC) -D=WITH_BIOSIG $(DEFINE) $(CFLAGS) $^ -Wall -Wextra -lasound $(LDLIBS) -lm -o "$@"
+	$(CC) -D=WITH_BIOSIG $(DEFINE) $(CFLAGS) $^ -Wall -Wextra -lasound $(LDLIBS) -o "$@"
 
 ###	FLOWMON
 flowmon.o: src/flowmon2.c 
 	$(CC) -c $(DEFINES) $(CFLAGS) -o "$@" "$<"
         
+flowmon: bin/flowmon
 bin/flowmon: flowmon.o gdf.o gdftime.o physicalunits.o
-	$(CC) $^ $(LDLIBS) -lm -o "$@"
+	$(CC) $^ $(LDLIBS) -o "$@"
 
 
 #############################################################

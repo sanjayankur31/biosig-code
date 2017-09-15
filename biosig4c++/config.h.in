@@ -75,9 +75,6 @@
 /* Define to 1 if you have the `libmx' library (-llibmx). */
 #undef HAVE_LIBLIBMX
 
-/* Define to 1 if you have the `m' library (-lm). */
-#undef HAVE_LIBM
-
 /* Define to 1 if you have the `mathlink' library (-lmathlink). */
 #undef HAVE_LIBMATHLINK
 
