@@ -13,6 +13,8 @@ function [RES] = roc(d, c, varargin);
 %	the given FPR rate.
 %	RES.THRESHOLD.{maxYI,maxACC,maxKAPPA} return the threshold
 %	value to obtain the maximum YoudenIndex (YI), Accuracy and Kappa, resp.
+% RES = roc(...,'flag_plot');
+%	plot ROC curve, including suggested thresholds
 %
 % INPUT:
 % d	DATA
@@ -57,8 +59,6 @@ function [RES] = roc(d, c, varargin);
 % Boston, MA  02111-1307, USA.
 %
 
-global FLAG_DISPLAY;
-
 MODE = all(size(d)==size(c)) && all(all((c==1) | (c==0) | isnan(c)));
 d=d(:);
 c=c(:);
@@ -81,12 +81,17 @@ d = d(~isnan(d));
 plot_args={'-'};
 flag_plot_args = 1;
 thFPR = NaN;
+
+FLAG_DISPLAY=0;
 for k=1:length(varargin)
 	arg = varargin{k};
 	if strcmp(arg,'FPR')
 		flag_plot_args = 0;
 		thFPR = varargin{k+1};
 	end;
+	if strcmp(arg,'flag_display') || strcmp(arg,'flag_plot')
+		FLAG_DISPLAY=1;
+	end
 	if flag_plot_args,
 		plot_args{k} = arg;
 	end
