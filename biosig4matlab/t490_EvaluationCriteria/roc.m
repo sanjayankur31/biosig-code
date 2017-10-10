@@ -130,8 +130,14 @@ mcc = (TP .* TN - FN .* FP) ./ sqrt(prod( [p_i, pi_], 2));
 pxi = pi_/N;                       % p(x_i)
 pyj = p_i/N;                       % p(y_j)
 log2pji = ([TP,FN,FP,TN]/N).*log2([TP,FN,FP,TN]./[p_i,p_i]);
-RES.MI = -sumskipnan(pyj.*log2(pyj),2) + sumskipnan(log2pji,2);
 
+% replace sumskipnan in order to avoid dependency on NaN-toolbox
+% RES.MI = -sumskipnan(pyj.*log2(pyj),2) + sumskipnan(log2pji,2);
+tmp1 = pyj.*log2(pyj);
+tmp2 = log2pji;
+tmp1(isnan(tmp1))=0;
+tmp2(isnan(tmp2))=0;
+RES.MI = -sum(tmp1,2) + sum(tmp2,2);
 
 
 % area under the ROC curve
