@@ -8,14 +8,11 @@ function [RES] = roc(d, c, varargin);
 % [...] = roc(d1,d0);
 % [...] = roc(...,s);
 % [SEN, SPEC, TH, ACC, AUC,Yi,idx]=roc(...);
-% RES = roc(...,'FPR',FPR);
+% RES = roc(...);
 %	RES.THRESHOLD.FPR returns the threshold value to obtain
 %	the given FPR rate.
-% RES = roc(...,'maxYI');
-% RES = roc(...,'maxACC');
-% RES = roc(...,'maxKAPPA');
 %	RES.THRESHOLD.{maxYI,maxACC,maxKAPPA} return the threshold
-%	value to obtain the maxium YoudenIndex (YI), Accuracy and Kappa, resp.
+%	value to obtain the maximum YoudenIndex (YI), Accuracy and Kappa, resp.
 %
 % INPUT:
 % d	DATA
@@ -137,19 +134,6 @@ RES.MI = -sumskipnan(pyj.*log2(pyj),2) + sumskipnan(log2pji,2);
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%  display only 10000 points at most.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if FLAG_DISPLAY,
-	len = length(FPR);
-	delta = max(1,floor(len/5000));
-	ix = [1:delta:len-1,len];
-	plot(FPR(ix)*100,TPR(ix)*100, plot_args{:});
-
-	%ylabel('Sensitivity (true positive ratio) [%]');
-	%xlabel('1-Specificity (false positive ratio) [%]');
-end;
-
 % area under the ROC curve
 RES.AUC = -diff(FPR)' * (TPR(1:end-1)+TPR(2:end))/2;
 
@@ -178,32 +162,63 @@ RES.LRN = FNR./TNR;
 
 % find optimal threshold
 [tmp,ix] = max(SEN+SPEC-1);
-RES.THRESHOLD.maxYI = D(ix);
+RES.THRESHOLD.maxYI   = D(ix);
+RES.THRESHOLD.maxYIix = ix;
 RES.H_yi = [TP(ix),FN(ix);FP(ix),TN(ix)];
 
 [RES.maxKAPPA,ix] = max(kap);
 RES.THRESHOLD.maxKAPPA = D(ix);
+RES.THRESHOLD.maxKAPPAix = ix;
 RES.H_kappa = [TP(ix),FN(ix);FP(ix),TN(ix)];
 
 [RES.maxMCC,ix] = max(mcc);
 RES.THRESHOLD.maxMCC = D(ix);
+RES.THRESHOLD.maxMCCix = ix;
 RES.H_mcc = [TP(ix),FN(ix);FP(ix),TN(ix)];
 
 [RES.maxMI,ix] = max(RES.MI);
 RES.THRESHOLD.maxMI = D(ix);
+RES.THRESHOLD.maxMIix = ix;
 RES.H_mi = [TP(ix),FN(ix);FP(ix),TN(ix)];
 
 [tmp,ix] = max(ACC);
 RES.THRESHOLD.maxACC = D(ix);
+RES.THRESHOLD.maxACCix = ix;
 RES.H_acc = [TP(ix),FN(ix);FP(ix),TN(ix)];
 
 [tmp,ix] = max(RES.F1);
 RES.THRESHOLD.maxF1 = D(ix);
+RES.THRESHOLD.maxF1ix = ix;
 RES.H_f1 = [TP(ix),FN(ix);FP(ix),TN(ix)];
 
 RES.THRESHOLD.FPR = NaN;
 if ~isnan(thFPR)
 	ix = max(1,min(N,round((1-thFPR)*N)));
 	RES.THRESHOLD.FPR = D(ix);
+	RES.THRESHOLD.FPRix = ix;
 	RES.H_fpr = [TP(ix),FN(ix);FP(ix),TN(ix)];
+end;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%  display only 10000 points at most.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if FLAG_DISPLAY,
+	len = length(FPR);
+	delta = max(1,floor(len/5000));
+	ix = [1:delta:len-1,len];
+
+	ix0 = RES.THRESHOLD.maxKAPPAix;
+	ix1 = RES.THRESHOLD.maxYIix ;
+	ix2 = RES.THRESHOLD.maxMCCix;
+	ix3 = RES.THRESHOLD.maxMIix;
+	ix4 = RES.THRESHOLD.maxACCix;
+	ix5 = RES.THRESHOLD.maxF1ix;
+
+	plot(FPR(ix)*100,TPR(ix)*100, FPR(ix0)*100, TPR(ix0)*100,'ok', FPR(ix1)*100, TPR(ix1)*100, 'xb', FPR(ix2)*100, TPR(ix2)*100, 'xg', FPR(ix3)*100, TPR(ix3)*100, 'xr', FPR(ix4)*100, TPR(ix4)*100, 'xc', FPR(ix5)*100, TPR(ix5)*100, 'xm');
+	ylabel('TPR [%]');xlabel('FPR [%]');
+	legend('ROC','maxKappa','maxYoudenIndex','maxMCC','maxMI','maxACC','maxF1','location','southeast');
+
+	%ylabel('Sensitivity (true positive ratio) [%]');
+	%xlabel('1-Specificity (false positive ratio) [%]');
 end;
