@@ -281,7 +281,9 @@ end;
 [tmp,eIdx]=sort(HDR.EVENT.POS); % sort event in chronological order
 
 for k = eIdx(:)',
-	if length(HDR.T0)==1,
+	if any(isnan(HDR.T0))
+		T0 = 0;
+	elseif length(HDR.T0)==1,
 		T0 = HDR.T0;
 	else
 		T0 = datenum(HDR.T0);

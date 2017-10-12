@@ -186,25 +186,18 @@ X.N        = sum(~isnan(NN));	% number of intervals
 %%%%%%%%% time domain parameters %%%%%%%%%%%%%%%%%%%%
 X.meanNN   = mean(NN); 
 X.SDNN     = std(NN); 
-X.RMSSD    = rms(diff(NN));  % SDSD
+X.RMSSD    = sqrt(mean(diff(NN).^2));  % SDSD
 X.NN50count1 = sum(-diff(NN)>0.050/t_scale);
 X.NN50count2 = sum( diff(NN)>0.050/t_scale);
 X.NN50count  = sum(abs(diff(NN))>0.050/t_scale);
 X.pNN50    = X.NN50count/X.N; 
 
-g = acovf(center(NN(:)'),2);
-X.SD1 	= sqrt(g(1)-g(2));
-X.SD2 	= sqrt(g(1)+g(2));
-X.SD1 	= sqrt(g(1)-g(2));
-X.r_RR	= g(2)/g(1);
-
 t   = round(NN * 128)/128; 
-try
-	HIS = histo_mex(t(:)); 
-	HIS.N = sum(HIS.H(~isnan(HIS.X)));
-catch 
-	HIS = histo3(t(:)); 
-end; 
+HIS.N     = sum(~isnan(t));
+[sY, idx] = sort(t(:),1);
+ix        = diff(sY, [], 1) > 0;
+tmp       = [find(ix); HIS.N];
+HIS.H     = [tmp(1); diff(tmp)];
 X.HRVindex128 = HIS.N/max(HIS.H); 
 
 %still missing 
@@ -214,16 +207,29 @@ X.HRVindex128 = HIS.N/max(HIS.H);
 %SDNNindex
 %SDSD  = RMSSD
 
+if ~exist('acovf','file')
+	printf('Warning: ACOVF from TSA toolbox is not available - AR-based parameters are not computed. Installing the TSA toolbox is strongly recommended\n')
+	return
+end
+
+g = acovf(center(NN(:)'),2);
+X.SD1 	= sqrt(g(1)-g(2));
+X.SD2 	= sqrt(g(1)+g(2));
+X.r_RR	= g(2)/g(1);
+
+
 
 %%%%%%% AR-based spectrum  analysis %%%%%%%%%%%%%
 OS = 1; 
 if 0,
 	y = log(NN); 
-	[y,m]=center(y); 
+	m = mean(y);
+	y = y - m;
 	f0= exp(-m)/t_scale;
 elseif 1,
 	y = NN; 
-	[y,m] = center(y); 
+	m = mean(y);
+	y = y - m;
 	f0= 1/(m*t_scale);
 else
 	%% factor 1000 because data is converted to [ms], berger expects [s]
