@@ -234,6 +234,10 @@ ifeq (1,@HAVE_LIBPTHREAD@)
 endif
 ifeq (1,@HAVE_LIBCHOLMOD@)
 	LDLIBS     += -lcholmod
+	ifeq (Darwin,$(shell uname))
+	  ## homebrew requires this in addition to cholmod
+	  LDLIBS     += -lsuitesparseconfig
+	endif
 endif
 ifeq (1,@HAVE_LIBHDF5@)
 	LDLIBS     += -lhdf5
@@ -248,11 +252,6 @@ endif
 ifneq (,$(findstring WITH_GDCM, $(DEFINES)))
   INCPATH    += -I$(wildcard /usr/include/gdcm-2*/)
   LDLIBS     += -lgdcmCommon -lgdcmDSED -lgdcmMEXD -lgdcmMSFF -lgdcmDICT -lgdcmIOD
-endif
-
-ifeq (Darwin,$(shell uname))
-  ## homebrew requires this in addition to cholmod
-  LDLIBS     += -lsuitesparseconfig
 endif
 
 ifneq (,$(findstring WITH_LIBXML2, $(DEFINES)))
