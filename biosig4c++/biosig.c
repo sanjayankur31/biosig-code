@@ -3477,7 +3477,7 @@ int read_header(HDRTYPE *hdr) {
 	size_t count = hdr->HeadLen;
 	if (hdr->HeadLen<=512) {
 		ifseek(hdr, count, SEEK_SET);
-	    	hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header, 513);
+		hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header, 513);
 		count += ifread(hdr->AS.Header+hdr->HeadLen, 1, 512-count, hdr);
 		getfiletype(hdr);
 	}
@@ -3718,7 +3718,13 @@ else if (!strncmp(MODE,"r",1)) {
     	}
 #endif
 
-    	hdr->AS.Header = (uint8_t*)malloc(513);
+	// modern cpu's have cache lines of 4096 bytes, so for performance reasons we use this size as well.
+	const size_t PAGESIZE=4096;
+	/* reading some formats may imply that at least 512 bytes are read,
+           if you want to use a smaller page size, double check whether your format(s) are correctly handled. */
+	assert(PAGESIZE >= 512);
+	hdr->AS.Header = (uint8_t*)malloc(PAGESIZE+1);
+
 	size_t k;
 #ifndef  ONLYGDF
 	size_t name=0,ext=0;
@@ -3769,8 +3775,8 @@ else if (!strncmp(MODE,"r",1)) {
 	                curl_easy_cleanup(curl);
 
 			/* */
-			count = ifread(hdr->AS.Header, 1, 512, hdr);
-	        	hdr->AS.Header[512]=0;
+			count = ifread(hdr->AS.Header, 1, PAGESIZE, hdr);
+			hdr->AS.Header[count]=0;
 	        }
 	} else
 #endif
@@ -3811,7 +3817,7 @@ else if (!strncmp(MODE,"r",1)) {
 	    		return(hdr);
 		}
 		if (VERBOSE_LEVEL>7) fprintf(stdout,"SOPEN 101:\n");
-		count = ifread(hdr->AS.Header, 1, 512, hdr);
+		count = ifread(hdr->AS.Header, 1, PAGESIZE, hdr);
 		hdr->AS.Header[count]=0;
 
 
@@ -3823,8 +3829,8 @@ else if (!strncmp(MODE,"r",1)) {
 			hdr->FILE.gzFID = gzdopen(fileno(hdr->FILE.FID),"r"); 
 		        hdr->FILE.COMPRESSION = (uint8_t)1;
 			hdr->FILE.FID = NULL;
-			count = ifread(hdr->AS.Header, 1, 512, hdr);
-	        	hdr->AS.Header[512]=0;
+			count = ifread(hdr->AS.Header, 1, PAGESIZE, hdr);
+			hdr->AS.Header[count]=0;
 #else
 			biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "Error SOPEN(READ); *.gz file not supported because not linked with zlib.");
 #endif
