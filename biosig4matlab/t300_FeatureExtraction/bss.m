@@ -12,22 +12,35 @@ function [W] = bss(data,Mode,M,maxlag)
 %  maxlag: maximum lag for time delayed separation 	
 %  Mode:   algorithm used. Currently are supported: 
 %	PCA
-%	FastICA
-%	JADE
+%	FastICA [6]
+%	JADE [1-3]
 %	NGCA
-% 	FFDIAG 
+% 	FFDIAG [4-5]
 %	TDSEP (old not recommended)
-%	TDSEP1 
-%	TDSEP3  
+%	TDSEP1 [4-5]
+%	TDSEP3 [4-5]
+%
+% References:
+% [1] Cardoso, Jean-François; Souloumiac, Antoine (1993).
+%   Blind beamforming for non-Gaussian signals.
+%   IEE Proceedings F (Radar and Signal Processing). 140 (6): 362–370.
+% [2] http://perso.telecom-paristech.fr/~cardoso/guidesepsou.html
+% [3] http://perso.telecom-paristech.fr/~cardoso/Algo/Jade/jade.m
+% [4] A. Ziehe, G.Nolte, K-R. Mueller
+%   A Fast Algorithm for Joint Diagonalization with Non-orthogonal
+%   Transformations and its Application to Blind Source Separation.
+%   Journal of Machine Learning Research 5 (2004) 777–800
+%   http://www.jmlr.org/papers/volume5/ziehe04a/ziehe04a.pdf
+% [5] http://www.user.tu-berlin.de/aziehe/code/
+% [6] https://research.ics.aalto.fi/ica/fastica/
 
-%	$Id$
-%	Copyright (C) 2007 by Alois Schloegl 
-%    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
+%	Copyright (C) 2007,2018 by Alois Schloegl
+%	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This library is free software; you can redistribute it and/or
 % modify it under the terms of the GNU Library General Public
 % License as published by the Free Software Foundation; either
-% Version 2 of the License, or (at your option) any later version.
+% Version 3 of the License, or (at your option) any later version.
 
 
 if ~exist('jade','file')
