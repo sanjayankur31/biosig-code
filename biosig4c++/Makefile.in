@@ -97,14 +97,12 @@ PathToSigViewer = ../sigviewer
 PathToSigViewerWIN32 = ../sigviewer4win32
 PathToSigViewerWIN64 = ../sigviewer4win64
 
-CFLAGS       += -std=gnu11
 CFLAGS       += -pipe -fPIC -fno-builtin-memcmp -O2 -Wno-unused-result
 CFLAGS       += -Wno-deprecated
 CFLAGS       += -D_GNU_SOURCE
 CFLAGS       += -D_XOPEN_SOURCE=700
 CFLAGS       += -D_DEFAULT_SOURCE
 CXXFLAGS     += $(CFLAGS)
-CXXFLAGS     += -std=gnu++11
 
 prefix        = @prefix@
 datarootdir   = @datarootdir@
