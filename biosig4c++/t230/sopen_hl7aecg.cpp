@@ -3,6 +3,7 @@
     Copyright (C) 2006,2007,2009,2011,2012,2018 Alois Schloegl <alois.schloegl@gmail.com>
     Copyright (C) 2007 Elias Apostolopoulos
     Copyright (C) 2011 Stoyan Mihaylov
+    Copyright (C) 2018 Stefan Soueiha <sts@nabios.com>
 
     This file is part of the "BioSig for C/C++" repository 
     (biosig4c++) at http://biosig.sf.net/ 
@@ -1083,8 +1084,21 @@ EXTERN_C int sclose_HL7aECG_write(HDRTYPE* hdr){
     if (!hdr->FLAG.ANONYMOUS) 
     {	
 	TiXmlElement *subjectDemographicPersonName = new TiXmlElement("name");
-    	TiXmlText *nameText = new TiXmlText(hdr->Patient.Name);
-    	subjectDemographicPersonName->LinkEndChild(nameText);
+	char tmpstr[MAX_LENGTH_NAME+1];
+	strcpy(tmpstr, hdr->Patient.Name);
+	char *LastName=strtok(tmpstr, "\x1f");
+	char *FirstName=strtok(NULL, "\x1f");
+	/* LastName */
+	TiXmlElement *subjectDemographicPersonLastName = new TiXmlElement("family");
+	TiXmlText *lastnameText = new TiXmlText(LastName);
+	subjectDemographicPersonLastName->LinkEndChild(lastnameText);
+	subjectDemographicPersonName->LinkEndChild(subjectDemographicPersonLastName);
+	/* FirstName */
+	TiXmlElement *subjectDemographicPersonFirstName = new TiXmlElement("given");
+	TiXmlText *firstnameText = new TiXmlText(FirstName);
+	subjectDemographicPersonFirstName->LinkEndChild(firstnameText);
+	subjectDemographicPersonName->LinkEndChild(subjectDemographicPersonFirstName);
+
     	trialSubjectDemographicPerson->LinkEndChild(subjectDemographicPersonName);
     }
     
@@ -1149,7 +1163,20 @@ EXTERN_C int sclose_HL7aECG_write(HDRTYPE* hdr){
     clinicalTrialId->SetAttribute("root", "GRATZ");
     clinicalTrialId->SetAttribute("extension", "CLINICAL_TRIAL");
     clinicalTrial->LinkEndChild(clinicalTrialId);
-    
+
+    /* location/trialSite/location/name */
+    /* hdr->ID.Hospital is malloc'ed only if exist */
+    TiXmlText *t_location       = new TiXmlText(hdr->ID.Hospital ? hdr->ID.Hospital : "");
+    TiXmlElement *s_location_1  = new TiXmlElement("location");
+    TiXmlElement *s_location_2  = new TiXmlElement("trialSite");
+    TiXmlElement *s_location_3  = new TiXmlElement("location");
+    TiXmlElement *s_location_name  = new TiXmlElement("name");
+    s_location_name->LinkEndChild(t_location);
+    s_location_3->LinkEndChild(s_location_name);
+    s_location_2->LinkEndChild(s_location_3);
+    s_location_1->LinkEndChild(s_location_2);
+    clinicalTrial->LinkEndChild(s_location_1);
+
     TiXmlElement *rootComponent = new TiXmlElement("component");
     rootComponent->SetAttribute("typeCode", "COMP");
     rootComponent->SetAttribute("contextConductionInd", "true");
@@ -1175,6 +1202,32 @@ EXTERN_C int sclose_HL7aECG_write(HDRTYPE* hdr){
     seriesEffectiveTimeHigh->SetAttribute("value", timehigh);
     seriesEffectiveTime->LinkEndChild(seriesEffectiveTimeHigh);
     series->LinkEndChild(seriesEffectiveTime);
+
+    /* Manufacturer device
+       <author><seriesAuthor>
+       <manufacturedSeriesDevice>
+	   <manufacturerModelName> modelname </manufacturerModelName>
+       </manufacturedSeriesDevice>
+       <manufacturerOrganization>
+	   <name> manu name </name>
+       </manufacturerOrganization> */
+    TiXmlText *t_modelname       = new TiXmlText(hdr->ID.Manufacturer.Model ? hdr->ID.Manufacturer.Model : "");
+    TiXmlText *t_manuname	 = new TiXmlText(hdr->ID.Manufacturer.Name  ? hdr->ID.Manufacturer.Name  : "");
+    TiXmlElement *s_author       = new TiXmlElement("author");
+    TiXmlElement *s_seriesauthor = new TiXmlElement("seriesAuthor");
+    TiXmlElement *s_manudev      = new TiXmlElement("manufacturedSeriesDevice");
+    TiXmlElement *s_manumodel    = new TiXmlElement("manufacturerModelName");
+    s_manumodel->LinkEndChild(t_modelname);
+    s_manudev->LinkEndChild(s_manumodel);
+    s_seriesauthor->LinkEndChild(s_manudev);
+    TiXmlElement *s_manuorg      = new TiXmlElement("manufacturerOrganization");
+    TiXmlElement *s_manuorgname  = new TiXmlElement("name");
+    s_manuorgname->LinkEndChild(t_manuname);
+    s_manuorg->LinkEndChild(s_manuorgname);
+    s_seriesauthor->LinkEndChild(s_manuorg);
+
+    s_author->LinkEndChild(s_seriesauthor);
+    series->LinkEndChild(s_author);
     
     for(int i=3; i; --i){
 
