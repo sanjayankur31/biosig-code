@@ -68,6 +68,7 @@ int main(int argc, char **argv){
     uint16_t	k;
     int		TARGETSEGMENT=1; 	// select segment in multi-segment file format EEG1100 (Nihon Kohden)
     int 	VERBOSE	= 0; 
+    char	FLAG_ANON = 1;
     char	FLAG_CSV = 0;
     char	FLAG_JSON = 0; 
     char	FLAG_DYGRAPH = 0; 
@@ -100,7 +101,7 @@ int main(int argc, char **argv){
 		fprintf(stdout,"   -v, --version\n\tprints version information\n");
 		fprintf(stdout,"   -h, --help   \n\tprints this information\n");
 #ifdef T1T2
-		fprintf(stdout,"   [t0,dt]\n\tstart time and duriation in seconds (do not use any spaces). \n");
+		fprintf(stdout,"   [t0,dt]\n\tstart time and duration in seconds (do not use any spaces). \n");
 		fprintf(stdout,"\tTHIS FEATURE IS CURRENTLY EXPERIMENTAL !!!\n");
 #endif
 #ifdef CHOLMOD_H
@@ -113,6 +114,15 @@ int main(int argc, char **argv){
 #else
 		fprintf(stdout,"\tCurrently are supported: HL7aECG, SCP_ECG (EN1064:2005), GDF, EDF, BDF, CFWB, BIN, ASCII, ATF, BVA (BrainVision)\n\tas well as HEKA v2 -> ITX\n");
 #endif
+		fprintf(stdout, "   -a, --anon=yes   (default)\n"
+				"\tanonymized data processing - personalize data (name, and birthday) is not processed but ignored.\n"
+				"\tThe patient can be still identified with the unique patient identifier (and an external database).\n"
+				"\tThis is for many cases sufficient (e.g. for research etc.). This mode can be turn off with\n"
+				"   -n, --anon=no\n"
+				"\tThis will process personal information like name and birthday. One might want to use this mode\n"
+				"\twhen converting personalized patient data and no unique patient identifier is available.\n"
+				"\tIt's recommended to pseudonize the data, or to use the patient identifier instead of patient name and birthday.\n"
+		);
 		fprintf(stdout,"   -CSV  \n\texports data into CSV file\n");
 		fprintf(stdout,"   -DYGRAPH, -f=DYGRAPH  \n\tproduces JSON output for presentation with dygraphs\n");
 		fprintf(stdout,"   -JSON  \n\tshows header and events in JSON format\n");
@@ -146,6 +156,12 @@ int main(int argc, char **argv){
 	    	argsweep = argv[k]+6;
 
 	}
+
+	else if (!strcasecmp(argv[k],"-a") || !strcasecmp(argv[k],"--anon") )
+		FLAG_ANON = 1;
+
+	else if (!strcasecmp(argv[k],"-n") || !strcasecmp(argv[k],"--anon=no") )
+		FLAG_ANON = 0;
 
 	else if (!strcasecmp(argv[k],"-CSV"))
 		FLAG_CSV = 1;
@@ -273,7 +289,7 @@ int main(int argc, char **argv){
 	// hdr->FLAG.OVERFLOWDETECTION = FlagOverflowDetection; 
 	hdr->FLAG.UCAL = ((TARGET.TYPE==BIN) || (TARGET.TYPE==SCP_ECG));
 	hdr->FLAG.TARGETSEGMENT = TARGETSEGMENT;
-	// hdr->FLAG.ANONYMOUS = 0; 	// personal names are processed 
+	hdr->FLAG.ANONYMOUS = FLAG_ANON;
 	
 	if (argsweep) {
 		k = 0;
@@ -635,7 +651,7 @@ int main(int argc, char **argv){
 
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i): UCAL=%i\n",__FILE__,__LINE__, hdr->FLAG.UCAL);
 
-	hdr->FLAG.ANONYMOUS = 1; 	// no personal names are processed 
+	hdr->FLAG.ANONYMOUS = FLAG_ANON;
 
 	/*
 	  keep header data from previous file, in might contain optional data
