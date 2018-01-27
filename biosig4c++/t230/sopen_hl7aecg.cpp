@@ -1,7 +1,6 @@
 /*
 
-    $Id$
-    Copyright (C) 2006,2007,2009,2011,2012 Alois Schloegl <alois.schloegl@gmail.com>
+    Copyright (C) 2006,2007,2009,2011,2012,2018 Alois Schloegl <alois.schloegl@gmail.com>
     Copyright (C) 2007 Elias Apostolopoulos
     Copyright (C) 2011 Stoyan Mihaylov
 
@@ -205,23 +204,23 @@ EXTERN_C int sopen_HL7aECG_read(HDRTYPE* hdr) {
 		if (H.Element()) memcpy(hdr->Patient.Id, H.Element()->GetText(), MAX_LENGTH_PID);
 		hdr->Patient.Name[0] = 0;
 		size_t NameLength = 0;
-		H = SierraECG2.FirstChild("patient").FirstChild("generalpatientdata").FirstChild("name").FirstChild("firstname");
+		H = SierraECG2.FirstChild("patient").FirstChild("generalpatientdata").FirstChild("name").FirstChild("lastname");
 		if (H.Element()) {
 			strncpy(hdr->Patient.Name, H.Element()->GetText(), MAX_LENGTH_NAME);
 			hdr->Patient.Name[MAX_LENGTH_NAME]=0;
 			NameLength = strlen(hdr->Patient.Name);
 		}
-		H = SierraECG2.FirstChild("patient").FirstChild("generalpatientdata").FirstChild("name").FirstChild("middlename");
+		H = SierraECG2.FirstChild("patient").FirstChild("generalpatientdata").FirstChild("name").FirstChild("firstname");
 		if (H.Element()) {
 			const char *str = H.Element()->GetText();
 			size_t l2 = strlen(str); 
 			if (NameLength+l2+1 < MAX_LENGTH_NAME) {
-				hdr->Patient.Name[NameLength]= ' ';
+				hdr->Patient.Name[NameLength]= 0x1f;	// unit separator ascii(31)
 				strncpy(hdr->Patient.Name+NameLength+1, str, l2+1);
 				NameLength += l2+1;
 			}
 		}
-		H = SierraECG2.FirstChild("patient").FirstChild("generalpatientdata").FirstChild("name").FirstChild("lastname");
+		H = SierraECG2.FirstChild("patient").FirstChild("generalpatientdata").FirstChild("name").FirstChild("middlename");
 		if (H.Element()) {
 			const char *str = H.Element()->GetText();
 			size_t l2 = strlen(str); 
@@ -320,7 +319,7 @@ EXTERN_C int sopen_HL7aECG_read(HDRTYPE* hdr) {
 					size_t l2 = str2 ? strlen(str2) : 0;
 					if (0 < l1 && l1 <= MAX_LENGTH_PID) strncpy(hdr->Patient.Name, str1, l1+1);
 					if (l1+l2+1 < MAX_LENGTH_PID) {	
-						hdr->Patient.Name[l1] = ' ';
+						hdr->Patient.Name[l1] = 0x1f;
 						strncpy(hdr->Patient.Name+l1+1, str2, l2+1);
 					}
 				}
@@ -547,8 +546,8 @@ EXTERN_C int sopen_HL7aECG_read(HDRTYPE* hdr) {
 						strcpy(hdr->Patient.Name, str1);		// Flawfinder: ignore
 					if (l1+l2+2 <= MAX_LENGTH_NAME) {
 						strcpy(hdr->Patient.Name, str1);		// Flawfinder: ignore
-						strcpy(hdr->Patient.Name+l1, ", ");		// Flawfinder: ignore
-						strcpy(hdr->Patient.Name+l1+2, str2);		// Flawfinder: ignore
+						hdr->Patient.Name[l1] = 0x1f;
+						strcpy(hdr->Patient.Name+l1+1, str2);		// Flawfinder: ignore
 					}
 				}
 				}
@@ -1005,12 +1004,13 @@ EXTERN_C int sclose_HL7aECG_write(HDRTYPE* hdr){
 
 	char timelow[24], timehigh[24];
 	gdf_time t1,t2;
-	t1 = hdr->T0;// + ldexp(timezone/(3600.0*24),32);	
+	t1 = hdr->T0;// + ldexp(timezone/(3600.0*24),32);
+	if (VERBOSE_LEVEL>7) fprintf(stdout,"gdftime: hdr->T0: %ld\n", t1);
 
 	t0 = gdf_time2tm_time(t1);
 	sprintf(timelow, "%4d%2d%2d%2d%2d%2d", t0->tm_year+1900, t0->tm_mon+1, t0->tm_mday, t0->tm_hour, t0->tm_min, t0->tm_sec);
 
-	t1 = hdr->T0 + ldexp((hdr->SPR/hdr->SampleRate)/(3600.0*24),32);	
+	t1 = hdr->T0 + ldexp((hdr->SPR/hdr->SampleRate)/(3600.0*24),32);
 	t0 = gdf_time2tm_time(t1);
 	sprintf(timehigh, "%4d%2d%2d%2d%2d%2d", t0->tm_year+1900, t0->tm_mon+1, t0->tm_mday, t0->tm_hour, t0->tm_min, t0->tm_sec);
 

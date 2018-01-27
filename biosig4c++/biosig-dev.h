@@ -1,6 +1,6 @@
 /*
 
-% Copyright (C) 2005-2016 Alois Schloegl <alois.schloegl@gmail.com>
+% Copyright (C) 2005-2018 Alois Schloegl <alois.schloegl@gmail.com>
 % This file is part of the "BioSig for C/C++" repository 
 % (biosig4c++) at http://biosig.sf.net/ 
 
@@ -362,8 +362,14 @@ typedef struct HDR_STRUCT {
 		gdf_time 	Birthday; 	/* Birthday of Patient */
 		// 		Age;		// the age is HDR.T0 - HDR.Patient.Birthday, even if T0 and Birthday are not known
 		uint16_t	Headsize[3]; 	/* circumference, nasion-inion, left-right mastoid in millimeter;  */
-		char		Name[MAX_LENGTH_NAME+1]; /* because for privacy protection it is by default not supported, support is turned on with FLAG.ANONYMOUS */
-//		char*		Name;	// because for privacy protection it is by default not supported, support is turned on with FLAG.ANONYMOUS
+
+		/* Patient Name:
+		 * can consist of up to three components, separated by the unit separator ascii(31), 0x1f, containing in that order
+			Last name, first name, second last name (see also SCP-ECG specification EN1064, Section 1, tag 0, 1, and 3)
+		 * for privacy protection this field is by default not supported, support can be turned on with FLAG.ANONYMOUS
+                 */
+		char		Name[MAX_LENGTH_NAME+1];
+
 		char		Id[MAX_LENGTH_PID+1];	/* patient identification, identification code as used in hospital  */
 		uint8_t		Weight;		/* weight in kilograms [kg] 0:unkown, 255: overflow  */
 		uint8_t		Height;		/* height in centimeter [cm] 0:unkown, 255: overflow  */

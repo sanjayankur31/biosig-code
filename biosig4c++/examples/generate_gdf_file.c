@@ -3,7 +3,7 @@
     This is only a rough outline, for details, please check biosig.h. 
     
 
-    Copyright (C) 2016 Alois Schloegl <alois.schloegl@ist.ac.at>
+    Copyright (C) 2016,2018 Alois Schloegl <alois.schloegl@ist.ac.at>
     This file is part of the "BioSig for C/C++" repository
     (biosig4c++) at http://biosig.sf.net/
 
@@ -135,7 +135,7 @@ int main(int argc, char* argv[]) {
 	birthday.tm_mday=1;
 	biosig_set_birthdate(hdr, birthday);
 
-	biosig_set_patient_name(hdr, "A. Anonymous");
+	biosig_set_patient_name(hdr, "Anonymous", "A.", NULL);
 	biosig_set_patient_id(hdr, "pseudonym_0123456789");
 	biosig_set_recording_id(hdr, "recording 0000");
 	// biosig_set_technician(hdr, "Ms.Expert"); // by login name is used
