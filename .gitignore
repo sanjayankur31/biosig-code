@@ -30,6 +30,7 @@ biosig4c++/autom4te.cache/
 biosig4c++/config.h
 biosig4c++/config.log
 biosig4c++/config.status
+biosig4c++/configure
 # Make output
 biosig4c++/Makefile
 biosig4c++/*/Makefile
