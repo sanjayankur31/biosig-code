@@ -595,10 +595,12 @@ extern const struct FileFormatStringTable_t FileFormatStringTable [];
 #		define htole64(x) (x)
 #       if !defined(_MSC_VER)
 #           define htobe64(x) __builtin_bswap64(x)
-#		    define be64toh(x) __builtin_bswap64(x)
+#           define be64toh(x) __builtin_bswap64(x)
 #       else
-#           define htobe64(x) _byteswap_uint64(x)
-#           define be64toh(x) _byteswap_uint64(x)
+#           define ntohll(x) (((_int64)(ntohl((int)((x << 32) >> 32))) << 32) | (unsigned int)ntohl(((int)(x >> 32))))
+#           define htonll(x) ntohll(x)
+#           define htobe64(x) htonll(x)
+#           define be64toh(x) ntohll(x)
 #       endif
 #		define le64toh(x) (x)
 
