@@ -13425,10 +13425,10 @@ size_t swrite(const biosig_data_type *data, size_t nelem, HDRTYPE* hdr) {
 
 #ifdef ZLIB_H
 					if (H1.FILE.COMPRESSION)
-						gzprintf(H1.FILE.gzFID,"%f\n",i/DIV);
+						gzprintf(H1.FILE.gzFID,"%g\n",i/DIV);
 					else
 #endif
-						fprintf(H1.FILE.FID,"%f\n",i/DIV);
+						fprintf(H1.FILE.FID,"%g\n",i/DIV);
 				}
 			}
 			else if (hdr->TYPE == BIN) {
