@@ -30,7 +30,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#if !defined(_MSC_VER)
 #include <sys/param.h>
+#endif
 #include <time.h>
 #include "physicalunits.h"
 
@@ -131,7 +133,6 @@ char *getlogin (void);
     typedef __int64		int64_t;
     typedef unsigned __int32	uint32_t;
     typedef __int32		int32_t;
-    typedef unsigned __int16	uint16_t;
     typedef __int16		int16_t;
     typedef unsigned __int8	uint8_t;
     typedef __int8		int8_t;
@@ -567,7 +568,7 @@ extern const struct FileFormatStringTable_t FileFormatStringTable [];
 #  include <endian.h>
 #  include <byteswap.h>
 
-#elif defined(__WIN32__)
+#elif defined(__WIN32__) || defined(_WIN32)
 #  include <stdlib.h>
 #  define __BIG_ENDIAN		4321
 #  define __LITTLE_ENDIAN	1234
@@ -577,8 +578,9 @@ extern const struct FileFormatStringTable_t FileFormatStringTable [];
 #  define bswap_64(x) __builtin_bswap64(x)
 
 #	include <winsock2.h>
-#	include <sys/param.h>
-
+#   if !defined(_MSC_VER)
+#	    include <sys/param.h>
+#   endif
 #	if BYTE_ORDER == LITTLE_ENDIAN
 #		define htobe16(x) htons(x)
 #		define htole16(x) (x)
@@ -590,9 +592,14 @@ extern const struct FileFormatStringTable_t FileFormatStringTable [];
 #		define be32toh(x) ntohl(x)
 #		define le32toh(x) (x)
 
-#		define htobe64(x) __builtin_bswap64(x)
 #		define htole64(x) (x)
-#		define be64toh(x) __builtin_bswap64(x)
+#       if !defined(_MSC_VER)
+#           define htobe64(x) __builtin_bswap64(x)
+#		    define be64toh(x) __builtin_bswap64(x)
+#       else
+#           define htobe64(x) _byteswap_uint64(x)
+#           define be64toh(x) _byteswap_uint64(x)
+#       endif
 #		define le64toh(x) (x)
 
 #	elif BYTE_ORDER == BIG_ENDIAN
