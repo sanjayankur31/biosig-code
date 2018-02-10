@@ -41,20 +41,28 @@ AC_CHECK_LIB([z],       [gzopen],              AC_SUBST(HAVE_LIBZ,       "1") )
 #AC_CHECK_LIB([gdcmMSFF], [main])
 
 AC_CHECK_LIB([iberty], [getlogin])
+
 AC_CHECK_LIB([iconv], [iconv_open])
 AC_CHECK_HEADER([iconv.h], ,[AC_MSG_ERROR([can not find iconv.h])])
+AC_CHECK_LIB([tinyxml], [main],                AC_SUBST(HAVE_LIBTINYXML, "1") [TEST_LIBS="$TEST_LIBS -ltinyxml"],  AC_MSG_WARN([libtinyxml is not installed.]))
+
+AC_CHECK_PROG(HAVE_OCTAVE,[mkoctfile],"1")
+#AC_CHECK_PROG(HAVE_MATHEMATICA,[mathematica],"1")
+AC_CHECK_PROG(HAVE_PYTHON,[python],"1")
+AC_CHECK_PROG(HAVE_PYTHON2,[python2],"1")
+AC_CHECK_PROG(HAVE_PYTHON3,[python3],"1")
+AC_CHECK_PROG(HAVE_R,[R],"1")
 
 # FIXME: Replace `main' with a function in `-llibmex':
 AC_CHECK_LIB([libmex], [main])
 # FIXME: Replace `main' with a function in `-llibmx':
 AC_CHECK_LIB([libmx], [main])
 
-AC_CHECK_LIB([m],       [round],               AC_SUBST(HAVE_LIBM,       "1") )
+AC_CHECK_LIB([m],	 [round],		AC_SUBST(HAVE_LIBM,       "1") )
 
 # Wolfram/Mathematica Mathlink interface
-AC_CHECK_LIB([mathlink], [MLPutRealArray])
-# FIXME: Replace `main' with a function in `-luuid':
-AC_CHECK_LIB([uuid], [main])
+AC_CHECK_LIB([mathlink], [MLPutRealArray],	AC_SUBST(HAVE_MATHEMATICA,"1"))
+AC_CHECK_LIB([uuid],     [uuid_generate],	AC_SUBST(HAVE_UUID,       "1"))
 
 #AC_CHECK_LIB([pthread], [pthread_mutex_lock])
 # FIXME: Replace `main' with a function in `-lssp':

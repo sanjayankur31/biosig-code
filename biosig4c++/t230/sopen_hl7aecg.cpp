@@ -22,11 +22,9 @@
 #include <stdlib.h>	// for strtod(3)
 #include <strings.h>
 
-#include "../biosig-dev.h"
 #include "../biosig.h"
-#ifdef WITH_LIBXML2
-#  include <libxml/parser.h>
-#  include <libxml/tree.h>
+#if defined(WITH_LIBTINYXML)
+#  include <tinyxml.h>
 #else 
 #  include "../XMLParser/tinyxml.h"
 #endif
@@ -130,9 +128,6 @@ EXTERN_C int sopen_HL7aECG_read(HDRTYPE* hdr) {
 
 	if (VERBOSE_LEVEL > 7) fprintf(stdout,"hl7r: [410]\n"); 
 
-#ifdef WITH_LIBXML2
-	fprintf(stderr,"Warning: LIBXML2 is used instead of TinyXML - support for HL7aECG is very experimental and must not be used for production use! You are warned\n");
-#else
 	TiXmlDocument doc(hdr->FileName);
 
 	if (VERBOSE_LEVEL > 7) fprintf(stdout,"hl7r: [411]\n"); 
@@ -909,8 +904,6 @@ EXTERN_C int sopen_HL7aECG_read(HDRTYPE* hdr) {
 	else
 	    fprintf(stderr, "%s : failed to parse (1)\n", hdr->FileName);
 
-#endif
-
 	return(0);
 
 };
@@ -1427,7 +1420,13 @@ EXTERN_C int sclose_HL7aECG_write(HDRTYPE* hdr){
 	delete []S;
     }
 
+#if defined(WITH_LIBTINYXML)
+	if (hdr->FILE.COMPRESSION)
+		fprintf(stderr,"WARNING: saving of compressed HL7aECG file not supported - compression flag is ignored\n");
+	int status = doc.SaveFile(hdr->FileName);
+#else
 	int status = doc.SaveFile(hdr->FileName, (char)hdr->FILE.COMPRESSION);
+#endif
 //	doc.SaveFile(hdr);
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"hl7c 989  (%i)\n",status);
 

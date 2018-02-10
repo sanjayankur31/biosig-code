@@ -208,7 +208,6 @@ DEFINES      += -D=WITH_FAMOS
 DEFINES      += -D=WITH_FIFF
 DEFINES      += -D=WITHOUT_NETWORK
 DEFINES      += -D=WITH_SCP3
-#DEFINES      += -D=WITH_LIBXML2 
 DEFINES      += -D=WITH_FEF
 #DEFINES      += -D=WITH_PDP
 #DEFINES      += -D=WITH_DCMTK
@@ -246,15 +245,16 @@ endif
 ifeq (1,@HAVE_LIBM@)
 	LDLIBS     += -lm
 endif
+ifeq (1,@HAVE_LIBTINYXML@)
+	DEFINES    += -D=WITH_LIBTINYXML
+	LDLIBS     += -ltinyxml
+endif
 
 ifneq (,$(findstring WITH_GDCM, $(DEFINES)))
   INCPATH    += -I$(wildcard /usr/include/gdcm-2*/)
   LDLIBS     += -lgdcmCommon -lgdcmDSED -lgdcmMEXD -lgdcmMSFF -lgdcmDICT -lgdcmIOD
 endif
 
-ifneq (,$(findstring WITH_LIBXML2, $(DEFINES)))
-  LDLIBS     += -lxml2
-endif
 ifneq (,$(findstring WITH_CURL, $(DEFINES)))
   LDLIBS     += -lcurl
 endif
@@ -377,8 +377,8 @@ SOURCES      += biosig.c \
 		biosig_client.c \
 		biosig_server.c
 
-ifeq (,$(findstring WITH_LIBXML2, $(DEFINES)))
-  ## TinyXML is used when built without libxml2 	
+ifeq (,$(findstring WITH_LIBTINYXML, $(DEFINES)))
+  ## build with TinyXML when libtinyxml is not available
   SOURCES    +=	XMLParser/tinyxml.cpp \
 		XMLParser/tinyxmlparser.cpp \
 		XMLParser/tinyxmlerror.cpp \
@@ -461,12 +461,9 @@ ifeq (,$(findstring WITHOUT_SCP_DECODE, $(MinGWDEF)))
   MinGWOBJECTS += win32/scp-decode.obj
 endif
 
-ifeq (,$(findstring WITH_LIBXML2, $(DEFINES)))
-  ## TinyXML is used when built without libxml2 	
+ifeq (,$(findstring WITH_LIBTINYXML, $(DEFINES)))
+  ## build with TinyXML when libtinyxml is not available
   OBJECTS    += tinyxml.o tinyxmlparser.o tinyxmlerror.o tinystr.o 
-endif
-ifeq (,$(findstring WITH_LIBXML2, $(DEFINES)))
-  ## TinyXML is used when built without libxml2 	
   MinGWOBJECTS += win32/tinyxml.obj win32/tinyxmlparser.obj win32/tinyxmlerror.obj win32/tinystr.obj 
 endif
 
