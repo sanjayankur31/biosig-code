@@ -38,7 +38,7 @@ SEXP sload(SEXP filename, SEXP channels) {
 
     // Open file 
     HDRTYPE *hdr = sopen(fn, "r", NULL);
-    if (serror2(hdr)) return NULL;   
+    if (serror2(hdr)) return R_NilValue;
 
     long NS = biosig_get_number_of_channels(hdr);	
   
@@ -51,7 +51,7 @@ SEXP sload(SEXP filename, SEXP channels) {
         destructHDR(hdr);
 	Free(result);
 	UNPROTECT(1);
-        return NULL;   
+        return R_NilValue;
     }
 
     // close file, and cleanup memory to avoid any leaks 
