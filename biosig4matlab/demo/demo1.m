@@ -25,11 +25,22 @@
 [F,P]=uigetfile('*.*','Pick an ECG file');
 
 if (F==0)
-	fprintf(1,'ECG data is available from PhysioBank: http://www.physionet.org/physiobank/database/#ecg\n');
-	return; 
+	for ext = {'atr','dat','hea'}
+		f = ['100.',ext{1}]
+		url=fullfile('https://www.physionet.org/physiobank/database/mitdb/',f);
+		fprintf(1,'Example ECG data is automatically downloaded from PhysioBank: http://www.physionet.org/physiobank/database/#ecg\n');
+		[S, SUCCESS] = urlread(url);
+		if SUCCESS,
+			fid=fopen(f,'w');
+			fwrite(fid,S,'char');
+			fclose(fid);
+		else
+			error('download of example file failed');
+		end;
+	end;
+	P='';
+	F='100.hea';
 end; 	
-
-
 
 HDR  = sopen(fullfile(P,F),'r');
 if HDR.NS > 1,

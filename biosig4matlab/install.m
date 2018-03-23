@@ -69,8 +69,8 @@ if exist([BIOSIG_HOME,'/freetb4matlab'],'dir')
 end
 
 path([BIOSIG_HOME,'/tsa'],path);		%  Time Series Analysis
-%path([BIOSIG_HOME,'/tsa/inst'],path);		%  Time Series Analysis
-% some users might get confused by this
+path([BIOSIG_HOME,'/tsa/inst'],path);		%  Time Series Analysis
+path([BIOSIG_HOME,'/tsa/src'],path);		%  Time Series Analysis
 
 fprintf(1,'\nThe NaN-toolbox is going to be installed\n'); 
 fprintf(1,'The NaN-toolbox is a powerful statistical and machine learning toolbox, \nwhich is also able to handle data with missing values.\n');
