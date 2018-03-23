@@ -7,6 +7,16 @@ Quick start for Debian/Linux installing libbiosig:
 # Requirements:
         apt-get install libb64-dev libsuitesparse-dev zlib1g-dev
 
+# Download
+## latest development version
+	git clone https://git.code.sf.net/p/biosig/code biosig-code
+	cd biosig-code/biosig4c++
+	autoreconf -fi
+##
+	wget https://sourceforge.net/projects/biosig/files/BioSig\ for\ C_C\+\+/src/biosig4c\+\+-1.9.1.src.tar.gz
+	tar xvf biosig4c++-1.9.1.src.tar.gz
+
+
 # compiling libbiosig
    ./configure && make   # compile libbiosig
 
@@ -26,6 +36,10 @@ Quick start for Debian/Linux installing libbiosig:
 # Compiling save2gdf and biosig_fhir
    make tools
    sudo make install_tools
+
+# Monitoring of flow sensor
+   ./flowmon2 -d `ls /dev/ttyUSB*`
+
 
 
 

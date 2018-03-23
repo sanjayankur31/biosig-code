@@ -44,7 +44,8 @@ AC_CHECK_LIB([iberty], [getlogin])
 
 AC_CHECK_LIB([iconv], [iconv_open])
 AC_CHECK_HEADER([iconv.h], ,[AC_MSG_ERROR([can not find iconv.h])])
-AC_CHECK_LIB([tinyxml], [main],                AC_SUBST(HAVE_LIBTINYXML, "1") [TEST_LIBS="$TEST_LIBS -ltinyxml"],  AC_MSG_WARN([libtinyxml is not installed.]))
+AC_CHECK_LIB([tinyxml] , [main],        AC_SUBST(HAVE_LIBTINYXML, "1")  [TEST_LIBS="$TEST_LIBS -ltinyxml"],   AC_MSG_WARN([libtinyxml is not installed.]))
+AC_CHECK_LIB([tinyxml2], [main],        AC_SUBST(HAVE_LIBTINYXML2, "1") [TEST_LIBS="$TEST_LIBS -ltinyxml2"],  AC_MSG_WARN([libtinyxml2 is not installed.]))
 
 AC_CHECK_PROG(HAVE_OCTAVE,[mkoctfile],"1")
 #AC_CHECK_PROG(HAVE_MATHEMATICA,[mathematica],"1")

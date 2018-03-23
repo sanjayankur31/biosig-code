@@ -6,20 +6,26 @@ import platform
 if platform.system() == 'Linux' :
      LIBS = ['biosig']
 elif platform.system() == 'Windows' :
-     LIBS = ['biosig','stdc++','iconv','z','cholmod']
+     LIBS = ['biosig','stdc++','iconv','z','cholmod','tinyxml']
+     try:
+        from setuptools import setup
+        from setuptools import Extension
+     except ImportError:
+        from distutils.core import setup
+        from distutils.extension import Extension
 else:
-     LIBS = ['biosig','stdc++','iconv','z','cholmod']
+     LIBS = ['biosig','stdc++','iconv','z','cholmod','tinyxml']
 
 module1 = Extension('biosig',
                     define_macros = [('MAJOR_VERSION', '1'),
-                                     ('MINOR_VERSION', '8')],
-                    include_dirs = ['./..','/usr/local/include',mu.get_numpy_include_dirs()[0]],
+                                     ('MINOR_VERSION', '9')],
+                    include_dirs = ['./..',CPATH,mu.get_numpy_include_dirs()[0]],
                     libraries = LIBS,
-                    library_dirs = ['./..','/usr/local/lib'],
+                    library_dirs = ['./..',LDPATH],
                     sources = ['biosigmodule.c'])
 
 setup (name = 'Biosig',
-       version = '1.8',
+       version = '1.9',
        description = 'This is a biosig package',
        author = 'Alois Schloegl',
        author_email = 'alois.schloegl@ist.ac.at',
