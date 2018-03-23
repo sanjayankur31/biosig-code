@@ -88,6 +88,7 @@ else
 		## exclude conflicting definition of sopen from mingw's io.h
 		CFLAGS  += -I.
 		IO_H_FILE2 = io.h
+		CFLAGS  += -I$(prefix)/include
 		LIBS    += -lssp
 		LDLIBS  += -liconv -liberty -lws2_32
 	endif
@@ -269,11 +270,13 @@ endif
 
 %.mexw32: %.cpp Makefile biosig.h biosig-dev.h
 	## $(CROSS)-g++ is used instead of $(CXX), so it can be called from biosig as well as mxe. 
-	$(CROSS)-g++ -shared $(GNUMEX)/mex.def -DMATLAB_MEX_FILE $(DEFINES) -x c++  \
+	$(CROSS)-g++ -shared $(GNUMEX)/mex.def -DMATLAB_MEX_FILE $(DEFINES) -x c++ \
+		-I$(prefix)/include \
 		-I$(W32MAT_INC) -O2 -o "$@" -L$(GNUMEX) -s "$<" -llibmx -llibmex -lbiosig -liconv -lssp $(LDLIBS) -lws2_32
 
 %.mexw64: %.cpp Makefile biosig.h biosig-dev.h
-	$(CROSS64)-g++ -shared $(GNUMEX64)/mex.def -DMATLAB_MEX_FILE $(DEFINES) -x c++  \
+	$(CROSS64)-g++ -shared $(GNUMEX64)/mex.def -DMATLAB_MEX_FILE $(DEFINES) -x c++ \
+		-I$(prefix)/include \
 		-I$(W64MAT_INC) -O2 -o "$@" -L$(GNUMEX64) -s "$<" -llibmx -llibmex -lbiosig -liconv -lssp $(LDLIBS) -lws2_32
 
 
