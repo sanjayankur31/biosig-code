@@ -33,7 +33,7 @@
 */
 
 
-#include "biosig-dev.h"
+#include "../biosig.h"
 
 #include <math.h>
 #include <inttypes.h>

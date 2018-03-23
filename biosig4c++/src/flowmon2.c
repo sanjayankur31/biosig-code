@@ -38,7 +38,7 @@
 
 
 
-#include "../biosig-dev.h"
+#include "../biosig.h"
 
 #include <errno.h>
 #include <math.h>
@@ -192,7 +192,7 @@ char debugfile[] = "flowmonDD.log.txt";
 	const char help[]=
 		"FLOWMON reads data of the flow sensor through the serial terminal and stores it into a data file for archiving.\n"
 		"   The current measurement values are also written into the file /var/www/flowsensor.html.\n"
-		"   This software supports the device 'Flomw Meter GSM-D3KA-BN00 (BHT Rotary Gas Meter) from Vögtlin Instruments'.\n\n"
+		"   This software supports the device 'Flow Meter GSM-D3KA-BN00 (BHT Rotary Gas Meter) from Vögtlin Instruments'.\n\n"
 		"Usage: flowmon -d devicename [-o outfile] [-D debugfile] [-V#]\n"
 		"   devicename: default value is /dev/ttyS0\n"
 		"   outfile:    logs the recorded data\n"
@@ -200,6 +200,7 @@ char debugfile[] = "flowmonDD.log.txt";
                 "   debugfile:  logs the data in ascii text"
                 "               If no outfile is provided, the data will be logged into daily files named flowmon<$day-of-month>.log.txt \n"
                 "   -V#		verbose level #=0 is no messages, #=9 is highest level(debugging) messages\n"
+                "   -h, --help:	display this help text"
                 "   -z		save outfile in gzipped format"  
                 " \n\n"
 	;
@@ -219,6 +220,10 @@ char debugfile[] = "flowmonDD.log.txt";
 		else if (!strcmp(argv[k],"-d")) {
 			devicename = argv[++k];
 		}
+		else if (!strcmp(argv[k],"-h") || !strcmp(argv[k],"--help") ) {
+                        fprintf(stdout,"%s",help);
+                        return 0;
+                }
 		else if (!strcmp(argv[k],"-o")) {
 			k++;
 			outFile = argv[k];
