@@ -24,6 +24,7 @@
 
 #include "../biosig.h"
 #if defined(WITH_LIBTINYXML)
+#  define TIXML_USE_STL
 #  include <tinyxml.h>
 #else 
 #  include "../XMLParser/tinyxml.h"
@@ -940,33 +941,6 @@ EXTERN_C int sclose_HL7aECG_write(HDRTYPE* hdr){
     struct tm *t0;
     char tmp[80];	
 
-#ifdef WITH_LIBXML2
-	fprintf(stderr,"Warning: LIBXML2 is used instead of TinyXML - support for HL7aECG is very experimental and must not be used for production use! You are warned\n");
-
-	xmlDoc *doc = xmlNewDoc("1.0");
-	xmlNode *root = xmlNewNode(NULL, "root");
-	xmlDocSetRootElement(doc, root);
- 
-	xmlNode *node = xmlNewNode(NULL, "element");
-	xmlAddChild(node, xmlNewText("some text here"));
-	xmlAddChild(root, node);
- 
-	if (ifopen(hdr, "w")) {
-		biosigERROR(hdr, B4C_CANNOT_WRITE_FILE, "Cannot open file for writing");
-	} 
-	else if (hdr->FILE.COMPRESSION) 
-		xmlElemDump(hdr->FILE.gzFID, doc, root);
-	else
-		xmlElemDump(hdr->FILE.FID, doc, root);
-	
-	ifclose(hdr);
- 
-	xmlFreeDoc(doc);
-	xmlCleanupParser();
- 
-
-#else
-
     TiXmlDocument doc;
     
     TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "UTF-8", "");
@@ -1429,8 +1403,6 @@ EXTERN_C int sclose_HL7aECG_write(HDRTYPE* hdr){
 #endif
 //	doc.SaveFile(hdr);
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"hl7c 989  (%i)\n",status);
-
-#endif 
 
     return(0);
 };
