@@ -3820,6 +3820,12 @@ else if (!strncmp(MODE,"r",1)) {
 		count = ifread(hdr->AS.Header, 1, PAGESIZE, hdr);
 		hdr->AS.Header[count]=0;
 
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) count=%i\n", __func__, __LINE__,(int)count);
+
+		if (count < 512) {
+			biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "Error SOPEN(READ): file is too short\n");
+			return(hdr);
+		}
 
 		if (!memcmp(Header1,MAGIC_NUMBER_GZIP,strlen(MAGIC_NUMBER_GZIP))) {
 #ifdef ZLIB_H

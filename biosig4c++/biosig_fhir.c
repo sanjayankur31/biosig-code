@@ -134,8 +134,13 @@ char* biosig_fhir_binary_json_template(const char *filename, FILE *fid) {
 	  "content" : "<base64Binary>" // R!  The actual content
 	}
 	*/
+	int status;
 	HDRTYPE *hdr = NULL;
 	hdr = sopen(filename, "r", hdr);
+	if ((status=serror2(hdr))) {
+		destructHDR(hdr);
+		exit(status);
+	}
 
 	fprintf(fid,"{\n"	
 		  "    \"resourceType\" : \"Binary\",\n"
