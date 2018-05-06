@@ -1,28 +1,29 @@
-from distutils.core import setup, Extension
+try:
+    from setuptools import setup
+    from setuptools import Extension
+except ImportError:
+    from distutils.core import setup
+    from distutils.extension import Extension
 
 import numpy.distutils.misc_util as mu
-import platform
-
-if platform.system() == 'Linux' :
-     LIBS = ['biosig']
-elif platform.system() == 'Windows' :
-     LIBS = ['biosig','stdc++','iconv','z','cholmod','tinyxml']
-     try:
-        from setuptools import setup
-        from setuptools import Extension
-     except ImportError:
-        from distutils.core import setup
-        from distutils.extension import Extension
-else:
-     LIBS = ['biosig','stdc++','iconv','z','cholmod','tinyxml']
+try:
+    import pkgconfig
+    PKG=pkgconfig.parse('libbiosig')
+    CPATH=PKG['include_dirs']
+    LIBS=PKG['libraries']
+    LIBDIR=PKG['library_dirs']
+except ValueError:
+    print('cannot load pkgconfig(libbiosig) - use default location')
+    CPATH='/usr/local/include'
+    LIBS='-lbiosig'
+    LIBDIR='/usr/local/lib'
 
 module1 = Extension('biosig',
-                    define_macros = [('MAJOR_VERSION', '1'),
-                                     ('MINOR_VERSION', '9')],
-                    include_dirs = ['./..',CPATH,mu.get_numpy_include_dirs()[0]],
-                    libraries = LIBS,
-                    library_dirs = ['./..',LDPATH],
-                    sources = ['biosigmodule.c'])
+        define_macros = [('MAJOR_VERSION', '1'), ('MINOR_VERSION', '9')],
+        include_dirs = [CPATH, mu.get_numpy_include_dirs()[0]],
+        libraries    = LIBS,
+        library_dirs = LIBDIR,
+        sources      = ['biosigmodule.c'])
 
 setup (name = 'Biosig',
        version = '1.9',
