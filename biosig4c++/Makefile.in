@@ -249,6 +249,10 @@ ifeq (1,@HAVE_LIBTINYXML@)
 	DEFINES    += -D=WITH_LIBTINYXML
 	LDLIBS     += -ltinyxml
 endif
+ifeq (1,@HAVE_LIBTINYXML2@)
+	DEFINES    += -D=WITH_LIBTINYXML2
+	LDLIBS     += -ltinyxml2
+endif
 
 ifneq (,$(findstring WITH_GDCM, $(DEFINES)))
   INCPATH    += -I$(wildcard /usr/include/gdcm-2*/)
@@ -733,11 +737,12 @@ libbiosig.pc :
 	echo "Description: Biosig library"  >>"$@"
 	echo "Version: ${MAJOR_VERSION}.${MINOR_VERSION}.${STEPPING}" >>"$@"
 	echo "URL: http://biosig.sf.net"    >>"$@"
-	#echo "Libs: -L$(LIB) -lbiosig $(LDLIBS)"  >>"$@"
-	echo "Libs: $(LDLIBS)"  >>"$@"
-	#echo "Libs.private: -liconv"  >>"$@"
-	echo "Cflags: $(DEFINES) -I$(INC)" >>"$@"
-	#echo "Cflags: -I$(INC)" >>"$@"
+	#
+	echo "Requires: "                   >> "$@"
+	echo "Requires.private: "           >> "$@"
+	echo "Cflags: $(DEFINES) -I$(INC)"  >> "$@"
+	echo "Libs: -L$(LIB) -lbiosig"      >> "$@"
+	echo "Libs.private: $(LDLIBS)"      >> "$@"
 
 
 ## save2gdf, pdp2gdf
