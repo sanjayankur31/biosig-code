@@ -518,7 +518,7 @@ void mexFunction(
 
 		mxArray *tmp, *tmp2, *Patient, *Manufacturer, *ID, *EVENT, *Filter, *Flag, *FileType;
 		uint16_t numfields;
-		const char *fnames[] = {"TYPE","VERSION","FileName","T0","tzmin","FILE","Patient",\
+		const char *fnames[] = {"TYPE","VERSION","FileName","T0","tzmin","Patient",\
 		"HeadLen","NS","SPR","NRec","SampleRate", "FLAG", \
 		"EVENT","Label","LeadIdCode","PhysDimCode","PhysDim","Filter",\
 		"PhysMax","PhysMin","DigMax","DigMin","Transducer","Cal","Off","GDFTYP","TOffset",\
