@@ -31,7 +31,8 @@ setup (name = 'Biosig',
        author = 'Alois Schloegl',
        author_email = 'alois.schloegl@ist.ac.at',
        license = 'GPL',
-       url = 'http://docs.python.org/extending/building',
+       url = 'http://biosig.sf.net',
        long_description = '''This is the biosig demo package.''',
+       keywords = 'EEG ECG EKG EMG EOG Polysomnography ECoG biomedical signals SCP EDF GDF HEKA CFS ABF',
        ext_modules = [module1])
 
