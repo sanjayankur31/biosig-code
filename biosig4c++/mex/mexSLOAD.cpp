@@ -522,7 +522,7 @@ void mexFunction(
 		"HeadLen","NS","SPR","NRec","SampleRate", "FLAG", \
 		"EVENT","Label","LeadIdCode","PhysDimCode","PhysDim","Filter",\
 		"PhysMax","PhysMin","DigMax","DigMin","Transducer","Cal","Off","GDFTYP","TOffset",\
-		"LowPass","HighPass","Notch","ELEC","Impedance","fZ","AS","Dur","REC","Manufacturer",NULL};
+		"ELEC","Impedance","fZ","AS","Dur","REC","Manufacturer",NULL};
 
 		for (numfields=0; fnames[numfields++] != NULL; );
 		HDR = mxCreateStructMatrix(1, 1, --numfields, fnames);
@@ -601,8 +601,8 @@ void mexFunction(
 			*(mxGetPr(ELEC_Orient)+k1+NS*2)	= (double)hdr->CHANNEL[k].Orientation[2];
 			*(mxGetPr(ELEC_Area)+k1)	= (double)hdr->CHANNEL[k].Area;
 */
-			mxSetCell(Label,k1,mxCreateString(hdr->CHANNEL[k].Label));
-			mxSetCell(Transducer,k1,mxCreateString(hdr->CHANNEL[k].Transducer));
+			mxSetCell(Label,k1,mxCreateString(hdr->CHANNEL[k].Label ? hdr->CHANNEL[k].Label : ""));
+			mxSetCell(Transducer,k1,mxCreateString(hdr->CHANNEL[k].Transducer ? hdr->CHANNEL[k].Transducer : ""));
 			
 			mxSetCell(PhysDim1,k1,mxCreateString(PhysDim3(hdr->CHANNEL[k].PhysDimCode)));
 			k1++;
@@ -625,7 +625,7 @@ void mexFunction(
 		mxSetField(HDR,0,"Transducer",Transducer);
 		mxSetField(HDR,0,"Label",Label);
 
-		const char* field[] = {"XYZ","Orientation","Area","GND","REF",NULL};
+		const char* field[] = {"XYZ",NULL};
 		for (numfields=0; field[numfields++] != 0; );
 		tmp = mxCreateStructMatrix(1, 1, --numfields, field);
 		mxSetField(tmp,0,"XYZ",ELEC_POS);
@@ -789,6 +789,16 @@ void mexFunction(
 		for (numfields=0; manufacturer_fields[numfields++] != 0; );
 		Manufacturer = mxCreateStructMatrix(1, 1, --numfields, manufacturer_fields);
 
+		if ((hdr->TYPE==CFS) && (get_biosig_version () < 0x010902)) {
+			// workaround for files when these are not defined;
+			const char *emptyString="";
+			mxSetField(Manufacturer,0,"Name",mxCreateCharMatrixFromStrings(1,&emptyString));
+			mxSetField(Manufacturer,0,"Model",mxCreateCharMatrixFromStrings(1,&emptyString));
+			mxSetField(Manufacturer,0,"Version",mxCreateCharMatrixFromStrings(1,&emptyString));
+			mxSetField(Manufacturer,0,"SerialNumber",mxCreateCharMatrixFromStrings(1,&emptyString));
+		}
+
+		else {
 #ifdef __LIBBIOSIG2_H__
 		strarray[0] = biosig_get_manufacturer_name(hdr);
 		if (strarray[0]) {
@@ -796,12 +806,10 @@ void mexFunction(
 		}	
 		strarray[0] = biosig_get_manufacturer_model(hdr);
 		if (strarray[0]) {
-			biosig_get_manufacturer_model(hdr);
 			mxSetField(Manufacturer,0,"Model",mxCreateCharMatrixFromStrings(1,strarray));
 		}	
 		strarray[0] = biosig_get_manufacturer_version(hdr);
 		if (strarray[0]) {
-			biosig_get_manufacturer_version(hdr);
 			mxSetField(Manufacturer,0,"Version",mxCreateCharMatrixFromStrings(1,strarray));
 		}	
 		strarray[0] = biosig_get_manufacturer_serial_number(hdr);
@@ -826,6 +834,7 @@ void mexFunction(
 			mxSetField(Manufacturer,0,"SerialNumber",mxCreateCharMatrixFromStrings(1,strarray));
 		}
 #endif
+		}
 		mxSetField(HDR,0,"Manufacturer",Manufacturer);
 
 
