@@ -746,25 +746,19 @@ void mexFunction(
 		const char *patient_fields[] = {"Sex","Handedness","Id","Name","Weight","Height","Birthday",NULL};
 		for (numfields=0; patient_fields[numfields++] != 0; );
 		Patient = mxCreateStructMatrix(1, 1, --numfields, patient_fields);
-		const char *strarray[1];
+		const char *strarray;
 #ifdef __LIBBIOSIG2_H__
-		strarray[0] = biosig_get_patient_name(hdr);
-		if (strarray[0]) {
-			mxSetField(Patient,0,"Name",mxCreateCharMatrixFromStrings(1,strarray));
-		}	
-		strarray[0] = biosig_get_patient_id(hdr);
-		if (strarray[0]) {
-			mxSetField(Patient,0,"Id",mxCreateCharMatrixFromStrings(1,strarray));
-		}	
+		strarray = biosig_get_patient_name(hdr);
+		mxSetField(Patient,0,"Name",mxCreateCharMatrixFromStrings(strarray!=NULL, &strarray));
+
+		strarray = biosig_get_patient_id(hdr);
+		mxSetField(Patient,0,"Id",mxCreateCharMatrixFromStrings(strarray!=NULL, &strarray));
 #else
-		strarray[0] = hdr->Patient.Name;
-		if (strarray[0]) {
-			mxSetField(Patient,0,"Name",mxCreateCharMatrixFromStrings(1,strarray));
-		}
-		strarray[0] = hdr->Patient.Id;
-		if (strarray[0]) {
-			mxSetField(Patient,0,"Id",mxCreateCharMatrixFromStrings(1,strarray));
-		}
+		strarray = hdr->Patient.Name;
+		mxSetField(Patient,0,"Name",mxCreateCharMatrixFromStrings(strarray!=NULL, &strarray));
+
+		strarray = hdr->Patient.Id;
+		mxSetField(Patient,0,"Id",mxCreateCharMatrixFromStrings(strarray!=NULL, &strarray));
 #endif
 		mxSetField(Patient,0,"Handedness",mxCreateDoubleScalar(hdr->Patient.Handedness));
 
@@ -789,52 +783,32 @@ void mexFunction(
 		for (numfields=0; manufacturer_fields[numfields++] != 0; );
 		Manufacturer = mxCreateStructMatrix(1, 1, --numfields, manufacturer_fields);
 
-		if ((hdr->TYPE==CFS) && (get_biosig_version () < 0x010902)) {
-			// workaround for files when these are not defined;
-			const char *emptyString="";
-			mxSetField(Manufacturer,0,"Name",mxCreateCharMatrixFromStrings(1,&emptyString));
-			mxSetField(Manufacturer,0,"Model",mxCreateCharMatrixFromStrings(1,&emptyString));
-			mxSetField(Manufacturer,0,"Version",mxCreateCharMatrixFromStrings(1,&emptyString));
-			mxSetField(Manufacturer,0,"SerialNumber",mxCreateCharMatrixFromStrings(1,&emptyString));
-		}
-
-		else {
 #ifdef __LIBBIOSIG2_H__
-		strarray[0] = biosig_get_manufacturer_name(hdr);
-		if (strarray[0]) {
-			mxSetField(Manufacturer,0,"Name",mxCreateCharMatrixFromStrings(1,strarray));
-		}	
-		strarray[0] = biosig_get_manufacturer_model(hdr);
-		if (strarray[0]) {
-			mxSetField(Manufacturer,0,"Model",mxCreateCharMatrixFromStrings(1,strarray));
-		}	
-		strarray[0] = biosig_get_manufacturer_version(hdr);
-		if (strarray[0]) {
-			mxSetField(Manufacturer,0,"Version",mxCreateCharMatrixFromStrings(1,strarray));
-		}	
-		strarray[0] = biosig_get_manufacturer_serial_number(hdr);
-		if (strarray[0]) {
-			mxSetField(Manufacturer,0,"SerialNumber",mxCreateCharMatrixFromStrings(1,strarray));
-		}
+		strarray = biosig_get_manufacturer_name(hdr);
+		mxSetField(Manufacturer,0,"Name",mxCreateCharMatrixFromStrings(strarray!=NULL, &strarray));
+
+		strarray = biosig_get_manufacturer_model(hdr);
+		mxSetField(Manufacturer,0,"Model",mxCreateCharMatrixFromStrings(strarray!=NULL, &strarray));
+
+		strarray = biosig_get_manufacturer_version(hdr);
+		mxSetField(Manufacturer,0,"Version",mxCreateCharMatrixFromStrings(strarray!=NULL, &strarray));
+
+		strarray = biosig_get_manufacturer_serial_number(hdr);
+		mxSetField(Manufacturer,0,"SerialNumber",mxCreateCharMatrixFromStrings(strarray!=NULL, &strarray));
+
 #else
-		strarray[0] = hdr->ID.Manufacturer.Name;
-		if (strarray[0]) {
-			mxSetField(Manufacturer,0,"Name",mxCreateCharMatrixFromStrings(1,strarray));
-		}
-		strarray[0] = hdr->ID.Manufacturer.Model;
-		if (strarray[0]) {
-			mxSetField(Manufacturer,0,"Model",mxCreateCharMatrixFromStrings(1,strarray));
-		}
-		strarray[0] = hdr->ID.Manufacturer.Version;
-		if (strarray[0]) {
-			mxSetField(Manufacturer,0,"Version",mxCreateCharMatrixFromStrings(1,strarray));
-		}
-		strarray[0] = hdr->ID.Manufacturer.SerialNumber;
-		if (strarray[0]) {
-			mxSetField(Manufacturer,0,"SerialNumber",mxCreateCharMatrixFromStrings(1,strarray));
-		}
+		strarray = hdr->ID.Manufacturer.Name;
+		mxSetField(Manufacturer,0,"Name",mxCreateCharMatrixFromStrings(strarray!=NULL, &strarray));
+
+		strarray = hdr->ID.Manufacturer.Model;
+		mxSetField(Manufacturer,0,"Model",mxCreateCharMatrixFromStrings(strarray!=NULL, &strarray));
+
+		strarray = hdr->ID.Manufacturer.Version;
+		mxSetField(Manufacturer,0,"Version",mxCreateCharMatrixFromStrings(strarray!=NULL, &strarray));
+
+		strarray = hdr->ID.Manufacturer.SerialNumber;
+		mxSetField(Manufacturer,0,"SerialNumber",mxCreateCharMatrixFromStrings(strarray!=NULL, &strarray));
 #endif
-		}
 		mxSetField(HDR,0,"Manufacturer",Manufacturer);
 
 
