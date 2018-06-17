@@ -10,11 +10,6 @@ PYTHON ?= python
 PYVER  := $(shell $(PYTHON) -c "import sys; print(sys.version[:3])")
 
 
-# old style, using swig interface
-biosig4python:
-	make -C .. biosig4python
-
-# new interface, using so-called "extension modules", this still experimental
 build:
 	$(PYTHON) setup.py build
 	-python2 setup.py build
