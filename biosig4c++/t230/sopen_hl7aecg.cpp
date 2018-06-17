@@ -26,6 +26,8 @@
 #if defined(WITH_LIBTINYXML)
 #  define TIXML_USE_STL
 #  include <tinyxml.h>
+#elif defined(WITH_LIBTINYXML2)
+#  include <tinyxml2.h>
 #else 
 #  include "../XMLParser/tinyxml.h"
 #endif
@@ -129,7 +131,15 @@ EXTERN_C int sopen_HL7aECG_read(HDRTYPE* hdr) {
 
 	if (VERBOSE_LEVEL > 7) fprintf(stdout,"hl7r: [410]\n"); 
 
+#if defined(TINYXML_INCLUDED)
 	TiXmlDocument doc(hdr->FileName);
+#elif 0 // defined(TINYXML2_INCLUDED)
+	// this is not ready yet
+	tinyxml2::XMLDocument doc(hdr->FileName);
+#else
+	biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "HL7aECG not supported because of missing libtinyxml - recompile with libtinyxml");
+	return -1;
+#endif
 
 	if (VERBOSE_LEVEL > 7) fprintf(stdout,"hl7r: [411]\n"); 
 
@@ -137,12 +147,21 @@ EXTERN_C int sopen_HL7aECG_read(HDRTYPE* hdr) {
 
 	if (VERBOSE_LEVEL > 7) fprintf(stdout,"hl7r: [412]\n"); 
 
+#if defined(TINYXML_INCLUDED)
 	    TiXmlHandle hDoc(&doc);
 	    TiXmlHandle geECG = hDoc.FirstChild("CardiologyXML");
 	    TiXmlHandle IHE = hDoc.FirstChild("IHEDocumentList");
 	    TiXmlHandle aECG = hDoc.FirstChild("AnnotatedECG");
 	    TiXmlHandle SierraECG = hDoc.FirstChild("restingECG");
 	    TiXmlHandle SierraECG2 = hDoc.FirstChild("restingecgdata");
+#elif defined(TINYXML2_INCLUDED)
+	    TINYXML2_LIB XMLNode  hDoc(doc);
+	    TINYXML2_LIB XMLNode  geECG = hDoc.FirstChild("CardiologyXML");
+	    TINYXML2_LIB XMLNode  IHE = hDoc.FirstChild("IHEDocumentList");
+	    TINYXML2_LIB XMLNode  aECG = hDoc.FirstChild("AnnotatedECG");
+	    TINYXML2_LIB XMLNode  SierraECG = hDoc.FirstChild("restingECG");
+	    TINYXML2_LIB XMLNode  SierraECG2 = hDoc.FirstChild("restingecgdata");
+#endif
 
 	    if (VERBOSE_LEVEL>7) fprintf(stdout,"hl7r: [412]\n"); 
 
@@ -941,10 +960,18 @@ EXTERN_C int sclose_HL7aECG_write(HDRTYPE* hdr){
     struct tm *t0;
     char tmp[80];	
 
+#if defined(TINYXML_INCLUDED)
     TiXmlDocument doc;
     
     TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "UTF-8", "");
     doc.LinkEndChild(decl);
+#elif 0 // defined(TINYXML2_INCLUDED)
+	// this is not ready yet
+#else
+	biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "HL7aECG not supported because of missing libtinyxml - recompile with libtinyxml");
+	return -1;
+#endif
+
     
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"910 %i\n",1);
 
