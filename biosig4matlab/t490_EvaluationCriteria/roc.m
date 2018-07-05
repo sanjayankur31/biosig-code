@@ -9,10 +9,16 @@ function [RES] = roc(d, c, varargin);
 % [...] = roc(...,s);
 % [SEN, SPEC, TH, ACC, AUC,Yi,idx]=roc(...);
 % RES = roc(...);
-%	RES.THRESHOLD.FPR returns the threshold value to obtain
+%   RES.THRESHOLD.FPR returns the threshold value to obtain
 %	the given FPR rate.
-%	RES.THRESHOLD.{maxYI,maxACC,maxKAPPA} return the threshold
-%	value to obtain the maximum YoudenIndex (YI), Accuracy and Kappa, resp.
+%   RES.THRESHOLD.{maxYI,maxACC,maxKAPPA,maxMCC,maxMI,maxF1,maxPHI} return the
+%	he maximum Youden Index (YI), Accuracy, Cohen's Kappa [3],
+%       Matthews correlation coefficient [2] (also known as Phi coefficient [1]),
+%       Mutual information, and F1 score [4], resp.
+%   RES.TH([RES.THRESHOLD.maxYIix, RES.THRESHOLD.maxACCix, RES.THRESHOLD.maxKAPPAix,
+%             RES.THRESHOLD.maxMCCix, RES.THRESHOLD.maxMIix, RES.THRESHOLD.maxF1ix])
+%       return the optimal threshold for the respective measure.
+%
 % RES = roc(...,'flag_plot');
 %	plot ROC curve, including suggested thresholds
 %
@@ -34,13 +40,24 @@ function [RES] = roc(d, c, varargin);
 %
 %   Remark: if the sample values in d are not unique, there is a certain
 %      ambiguity in the results; the results may vary depending on
-%      on the ordering of the samples. Usually, this is only a problem,
+%      on the ordering of the samples. Usually, this is only an issue,
 %      if the number of unique data value is much smaller than the total
 %      number of samples.
 %
 % see also: AUC, PLOT, ROC
+%
+% References:
+% [0] https://en.wikipedia.org/wiki/ROC_curve
+% [1] https://en.wikipedia.org/wiki/Phi_coefficient
+% [2] https://en.wikipedia.org/wiki/Matthews_correlation_coefficient
+% [3] https://en.wikipedia.org/wiki/Cohen%27s_kappa
+% [4] https://en.wikipedia.org/wiki/F1_score
+% [5] A. Schlögl, J. Kronegg, J.E. Huggins, S. G. Mason;
+%     Evaluation criteria in BCI research.
+%     (Eds.) G. Dornhege, J.R. Millan, T. Hinterberger, D.J. McFarland, K.-R.Müller;
+%     Towards Brain-Computer Interfacing, MIT Press, 2007, p.327-342
 
-%	Copyright (c) 1997-2003,2005,2007,2010,2011,2016,2017 Alois Schloegl <alois.schloegl@gmail.com>
+%	Copyright (c) 1997-2003,2005,2007,2010,2011,2016-2018 Alois Schloegl <alois.schloegl@gmail.com>
 %	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 %
 % This library is free software; you can redistribute it and/or
@@ -144,7 +161,6 @@ tmp1(isnan(tmp1))=0;
 tmp2(isnan(tmp2))=0;
 RES.MI = -sum(tmp1,2) + sum(tmp2,2);
 
-
 % area under the ROC curve
 RES.AUC = -diff(FPR)' * (TPR(1:end-1)+TPR(2:end))/2;
 
@@ -228,7 +244,7 @@ if FLAG_DISPLAY,
 
 	plot(FPR(ix)*100,TPR(ix)*100, FPR(ix0)*100, TPR(ix0)*100,'ok', FPR(ix1)*100, TPR(ix1)*100, 'xb', FPR(ix2)*100, TPR(ix2)*100, 'xg', FPR(ix3)*100, TPR(ix3)*100, 'xr', FPR(ix4)*100, TPR(ix4)*100, 'xc', FPR(ix5)*100, TPR(ix5)*100, 'xm');
 	ylabel('TPR [%]');xlabel('FPR [%]');
-	legend('ROC','maxKappa','maxYoudenIndex','maxMCC','maxMI','maxACC','maxF1','location','southeast');
+	legend({'ROC','maxKappa','maxYoudenIndex','maxMCC','maxMI','maxACC','maxF1'},'location','southeast');
 
 	%ylabel('Sensitivity (true positive ratio) [%]');
 	%xlabel('1-Specificity (false positive ratio) [%]');

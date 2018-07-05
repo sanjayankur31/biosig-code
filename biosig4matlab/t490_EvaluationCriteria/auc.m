@@ -3,14 +3,14 @@ function [AREA,d,SEN,SPEC,ACC] = auc(d,c,color);
 %
 % function [AREA,TH,SEN,SPEC,ACC] = auc(d,c,color);
 % d     DATA
-% c     CLASS, vector with 0 and 1 
+% c     CLASS, vector with 0 and 1
 % color optional, plots ROC curve
-% 
+%
 % function [AREA,TH,SEN,SPEC,ACC]=auc(d1,d0,color);
-% d1    DATA of class 1 
+% d1    DATA of class 1
 % d2    DATA of class 0
 % color optional, plots ROC curve
-% 
+%
 % OUTPUT:
 % AREA    area under ROC curve
 % TH      Threshold
@@ -18,8 +18,7 @@ function [AREA,d,SEN,SPEC,ACC] = auc(d,c,color);
 % SPEC    specificity
 % ACC     accuracy
 
-%	$Id$
-%	Copyright (c) 1997-2003,2005 by  Alois Schloegl <alois.schloegl@gmail.com>
+%	Copyright (c) 1997-2003,2005,2018 by  Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 %
 % This library is free software; you can redistribute it and/or
@@ -41,12 +40,12 @@ function [AREA,d,SEN,SPEC,ACC] = auc(d,c,color);
 MODE = all(size(d)==size(c)) & all(all((c==1) | (c==0)));
 d=d(:);
 c=c(:);
-        
+
 if ~MODE
         d2=c;
         c=[ones(size(d));zeros(size(d2))];
         d=[d;d2];
-end;        
+end;
 
 if nargin<3
         color='-';
@@ -63,19 +62,19 @@ FN   = cumsum(x==1)/sum(x==1);
 TN   = cumsum(x==0)/sum(x==0);
 AREA = diff(FN)' * (TN(1:end-1)+TN(2:end))/2;
 
-if nargin>2,  
+if nargin>2,
         plot((1-TN)*100,(1-FN)*100,color);
 end;
 
-if nargout<3, return; end; 
+if nargout<3, return; end;
 TP = 1-FN;
 SEN = TP./(TP+FN);
 
-if nargout<4, return; end; 
+if nargout<4, return; end;
 FP = 1-TN;
 SPEC= TN./(TN+FP);
 
-if nargout<5, return; end; 
+if nargout<5, return; end;
 ACC = (TP+TN)./(TP+TN+FP+FN);
 
 
