@@ -924,9 +924,6 @@ static inline void bef64a(  double i, void* r) {
 #ifndef isfinite
 # define isfinite(a) (-INFINITY < (a) && (a) < INFINITY)
 #endif
-#ifndef isnan
-# define isnan(a) ((a)!=(a))
-#endif
 
 /*
     The macro IS_SET() can be used to test for defines in 

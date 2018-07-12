@@ -51,8 +51,10 @@
 #include <errno.h>
 #include <float.h>
 #include <locale.h>
+#include <math.h>      // define macro isnan()
 #include <stdlib.h>
 #include <sys/stat.h>
+
 
 #ifdef WITH_CURL
 #  include <curl/curl.h>
