@@ -1,0 +1,259 @@
+2018
+    Build system is now using autogen.sh, autoconf, and automake, 
+
+2017
+    JSON(HL7/FHIR) support added 
+    Interface to Python3/Python2 added
+
+2016 
+    R binding added
+
+Nov 2015
+    homebrew support added
+       brew tap schloegl/biosig
+       brew install biosig mexbiosig
+
+Mar 2013
+    GDF v2.5 released: support for timezone, time stamps, and SCP sections 7-11 added
+    GDF got a step closer to provide a backwards compatible way to upgrade
+
+Oct 2013
+    libgdf - a small lightwight library, with the same API than libbiosig 
+
+Aug 2012
+    <NEW> utility functions of detection miniature epsp and ipsp events added
+     the tools get_local_maxima_above_threshold.m and signal_deconvolution.m
+     are available from biosig4octmat/t300
+
+Jul 2012
+    packages for libbiosig, biosig4c++-tools, mexSLOAD and biosig4python 
+    will become available for Debian/Wheezy
+
+Jun 2012
+    Support of FEF data format implemented
+
+May 2012
+    Support on NetBSD tested
+
+May 2012
+    NIRS tools of Günter Bauernfeind added.  
+
+Apr 2012
+    Stimfit can be used with biosig
+
+Dec 2011
+    Support for Itanium and SPARC/Solaris platform fixed
+    Support for Philips Sierra ECG added  
+ 
+Oct 2011
+    Support for ARM platform improved
+
+Aug 2011
+    Support detecting spikes, actionpotentials and bursts added
+
+Jul 2011
+    SigViewer patch to fix several issues
+
+Apr 2011
+    Several new fileformats, including HEKA/Patchmaster v2, CFS and 
+    Igor text format (ITX), have been included.
+
+Jan 2011
+    MathLink interface to Mathematica
+
+Nov 2010
+    switch from mingw to mingw-cross-env for win32
+
+Oct 2009
+    Support spatial filters in biosig4c++ (libbiosig).
+
+Mar 2009
+    Several new file formats supported including alpha-trace (B.E.S.T), GE-ECG
+    Improvements in: BVA, CNT, EDF+, GDF, FAMOS, MFER, SCP, DICOM, HL7aECG
+
+Feb 2009
+    Introduction of biosig client-server (BSCS) architecture. 
+    The first prototyp can be used as a central archive for biomedical signal data.
+
+Nov 2008
+    mexSLOAD.mexw32 - Mex-file for WIN32/matlab available. 
+    About 30 file formats are supported in libbiosig  used by mexSLOAD, sigviewer, save2gdf
+    About 50 file formats are supported in biosig for octave and matlab
+
+Aug 2008
+    save2gdf.exe - a file converter for WIN32 is available 
+
+Jul 2008 
+    GDF v2.1 defined, BCI2000 implements GDFv2.1
+
+May 2008
+    SigViewer 0.2 supports approx. 15 different data formats.
+
+Apr 2008
+    MEX-Interface speeds up data access
+
+Mar 2008
+    BioSig4C++ supports now reading of ca 15 data formats including:
+    ACQ, AINF, BDF, BKR, BrainVision, CFWB, CNT, DEMG, EDF, EGI,
+    ETG4000, GDF v1, GDF v2, HL7aECG/FDA-XML, MFER, SCP-ECG.
+
+Sep 2007
+    BioSig4C++ supports reading of MFER data
+
+Aug 2007
+    BioSig4C++ supports the bidirectional conversion between the following 
+    six 6 data formats: SCP, HL7aECG, GDF, BDF, EDF, CFWB
+
+Jul 2007
+    CSP classifier included in BioSig4OctMat
+
+Jun 2007
+    SCP-ECG - HL7aECG converter is available through BioSig4C++
+
+Oct 2006
+    Sparse-LDA and libSVM classifier included. 
+
+Aug 2006 
+    GDF2.0 is finalized.
+
+Jul 2006
+    removing line interference supported. 
+
+Jun 2006 
+    LDA/GSVD classifier added. LDA/GSVD is able to address the small sample size
+    problem. Hence, it is very suitable for high dimensional data.  
+
+May 2006
+    BioSig improves ranking:
+	it's now within top 1000 projects on SourceForge
+	and is the top rank project in the field (keyword search on "EEG ECG Biosignal")
+
+Mar 2006
+    BioSig for Python started
+
+Mar 2006
+    The stats-activity at SourceForge shows 99.1 % for BioSig. 
+    Thus, BioSig belongs to the top 1% projects.
+    BioSig is the top project in the field of EEG and biomedical signal processing.
+
+Jan 2006 
+    Converter between SCP and aECG started
+
+Dec 2005
+    BioSig for Java started 
+
+Nov 2005
+    Benchmark test based on BioSig developed
+
+Oct 2005
+    BioSig's homepage got a new layout - thanks to Clemens Brunner
+
+Sep 2005
+    Several subprojects are started:
+    - Biosig4c++ is a C/C++ library for accessing GDF and other dataformats is started. 
+    - SigViewer is a Viewing and Scoring software programmed in C/C++ and Qt
+    - BioProFeed is a real-time acquisition analysis system based on RTAI 
+    - rtsBCI is a realtime BCI system based on Matlab/Simulink
+    - biosig4octmat is the known Biosig-toolbox for Octave and Matlab 
+
+Aug 2005 
+    The next version (2.0) of the GDF data format 2.0 is under development. 
+    GDF2.0 will contain many new features while having still a simple file 
+    structure like EDF and GDF 1.x.   
+
+Jul 2005 
+    BioProFeed: realtime data aquisition tool based on RTAI - thanks to Andreas Glatz
+    
+Jun 2005
+    new version of rtsBCI available - thanks to Reinhold Scherer
+
+Apr 2005
+    BIOSIG supports more dataformats (of biomedical signals) than 
+    any other software package. Currently, over 30 different biosignal formats
+    and several image and sound formats are supported. 
+
+Mar 2005
+    BIOSIG has been tested with whole Physiobank.
+
+Mar 2005
+    TLOAD loads and triggers data, rejects visually identified artifacts. 
+    All processing steps are included in TLOAD.   
+
+Feb 2005
+    multiclass LDA included
+
+Dec 2004
+    BCI competition 2005 has been announced. Support for 
+    these datasets is included in BIOSIG. 
+
+Nov 2004
+    SVIEWER, a powerful viewing and scoring 
+    program is included. Now, it is really an important 
+    milestone which justifies the new version number 1.00.  
+    Thanks to Franz Einspieler, a student of the 
+    University of Technology Graz, Austria.  
+
+Nov 2004
+    Support of several IMAGE-, MESH- and MATRIX- formats added
+    8  file formats can be written
+    39 file formats can be read, 
+    ca. 100 formats are identified
+
+Sep 2004
+    Interface to EEGLAB improved
+    BIOSIG and EEGLAB work together
+
+Aug 15th, 2004
+    Online HELP uploaded
+    HELP is now available online at 
+	http://biosig.sf.net/help/ and
+        http://pub.ist.ac.at/~schloegl/matlab/help/
+
+Jul  7th, 2004
+    BIOSIG 0.65 released
+	minor changes
+
+May 24th, 2004
+    New Release: BIOSIG 0.60 
+	More dataformats, new features, improved performance. 
+	see release notes for more details 
+
+May 05th, 2004
+    New Release: Dataformat 1.40 
+	see release notes for more details 
+
+Apr 16, 2004 
+    EEG data of the Graz BCI experiments are saved in GDF format using the BIOSIG toolbox: 
+    The Event Codes as proposed in http://dpmi.tu-graz.ac.at/~schloegl/matlab/eeg/EventCodes.html
+    are implemented in the GDF format. This allows to save EEG data and Events in a single file. 
+    The advantage of this solution is based on some modifications of the originally, simple 
+    EDF format. 
+
+April 16th, 2004
+    Thanks to Robert Oostenveld's effort, 
+    support for 3 more data formats is included. 
+    BrainVision, FIF and EEProbe are supported now.  
+
+April 4th, 2004
+    BIOSIG reaches new record number of monthly 
+    downloads. In March 497 downloads are counted. 
+    The last record number was in Oct 2003 with 
+    367 downloads.  
+
+April 1st, 2004
+    Alois Schloegl is 3rd winner of the 
+    OpenECG programming contest. CONGRATULATION. 
+    
+    He received the prize for implemented an 
+    Converter for the SCP-ECG data format for Octave. 
+    The converver is part of the BIOSIG. 
+
+March, 2004
+    Robert Oostenveld will include support for 
+    the following formats: CTF, NeuroMag, BrainVision, EEProbe
+    
+March 8th, 2004
+    New releases from the BIOSIG project. 
+    
+=== earlier news omitted ===
+
