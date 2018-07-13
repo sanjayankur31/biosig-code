@@ -850,7 +850,7 @@ mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz: mex/*.cpp
 	$(shell mkdir -p $($@_TMP)/src/)
 	cp mex/README $($@_TMP)/doc/
 	sed -e 's#^Version.*$$#Version: $(BIOSIG_VERSION)#g' -e 's#^Date.*$$#Date: '$(shell date +%Y-%m-%d)'#g' mex/DESCRIPTION > $($@_TMP)/DESCRIPTION
-	cp LICENSE $($@_TMP)/COPYING
+	cp COPYING $($@_TMP)/
 	cp mex/mex*.cpp mex/Makefile $($@_TMP)/src/
 	### TODO
 	#touch $($@_TMP)/src/mex{SOPEN,SLOAD,SSAVE}.m
