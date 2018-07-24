@@ -1880,7 +1880,7 @@ HDRTYPE* getfiletype(HDRTYPE* hdr)
 	// general SCP
 	else if (  (hdr->HeadLen>32) && 
                    ( MAGIC_EN1064_Section0Length    >  120)
-		&& ( MAGIC_EN1064_Section0Length    <  250)
+		&& ( MAGIC_EN1064_Section0Length    <  16+10*1024)
 		&& ((MAGIC_EN1064_Section0Length%10)== 6)
 		&& (*(uint16_t*)(hdr->AS.Header+ 8) == 0x0000)
 		&& (leu32p(hdr->AS.Header+10) == leu32p(hdr->AS.Header+24))
