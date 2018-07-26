@@ -2699,6 +2699,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 		if (TagNLen[tag]>0) {
 			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=9 & Length of Tag 9
 			memcpy((char*)(Header2+4),hdr->SCP.Section7, TagNLen[tag]);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
+			hdr->SCP.Section7 = Header2+4;
 			Header2 += 4+TagNLen[tag];
 		}
 		tag = 10;
@@ -2706,6 +2707,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 		if (TagNLen[tag]>0) {
 			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=10 & Length of Tag 10
 			memcpy((char*)(Header2+4),hdr->SCP.Section8, TagNLen[tag]);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
+			hdr->SCP.Section8 = Header2+4;
 			Header2 += 4+TagNLen[tag];
 		}
 		tag = 11;
@@ -2713,6 +2715,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 		if (TagNLen[tag]>0) {
 			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=11 & Length of Tag 11
 			memcpy((char*)(Header2+4),hdr->SCP.Section9, TagNLen[tag]);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
+			hdr->SCP.Section9 = Header2+4;
 			Header2 += 4+TagNLen[tag];
 		}
 		tag = 12;
@@ -2720,6 +2723,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 		if (TagNLen[tag]>0) {
 			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=12 & Length of Tag 12
 			memcpy((char*)(Header2+4),hdr->SCP.Section10, TagNLen[tag]);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
+			hdr->SCP.Section10 = Header2+4;
 			Header2 += 4+TagNLen[tag];
 		}
 		tag = 13;
@@ -2727,6 +2731,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 		if (TagNLen[tag]>0) {
 			leu32a(tag + (TagNLen[tag]<<8), Header2); 	// Tag=13 & Length of Tag 13
 			memcpy((char*)(Header2+4),hdr->SCP.Section11, TagNLen[tag]);		/* Flawfinder: ignore *** memory is allocated after 1st H3 scan above */
+			hdr->SCP.Section11 = Header2+4;
 			Header2 += 4+TagNLen[tag];
 		}
 #endif
