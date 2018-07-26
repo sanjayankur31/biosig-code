@@ -2392,7 +2392,15 @@ void struct2gdfbin(HDRTYPE *hdr)
 
 		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %i %i %i\n", __func__, __LINE__, 1, hdr->HeadLen, TagNLen[1]);
 
-	    	hdr->AS.Header = (uint8_t*) realloc(hdr->AS.Header, hdr->HeadLen);
+		if (hdr->SCP.Section7 || hdr->SCP.Section8 || hdr->SCP.Section9 || hdr->SCP.Section10 || hdr->SCP.Section11) {
+			// use auxillary pointer in order to keep SCP sections in memory
+			if (hdr->aECG) free(hdr->aECG);
+			hdr->aECG = hdr->AS.Header;
+			hdr->AS.Header = (uint8_t*) realloc(NULL, hdr->HeadLen);
+		}
+		else {
+			hdr->AS.Header = (uint8_t*) realloc(hdr->AS.Header, hdr->HeadLen);
+		}
 	    	if (hdr->AS.Header == NULL) {
 	    		biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Memory allocation failed");
 			return; 
@@ -2726,6 +2734,10 @@ void struct2gdfbin(HDRTYPE *hdr)
 		while (Header2 < (hdr->AS.Header + hdr->HeadLen) ) {
 			*Header2 = 0;
 			 Header2++;
+		}
+		if (hdr->aECG) {
+			free(hdr->aECG);
+			hdr->aECG=NULL;
 		}
 
 		if (VERBOSE_LEVEL>8) fprintf(stdout,"GDFw [339] %p %p\n", Header1,Header2);
