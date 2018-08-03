@@ -6162,13 +6162,14 @@ if (VERBOSE_LEVEL>8)
 
 	else if (hdr->TYPE==CNT) {
 
-		if (VERBOSE_LEVEL>7)
-			fprintf(stdout,"SOPEN: Neuroscan format \n");
+		if (VERBOSE_LEVEL>7) fprintf(stdout, "%s: Neuroscan format (count=%i)\n",__func__,count);
 
 		// TODO: fix handling of AVG and EEG files
-	    	hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header, 900);
-	    	hdr->VERSION = atof((char*)hdr->AS.Header + 8);
-	    	count  += ifread(hdr->AS.Header+count, 1, 900-count, hdr);
+		if (count < 900) {
+			hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header, 900);
+			count  += ifread(hdr->AS.Header+count, 1, 900-count, hdr);
+		}
+		hdr->VERSION = atof((char*)hdr->AS.Header + 8);
 
 		int8_t FLAG_CNT32 = 0;
 		uint16_t gdftyp = 0;
@@ -6177,7 +6178,7 @@ if (VERBOSE_LEVEL>8)
 	    	uint32_t nextfilepos = leu32p(hdr->AS.Header+12);
 
 		if (VERBOSE_LEVEL > 7)
-			fprintf(stdout,"SOPEN: Neuroscan format: minor revision %i eventtablepos: %i nextfilepos: %i\n", minor_revision, (unsigned)eventtablepos, nextfilepos);
+			fprintf(stdout,"%s: Neuroscan format: minor revision %i eventtablepos: %i nextfilepos: %i\n", __func__, minor_revision, (unsigned)eventtablepos, nextfilepos);
 
 		/* make base of filename */
 		size_t i=0, j=0;
@@ -6221,12 +6222,12 @@ if (VERBOSE_LEVEL>8)
 			struct stat FileBuf;
 
 			if (VERBOSE_LEVEL>7)
-				fprintf(stdout,"SOPEN: Neuroscan format: minor rev=%i bpb2:%i bpb4:%i\n", minor_revision, (unsigned)hdr->AS.bpb, (unsigned)bpb4);
+				fprintf(stdout,"%s (line %d): Neuroscan format: minor rev=%i bpb2:%i bpb4:%i\n", __func__,__LINE__, minor_revision, (unsigned)hdr->AS.bpb, (unsigned)bpb4);
 
 		    	switch (minor_revision) {
 		    	case 9:
 		    		// TODO: FIXME
-    				fprintf(stderr,"Warning biosig/sopen (CNT/EEG): minor revision %i is experimental\n", minor_revision);
+				fprintf(stderr,"Warning biosig/%s (line %d) (CNT/EEG): minor revision %i is experimental\n", __func__,__LINE__, minor_revision);
 		    		gdftyp = 3;
 		    		hdr->FILE.LittleEndian = 0;
 				stat(hdr->FileName,&FileBuf);
@@ -6241,11 +6242,11 @@ if (VERBOSE_LEVEL>8)
 		    		break;
 
 		    	default:
-	    			if (minor_revision != 16)
-	    				fprintf(stderr,"Warning biosig/sopen (CNT/EEG): minor revision %i not tested\n", minor_revision);
+				if (minor_revision != 16)
+					fprintf(stderr,"Warning biosig/%s (line %d) sopen (CNT/EEG): minor revision %i not tested\n", __func__,__LINE__, minor_revision);
 
 				if (VERBOSE_LEVEL>7)
-		    			fprintf(stdout,"biosig/sopen (CNT/EEG):  %i %i %i %i %i %i \n", (int)hdr->NRec, hdr->SPR, hdr->NS, (int)eventtablepos, (int)(hdr->AS.bpb * hdr->NRec + hdr->HeadLen), (int)(bpb4 * hdr->NRec + hdr->HeadLen));
+					fprintf(stdout,"biosig/%s (line %d) (CNT/EEG):  %i %i %i %i %i %i \n", __func__,__LINE__, (int)hdr->NRec, hdr->SPR, hdr->NS, (int)eventtablepos, (int)(hdr->AS.bpb * hdr->NRec + hdr->HeadLen), (int)(bpb4 * hdr->NRec + hdr->HeadLen));
 
 	    			if ((size_t)(hdr->AS.bpb * hdr->NRec + hdr->HeadLen) == eventtablepos)
 	    				gdftyp = 3;
@@ -6274,11 +6275,13 @@ if (VERBOSE_LEVEL>8)
 			hdr->NRec   = (eventtablepos - hdr->HeadLen) / hdr->AS.bpb;
 
 			if (VERBOSE_LEVEL > 7)
-	    			fprintf(stdout,"biosig/sopen (CNT):  %i %i %i %i %i \n", (int)hdr->NRec, hdr->SPR, hdr->NS, (int)eventtablepos, (int)(hdr->AS.bpb * hdr->NRec + hdr->HeadLen) );
+				fprintf(stdout,"biosig/%s (line %d) (CNT):  %i %i %i %i %i \n", __func__,__LINE__, (int)hdr->NRec, hdr->SPR, hdr->NS, (int)eventtablepos, (int)(hdr->AS.bpb * hdr->NRec + hdr->HeadLen) );
 		}
 
-	    	hdr->AS.Header = (uint8_t*) realloc(Header1,hdr->HeadLen);
-	    	count  += ifread(Header1+900, 1, hdr->NS*75, hdr);
+		if (count < hdr->HeadLen) {
+			hdr->AS.Header = (uint8_t*) realloc(Header1, hdr->HeadLen);
+			count  += ifread(Header1+count, 1, hdr->HeadLen-count, hdr);
+		}
 
 	    	hdr->CHANNEL = (CHANNEL_TYPE*) realloc(hdr->CHANNEL, hdr->NS * sizeof(CHANNEL_TYPE));
 	    	size_t bi = 0;
@@ -6288,7 +6291,12 @@ if (VERBOSE_LEVEL>8)
 			hc->Transducer[0] = '\0';
 		    	hc->GDFTYP 	= gdftyp;
 		    	hc->SPR 	= hdr->SPR; // *(int32_t*)(Header1+56);
+
+
 		    	const size_t len = min(10, MAX_LENGTH_LABEL);
+
+if (VERBOSE_LEVEL > 7) fprintf(stdout,"biosig/%s (line %d): #%d label <%s>\n", __func__,__LINE__,k, (char*) Header2 );
+
 		    	strncpy(hc->Label, (char*)Header2, len);
 		    	hc->Label[len]  = 0;
 		    	hc->LeadIdCode  = 0;
@@ -6343,7 +6351,7 @@ if (VERBOSE_LEVEL>8)
 				uint8_t tmp8 = buf[k*fieldsize+3];
 				if (tmp8>0) {
 					if (hdr->EVENT.TYP[k]>0)
-						fprintf(stdout,"Warning SOPEN(CNT) event %i: both, stimulus and response, codes (%i/%i) are non-zero. response code is ignored.\n",(int)k+1,hdr->EVENT.TYP[k],tmp8);
+						fprintf(stdout,"Warning %s (line %d) event %i: both, stimulus and response, codes (%i/%i) are non-zero. response code is ignored.\n",__func__,__LINE__, (int)k+1,hdr->EVENT.TYP[k],tmp8);
 					else
 						hdr->EVENT.TYP[k] |= tmp8 | 0x80;	// response type
 				}
@@ -6362,10 +6370,8 @@ if (VERBOSE_LEVEL>8)
 
 	else if (hdr->TYPE==CTF) {
 
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"CTF[101]: %s\n",hdr->FileName);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s: CTF[101]: %s\n", __func__, hdr->FileName);
 
-		hdr->AS.Header  = (uint8_t*)realloc(hdr->AS.Header,1844);
-		hdr->HeadLen    = 1844;
 		char *f0        = hdr->FileName;
 		char *f1 	= (char*)malloc(strlen(f0)+6);
 		strcpy(f1, f0);				// Flawfinder: ignore
@@ -6381,7 +6387,11 @@ if (VERBOSE_LEVEL>8)
 			count = 0;
 		}
 
-		count += ifread(hdr->AS.Header+count,1,hdr->HeadLen-count,hdr);
+		hdr->HeadLen = 1844;
+		if (count < hdr->HeadLen) {
+			hdr->AS.Header  = (uint8_t*)realloc(hdr->AS.Header,hdr->HeadLen);
+			count += ifread(hdr->AS.Header+count,1,hdr->HeadLen-count,hdr);
+		}
 
 		if (VERBOSE_LEVEL>8) fprintf(stdout,"CTF[104]: %i %s\n\t%s\n",(int)count,f0,f1);
 
@@ -6400,11 +6410,17 @@ if (VERBOSE_LEVEL>8)
 		int32_t CTF_RunSize  = bei32p(hdr->AS.Header+1836);
 		//int32_t CTF_RunSize2 = bei32p(hdr->AS.Header+1844);
 
-		hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header,1844+CTF_RunSize+2);
-		count += ifread(hdr->AS.Header+count,1,CTF_RunSize+2,hdr);
+		hdr->HeadLen=1844+CTF_RunSize+2;
+		if (count < hdr->HeadLen) {
+			hdr->AS.Header  = (uint8_t*)realloc(hdr->AS.Header,hdr->HeadLen);
+			count += ifread(hdr->AS.Header+count,1,hdr->HeadLen-count,hdr);
+		}
 		int16_t CTF_NumberOfFilters = bei16p(hdr->AS.Header+1844+CTF_RunSize);
-		hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header,count+CTF_NumberOfFilters*26+hdr->NS*(32+48+1280));
-		count += ifread(hdr->AS.Header+count,1,CTF_NumberOfFilters*26+hdr->NS*(32+48+1280),hdr);
+		hdr->HeadLen = 1844+CTF_RunSize+2+CTF_NumberOfFilters*26+hdr->NS*(32+48+1280);
+		if (count < hdr->HeadLen) {
+			hdr->AS.Header  = (uint8_t*)realloc(hdr->AS.Header,hdr->HeadLen);
+			count += ifread(hdr->AS.Header+count,1,hdr->HeadLen-count,hdr);
+		}
 		ifclose(hdr);
 
 		size_t pos = 1846+CTF_RunSize+CTF_NumberOfFilters*26;
