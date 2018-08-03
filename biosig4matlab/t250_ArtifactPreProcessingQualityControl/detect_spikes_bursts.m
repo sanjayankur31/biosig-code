@@ -14,6 +14,7 @@ function [HDR, s] = detect_spikes_bursts(fn, chan, varargin)
 % ... = detect_spikes_bursts(... ,'-b',burstFilename)
 % ... = detect_spikes_bursts(... ,'slopeThreshold',slopeThreshold)
 % ... = detect_spikes_bursts(... ,'winlen',winlen)
+% ... = detect_spikes_bursts(... ,'chan',chan)
 % ... = detect_spikes_bursts(... ,'dT_Burst',dT_Burst)
 % ... = detect_spikes_bursts(... ,'dT_Exclude',dT_Exclude)
 % ... = detect_spikes_bursts(... ,[slopeThreshold [, winlen [, dT_Burst [,dT_Exclude ]]] ])
@@ -25,6 +26,8 @@ function [HDR, s] = detect_spikes_bursts(fn, chan, varargin)
 %	chan	list of channels that should be analyzed (default is 0: all channels)
 %	HDR	header structure obtained by SOPEN, SLOAD, or meXSLOAD
 %	data	signal data that should be analyzed
+%       chan 	channel number(s) in case HDR and data are not sufficient
+%		for specifying channel number
 %	slopeThreshold	[default: 10 V/s] Spike is detected when
 %		slope (over time winlen) exceeds this value
 %	winlen	[default: .2e-3 s] windowlength in seconds for computing slope
@@ -69,7 +72,7 @@ function [HDR, s] = detect_spikes_bursts(fn, chan, varargin)
 % References:
 %
 
-%    Copyright (C) 2011,2014,2016 by Alois Schloegl <alois.schloegl@ist.ac.at>
+%    Copyright (C) 2011,2014,2016,2018 by Alois Schloegl <alois.schloegl@ist.ac.at>
 %    This is part of the BIOSIG-toolbox http://biosig.sf.net/
 %
 %    BioSig is free software: you can redistribute it and/or modify
@@ -101,7 +104,7 @@ slopeThreshold = 10; 	%% [V/s]
 outFile = [];
 evtFile = [];
 burstFile = [];
-
+CHAN=0;
 
 %%%%% analyze input arguments %%%%%
 k = 1;
@@ -129,6 +132,9 @@ while k <= length(varargin)
 		elseif (strcmpi(varargin{k},'dT_Exclude'))
 			k = k + 1;
 			dT_Exclude = varargin{k};
+		elseif (strcmpi(varargin{k},'chan'))
+			k = k + 1;
+			CHAN = varargin{k};
 		elseif (strcmpi(varargin{k},'OptimumJK'))
 			slopeThreshold = 2.5; %
 			dT = .450e-3;
@@ -163,11 +169,17 @@ Fs = 20000; 	% assumed samplerate
 		winlen = ceil(Fs*.1);
 		[s, HDR] = sload(fn, 0, 'NUMBER_OF_NAN_IN_BREAK', winlen);
 		if Fs < HDR.SampleRate,
+			warning('Not-a-numbers are inserted between breaks, time structure w.r.t. to event table might be corrupted')
 			winlen   = ceil(HDR.SampleRate * .1);
 			[s, HDR] = sload(fn, 0, 'NUMBER_OF_NAN_IN_BREAK', winlen);
 		end;
 		if chan==0, chan = 1:HDR.NS; end;
+	elseif isstruct(fn) && (fn.NS==size(chan,2))
+		HDR = fn;
+		s = chan;
+		chan = CHAN;
 	elseif isstruct(fn)
+		warning('missmatch of header information and data, number of channels to not match')
 		HDR = fn;
 		s = chan;
 		HDR.NS = size(s,2);
@@ -176,6 +188,9 @@ Fs = 20000; 	% assumed samplerate
 		help(mfilename);
 	end
 
+	if (chan==0)
+		chan=1:HDR.NS;
+	end
 
 	EVENT = HDR.EVENT;
 	if ~isfield(EVENT,'DUR');
