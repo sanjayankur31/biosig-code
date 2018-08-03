@@ -12,7 +12,7 @@ function [RES] = roc(d, c, varargin);
 %   RES.THRESHOLD.FPR returns the threshold value to obtain
 %	the given FPR rate.
 %   RES.THRESHOLD.{maxYI,maxACC,maxKAPPA,maxMCC,maxMI,maxF1,maxPHI} return the
-%	he maximum Youden Index (YI), Accuracy, Cohen's Kappa [3],
+%	threshold obtained from maximum Youden Index (YI), Accuracy, Cohen's Kappa [3],
 %       Matthews correlation coefficient [2] (also known as Phi coefficient [1]),
 %       Mutual information, and F1 score [4], resp.
 %   RES.TH([RES.THRESHOLD.maxYIix, RES.THRESHOLD.maxACCix, RES.THRESHOLD.maxKAPPAix,
