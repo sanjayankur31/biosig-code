@@ -4654,9 +4654,9 @@ fprintf(stdout,"ACQ EVENT: %i POS: %i\n",k,POS);
 		hdr = ifopen(hdr,"rb");
 		count = 0;
 		while (!ifeof(hdr)) {
-			size_t bufsiz = 4096;
-		    	hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header,count+bufsiz+1);
-		    	count  += ifread(hdr->AS.Header+count,1,bufsiz,hdr);
+			size_t bufsiz = max(2*count, PAGESIZE);
+			hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header, bufsiz+1);
+			count  += ifread(hdr->AS.Header+count, 1, bufsiz-count, hdr);
 		}
 		hdr->AS.Header[count]=0;
 		hdr->HeadLen = count;
@@ -5164,7 +5164,7 @@ fprintf(stdout,"ACQ EVENT: %i POS: %i\n",k,POS);
 				if (!strncmp(line,"0x",2)) {
 
 					if (hdr->EVENT.N+1 >= N) {
-						N = max(4096, 2*N);
+						N = max(PAGESIZE, 2*N);
 						if (N != reallocEventTable(hdr, N)) {
 							biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
 							return (hdr);
@@ -5688,9 +5688,9 @@ if (VERBOSE_LEVEL>8)
 	else if (hdr->TYPE==BrainVisionMarker) {
 
 		while (!ifeof(hdr)) {
-			size_t bufsiz  = 4096;
-		    	hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header,count+bufsiz+1);
-		    	count += ifread(hdr->AS.Header+count,1,bufsiz,hdr);
+			size_t bufsiz  = max(count*2, PAGESIZE);
+			hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header,bufsiz+1);
+			count += ifread(hdr->AS.Header+count,1,bufsiz-count,hdr);
 		}
 		hdr->AS.Header[count]=0;
 		hdr->HeadLen = count;
@@ -5798,9 +5798,9 @@ if (VERBOSE_LEVEL>8)
 		char* ext = strrchr((char*)hdr->FileName,'.')+1;
 
 		while (!ifeof(hdr)) {
-			size_t bufsiz = 4096;
-		    	hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header,count+bufsiz+1);
-		    	count  += ifread(hdr->AS.Header+count,1,bufsiz,hdr);
+			size_t bufsiz = max(2*count, PAGESIZE);
+			hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header, bufsiz+1);
+			count  += ifread(hdr->AS.Header+count, 1, bufsiz-count, hdr);
 		}
 		hdr->AS.Header[count]=0;
 		hdr->HeadLen = count;
@@ -6474,12 +6474,12 @@ if (VERBOSE_LEVEL > 7) fprintf(stdout,"biosig/%s (line %d): #%d label <%s>\n", _
 		hdr->FileName = f2;
        		hdr = ifopen(hdr,"rb");
 	    	if (hdr->FILE.OPEN) {
-			size_t bufsiz = 4096;
 			count = 0;
 	    		char *vmrk=NULL;
 			while (!ifeof(hdr)) {
-			    	vmrk   = (char*)realloc(vmrk,count+bufsiz+1);
-			    	count += ifread(vmrk+count,1,bufsiz,hdr);
+				size_t bufsiz = max(2*count, PAGESIZE);
+				vmrk   = (char*)realloc(vmrk, bufsiz+1);
+				count += ifread(vmrk+count, 1, bufsiz-count, hdr);
 			}
 		    	vmrk[count] = 0;	// add terminating \0 character
 			ifclose(hdr);
@@ -6831,7 +6831,7 @@ if (VERBOSE_LEVEL > 7) fprintf(stdout,"biosig/%s (line %d): #%d label <%s>\n", _
 				count = 0;
 
 			 	while (!feof(fid)) {
-					size_t r = max(count*2,1024);
+					size_t r = max(count*2, PAGESIZE);
 					LOG = (char*) realloc(LOG,r+1);
 					count += fread(LOG+count,1,r-count,fid);
 			 	}
@@ -7421,9 +7421,10 @@ if (VERBOSE_LEVEL > 7) fprintf(stdout,"biosig/%s (line %d): #%d label <%s>\n", _
 		
 		hdr->NS = (uint8_t)hdr->AS.Header[3];
 		hdr->HeadLen = 1024 + hdr->NS*512; 
-	    	hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header, hdr->HeadLen);
-		count  += ifread(hdr->AS.Header+count, 1, hdr->HeadLen-count, hdr);
-
+		if (count < hdr->HeadLen) {
+			hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header, hdr->HeadLen);
+			count  += ifread(hdr->AS.Header+count, 1, hdr->HeadLen-count, hdr);
+		}
 		if (count < hdr->HeadLen) {
 			biosigERROR(hdr, B4C_INCOMPLETE_FILE, "EMSA file corrupted"); 
 		}
@@ -9816,10 +9817,10 @@ if (VERBOSE_LEVEL>2)
 		hdr->VERSION = hdr->AS.Header[6]+hdr->AS.Header[7]/100;
 		hdr->HeadLen = leu16p(hdr->AS.Header+8);
 		if (count < hdr->HeadLen) {
-			hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header,hdr->HeadLen+1);
+			hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header, hdr->HeadLen+1);
 			count += ifread(hdr->AS.Header + count, 1, hdr->HeadLen - count, hdr);
 		}
-		hdr->AS.Header[hdr->HeadLen]=0;
+		hdr->AS.Header[count]=0;
 
 		hdr->NS=1;
 		hdr->SPR=0;
@@ -9908,12 +9909,12 @@ if (VERBOSE_LEVEL>2)
 
     	else if (hdr->TYPE==Persyst) {
 
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"SOPEN (Persyst) [225]\n"); 		
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %d) (Persyst) [225]\n", __func__,__LINE__);
 
-		int c=1;	
+		size_t c=1;
 		while (~ifeof(hdr) && c) {
 
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"SOPEN (Persyst) [25] %d\n",(int)count);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %d) (Persyst) [25] %d\n",__func__,__LINE__,(int)count);
 
 			hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header,count*2+1);
 		    	c = ifread(hdr->AS.Header + count, 1, count, hdr);
@@ -10337,8 +10338,10 @@ if (VERBOSE_LEVEL>2)
 
 	else if (hdr->TYPE==SCP_ECG) {
 		hdr->HeadLen   = leu32p(hdr->AS.Header+2);
-		hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header,hdr->HeadLen);
-		count += ifread(hdr->AS.Header+count, 1, hdr->HeadLen-count, hdr);
+		if (count < hdr->HeadLen) {
+			hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header,hdr->HeadLen);
+			count += ifread(hdr->AS.Header+count, 1, hdr->HeadLen-count, hdr);
+		}
 		uint16_t crc   = CRCEvaluate(hdr->AS.Header+2,hdr->HeadLen-2);
 		if ( leu16p(hdr->AS.Header) != crc) {
 			biosigERROR(hdr, B4C_CRC_ERROR, "Warning SOPEN(SCP-READ): Bad CRC!");
@@ -10354,9 +10357,11 @@ if (VERBOSE_LEVEL>2)
 
 	else if (hdr->TYPE==Sigma) {  /********* Sigma PLpro ************/
 		hdr->HeadLen = leu32p(hdr->AS.Header+16);
-	    	hdr->AS.Header = (uint8_t*) realloc(hdr->AS.Header,hdr->HeadLen+1);
-    		count += ifread(Header1+count, 1, hdr->HeadLen-count, hdr);
-		hdr->AS.Header[hdr->HeadLen]=0;
+		if (count < hdr->HeadLen) {
+			hdr->AS.Header = (uint8_t*) realloc(hdr->AS.Header,hdr->HeadLen+1);
+			count += ifread(Header1+count, 1, hdr->HeadLen-count, hdr);
+		}
+		hdr->AS.Header[count]=0;
 
 		struct tm t;
 		char *tag, *val;
@@ -10651,10 +10656,9 @@ if (VERBOSE_LEVEL>2)
 		/* read header
 		      docu says HeadLen = 141+275*NS, but our example has 135+277*NS;
 		 */
-		int bufsiz = 16384;
 		while (!ifeof(hdr)) {
-			hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header, count+bufsiz+1);
-		    	count += ifread(hdr->AS.Header+count, 1, bufsiz, hdr);
+			hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header,count*2+1);
+			count += ifread(hdr->AS.Header + count, 1, count, hdr);
 		}
 	    	ifclose(hdr);
 	    	hdr->AS.Header[count] = 0;
