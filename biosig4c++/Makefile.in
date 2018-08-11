@@ -821,11 +821,11 @@ else
 mex: mex4o mexw32 mexw64
 endif
 
-mex/%.mex: mex/%.cpp
+mex/%.mex: mex/%.cpp libbiosig.a
 	$(OCT) -I./ $(shell $(PKGCONF) --cflags libbiosig) -v -g --mex "$<" libbiosig.a $(LDLIBS) -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
-mex/%.oct: mex/%.cpp
+mex/%.oct: mex/%.cpp libbiosig.a
 	$(OCT) -I./ $(shell $(PKGCONF) --cflags libbiosig) "$<" libbiosig.a $(LDLIBS) -o "$@"
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
@@ -841,6 +841,7 @@ mex/%.mexw64: mex/%.cpp Makefile biosig.h biosig-dev.h
 	-$(COPY) $@ ../biosig4matlab/t200_FileAccess/
 
 mexbiosig: mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz
+
 
 mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz: mex/*.cpp
 	$(eval $@_TMP := $(shell mktemp -d /tmp/biosig.XXXXXX)/mexbiosig-$(BIOSIG_VERSION))
