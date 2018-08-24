@@ -10,6 +10,7 @@
 % DEMO8   % overflow detection based on [1]
 % DEMO9   % AAR-based HRV analysis
 % DEMO10  % Demonstrates deconvolution method on spontaneous synaptic currents [2]
+% DEMO11  % Demonstrate corrections of EOG artifcts [4,5]
 % SLOPE_ESTIMATION: quantifies the error on slope estimation caused by 
 %         different noise sources (see [3] for details).  
 % SIMULATE_EPSP  generates a large number sweeps of EPSP data using
@@ -29,12 +30,19 @@
 % [3] Segundo J Guzman , Alois Schlögl and Christoph Schmidt-Hieber
 %     Stimfit: quantifying electrophysiological datwith Python
 %     Frontiers in Neuroinformatics. (submitted)
-%
-%
+% [4] A. Schlögl, C. Keinrath, D. Zimmermann, R. Scherer, R. Leeb, G. Pfurtscheller.
+%   A fully automated correction method of EOG artifacts in EEG recordings.
+%   Clin.Neurophys. 2007 Jan;118(1):98-104. Epub 2006 Nov 7 Paper(pdf)
+%   available online: http://dx.doi.org/10.1016/j.clinph.2006.09.003
+%   preprint: https://pub.ist.ac.at/~schloegl/publications/schloegl2007eog.pdf
+% [5] A. Schlögl, A. Ziehe, K.-R. Müller (2009)
+%   Automated ocular artifact removal: comparing regression and component-based methods
+%   Nature Precedings PrePrint
+%   available online: http://precedings.nature.com/documents/3446/version/1
 %
 
 
-% Copyright (C) 2013 by Alois Schloegl <alois.schloegl@ist.ac.at>	
+% Copyright (C) 2013,2018 by Alois Schloegl <alois.schloegl@ist.ac.at>
 % This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 % This library is free software; you can redistribute it and/or
@@ -63,6 +71,7 @@ DEMO7   % Multivariate autoregressive parameters
 DEMO8   % Quality Control: Overflow detection based on [1]	
 DEMO9   % AAR-based HRV analysis
 DEMO10  % Demonstrates deconvolution method on spontaneous synaptic currents [2]
+DEMO11  % Demonstrates correction of EOG artifacts [4,5]
 
     % This test was applied for the OPENECG programming contest. 
 SCPTEST.M % test of SCP-ECG files can be accessed. 
