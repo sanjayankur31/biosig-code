@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([biosig], [1.9.0])
+AC_INIT([biosig], [1.9.2])
 AC_CONFIG_SRCDIR([biosig.c])
 AC_CONFIG_HEADERS([config.h])
 
@@ -21,12 +21,11 @@ AC_PROG_MAKE_SET
 AC_CHECK_LIB([asound],  [snd_pcm_open])
 AC_CHECK_LIB([b64],     [base64_encode_block], AC_SUBST(HAVE_LIBB64,     "1") )
 AC_CHECK_LIB([cholmod], [cholmod_start],       AC_SUBST(HAVE_LIBCHOLMOD, "1") )
+AC_CHECK_LIB([dcmdata], [dcmEnableOtherLongVRGeneration], AC_SUBST(HAVE_DCMTK, "1") )
 # AC_CHECK_LIB([hdf5],    [H5open],              AC_SUBST(HAVE_LIBHDF5,    "1") )
 # AC_CHECK_LIB([matio],   [Mat_Open],            AC_SUBST(HAVE_LIBMATIO,   "1") )
 AC_CHECK_LIB([z],       [gzopen],              AC_SUBST(HAVE_LIBZ,       "1") )
 
-# FIXME: Replace `main' with a function in `-ldcmdata':
-#AC_CHECK_LIB([dcmdata], [main])
 # FIXME: Replace `main' with a function in `-lgdcmCommon':
 #AC_CHECK_LIB([gdcmCommon], [main])
 # FIXME: Replace `main' with a function in `-lgdcmDICT':

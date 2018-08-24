@@ -210,8 +210,11 @@ DEFINES      += -D=WITHOUT_NETWORK
 DEFINES      += -D=WITH_SCP3
 DEFINES      += -D=WITH_FEF
 #DEFINES      += -D=WITH_PDP
-#DEFINES      += -D=WITH_DCMTK
-#DEFINES      += -D=WITH_DICOM
+	### DICOM: DCMTK or GDCM, or internal
+	# WITH_DCMTK is already configured by autoconf
+	# WITH_GDCM is experimental
+	# WITH_DICOM (internal implementation) is experimental
+DEFINES      += -D=WITH_DICOM
 #DEFINES      += -D=WITH_GDCM
 #DEFINES      += -D=WITH_GSL
 #DEFINES      += -D=WITH_EEPROBE
@@ -235,6 +238,13 @@ ifeq (1,@HAVE_LIBCHOLMOD@)
 	  ## homebrew requires this in addition to cholmod
 	  LDLIBS     += -lsuitesparseconfig
 	endif
+endif
+ifeq (1,@HAVE_DCMTK@)
+	DEFINES      += -D=WITH_DCMTK
+	LDLIBS       += -ldcmdata -loflog -lofstd
+	SOURCES      += t210/sopen_dcmtk_read.cpp
+	OBJECTS      += sopen_dcmtk_read.o
+	MinGWOBJECTS += win32/sopen_dcmtk_read.obj
 endif
 ifeq (1,@HAVE_LIBHDF5@)
 	LDLIBS     += -lhdf5
@@ -261,9 +271,6 @@ endif
 
 ifneq (,$(findstring WITH_CURL, $(DEFINES)))
   LDLIBS     += -lcurl
-endif
-ifneq (,$(findstring WITH_DCMTK, $(DEFINES)))
-  LDLIBS     += -ldcmdata -loflog -lofstd
 endif
 ifneq (,$(findstring stack-protector, $(CFLAGS)))
 ifneq (,$(findstring CYGWIN, $(shell uname)))
@@ -381,8 +388,8 @@ SOURCES      += biosig.c \
 		biosig_client.c \
 		biosig_server.c
 
-ifeq (,$(findstring WITH_LIBTINYXML, $(DEFINES)))
-  ## build with TinyXML when libtinyxml is not available
+ifneq (1,@HAVE_LIBTINYXML@)
+  ## build with internal TinyXML when libtinyxml is not available
   SOURCES    +=	XMLParser/tinyxml.cpp \
 		XMLParser/tinyxmlparser.cpp \
 		XMLParser/tinyxmlerror.cpp \
