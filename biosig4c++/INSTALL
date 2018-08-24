@@ -5,15 +5,21 @@ INSTALLATION
 Quick start for Debian/Linux installing libbiosig:
 
 # Compile-Time Requirements
-        apt-get install libb64-dev libsuitesparse-dev zlib1g-dev libtinyxml-dev autoconf automake
+        apt-get install libb64-dev
+   optional:
+        apt-get install libsuitesparse-dev zlib1g-dev libtinyxml-dev libdcmtk-dev
+
 
 # Runtime requirements
-	apt-get install libb64 zlib1g libsuitesparse libtinyxml
+	apt-get install libb64 zlib1g
+    optional:
+        apt-get install libsuitesparse libtinyxml libdcmtk8
+
 
 # Installation (for users):
   download source release and run
 
-	VER=1.9.0
+	VER=1.9.2
         wget https://sourceforge.net/projects/biosig/files/BioSig\ for\ C_C\+\+/src/biosig4c\+\+-$VER.src.tar.gz
         tar xvf biosig4c++-$VER.src.tar.gz
 	cd biosig4c++-$VER
@@ -25,14 +31,16 @@ Quick start for Debian/Linux installing libbiosig:
 ## latest development version
 	git clone https://git.code.sf.net/p/biosig/code biosig-code
 	cd biosig-code/biosig4c++
-	./autogen.sh
-	./configure && make && sudo make install
+	autoreconf -fi  # only needed if autoconf files have been changed
+	./configure     # only needed if configuration has changed
+	make && sudo make install
 
 ## or if
 	git pull
 	make distclean
-	./autogen.sh
-	./configure && make && sudo make install
+	autoreconf -fi  # only needed if autoconf files have been changed
+	./configure 	# only needed if configuration has changed
+	make && sudo make install
 
 
 # compiling of mexbiosig for Matlab and Octave
@@ -42,10 +50,10 @@ Quick start for Debian/Linux installing libbiosig:
 # generating an octave package
       make mexbiosig
    start octave and run
-     pkg install mex/mexbiosig-X.Y.Z.src.tar.gz
+      pkg install mex/mexbiosig-X.Y.Z.src.tar.gz
 
    If libbiosig is available on your OS, you can also start octave and run
-     pkg install https://pub.ist.ac.at/~schloegl/biosig/prereleases/mexbiosig-1.9.2.src.tar.gz
+      pkg install https://pub.ist.ac.at/~schloegl/biosig/prereleases/mexbiosig-1.9.2.src.tar.gz
 
 # Compiling for python
    make python

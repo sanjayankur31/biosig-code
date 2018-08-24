@@ -1,5 +1,5 @@
 Introduction:
----------------
+=============
 
 The aim of this repository is providing a C/C++ software library for biomedical signal processing. 
 
@@ -32,29 +32,37 @@ it is strongly recommended to use only the level 2 interface, which provides acc
 header data through functions. If only level 2 interface functions are used, it is reasonable
 save to dynamically link libbiosig2.
 
-The build rules are
-	make libbiosig
-which can be installed with
-	sudo make install_libbiosig
 
-The following DEFINES are recommended and require:
- -D=WITH_CHOLMOD        used for re-referencing of data, REQUIREMENT: cholmod from libsuitesparse
- -D=WITH_ZLIB	        used to handle gzip-ped files,  REQUIREMENT: zlib (http://zlib.net/)
-There are some more defines to tweak your version.
- -D=NDEBUG		removes and debugging information 
- -D=WITH_PTHREAD 	recommended for multi-threaded appliations
- -D=WITH_GSL	        provides interface to GSL, REQUIREMENT: GNU Scientific Library (GSL), 
- -D=WITH_FEF	        includes support for FEF-format from CNSystems
- -D=WITH_FAMOS	        includes (partial) support for FAMOS format 
- -D=__4HAERTEL__	support for special flavor of FAMOS format (experimental) 
- Other flags are used for experimental development 
- -D=WITH_DICOM, -D=WITH_GDCM 	experimental DICOM support 
- -D=WITH_SCP3		experimental: testing next SCP version as discussed in PT-SCPECG
- -D=WITH_TIMESTAMPCHANNEL add an extra channel in HEKA format containing TIMESTAMPS
- -D=WITH_TIMESTAMPEVENT timestamps of sweep onset in HEKA format stored in EVENT.DUR with EVENT.TYP==0x7ffe 
- 
-If some libraries are not available on your system, remove the corresponding DEFINES in Makefile. 
+* Installation of official source release (for users):
+	download source release and run
 
+	VER=1.9.2
+	wget https://sourceforge.net/projects/biosig/files/BioSig\ for\ C_C\+\+/src/biosig4c\+\+-$VER.src.tar.gz
+	tar xvf biosig4c++-$VER.src.tar.gz
+	cd biosig4c++-$VER
+	./configure && make && sudo make install
+
+
+* Installation from git repository (for developers, usually untested):
+  ** Checkout code for the first time:
+
+	git clone https://git.code.sf.net/p/biosig/code biosig-code
+	cd biosig-code/biosig4c++
+	autoconf 	# needed only the first time after checkout
+	./configure
+	make
+	sudo make install
+
+  ** next time just update latest changes
+
+	git pull
+	autoreconf -fim # usually this can be omitted
+	./configure 	# usually this can be omitted
+	make
+	make install
+
+
+For doing some advanced (special) configurations, you can modify these flags in Makefile.in 
 
 (2) = converter and tools =
 contains several tools for data conversion,
