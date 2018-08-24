@@ -4,7 +4,7 @@
     The functions will be either fixed, then they are moved to another place;
     or the functions are discarded. Do not rely on the interface in this function
 
-    Copyright (C) 201 Alois Schloegl <alois.schloegl@gmail.com>
+    Copyright (C) 2018 Alois Schloegl <alois.schloegl@gmail.com>
     This file is part of the "BioSig for C/C++" repository
     (biosig4c++) at http://biosig.sf.net/
 

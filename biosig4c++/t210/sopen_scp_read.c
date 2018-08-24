@@ -646,7 +646,7 @@ int sopen_SCP_read(HDRTYPE* hdr) {
 				return -1;
 			}
 			section[curSect].ID 	= curSect;
-			section[curSect].length = len
+			section[curSect].length = len;
 			section[curSect].index  = leu32p(ptr+6+16+K*10+6)-1;
 		}
 		else if (len > 0)
