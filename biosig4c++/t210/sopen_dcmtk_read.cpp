@@ -109,20 +109,16 @@ extern "C" int sopen_dcmtk_read(HDRTYPE* hdr) {
 		const char *opt_convertToCharset = NULL;
 		size_t opt_conversionFlags = 0;
 	#endif
-	OFBool opt_noInvalidGroups = OFFalse;
 
-	OFCondition cond;
 	DcmFileFormat dfile;
 
-        size_t printFlags = DCMTypes::PF_shortenLongTagValues;
-	const char* pixelFileName = NULL;
-        size_t pixelCounter = 0;
-        int out=1; // stdout
+	if (dfile.loadFile(hdr->FileName, opt_ixfer, EGL_noChange, DCM_MaxReadLength, opt_readMode).bad()) {
+		fprintf(stderr,"# %s (line %d): DCMTK failed to read dicom file %s.\n",__func__,__LINE__, hdr->FileName);
+		biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "DICOM support not completed");
+		return -1;
+	}
 
-        status = dfile.loadFile(hdr->FileName, opt_ixfer, EGL_noChange, DCM_MaxReadLength, opt_readMode);
-        if (status.good()) {
-
-		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d): loadFile successful.\n",__func__,__LINE__);
+	if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d): loadFile successful.\n",__func__,__LINE__);
 
 		OFString csetString;
                 DcmDataset *dset = dfile.getDataset();
@@ -239,80 +235,149 @@ extern "C" int sopen_dcmtk_read(HDRTYPE* hdr) {
 
 		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d): read H1 successful.\n",__func__,__LINE__);
 
-	        DcmStack stack;
-	        key.set(OFstatic_cast(Uint16, 0x5400), OFstatic_cast(Uint16, 0x0100));	// Waveform sequence
-	        if (dfile.search(key, stack, ESM_fromHere, OFTrue) == EC_Normal) {
-			if (stack.card() > 1)
-				fprintf(stderr,"File %s contains more than one (%ld) waveform sequences - only first one will be read \n", hdr->FileName, stack.card());
+		DcmSequenceOfItems *seq = NULL;
+		if (dset->findAndGetSequence(DCM_WaveformSequence, seq).bad() || (seq==NULL)) {
+			biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "DICOM read error - no Waveform sequence found");
+			return -1;
+		}
 
-		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d): %ld wav seqs\n",__func__,__LINE__,stack.card());
+		Uint32 numGroups = seq->card();
+		if (numGroups == 0) {
+			biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "DICOM read error - no multiplex group founds");
+			return -1;
+		}
+		for (uint32_t i = 0; i < numGroups; i++) {
+			DcmItem *item = seq->getItem(i);
+			DcmStack stack;
+			DcmElement *el;
+			OFCondition result;
 
-			// FIXME: read meta information
+			// Number Of Waveform Channels
+			Uint16 numChannels;
+			if (item->findAndGetUint16(DCM_NumberOfWaveformChannels, numChannels).good())
+				hdr->NS=numChannels;
 
-//	        	DcmObject *waveformSequence = stack.top();
-			DcmItem *waveformSequence = (DcmItem*)stack.elem(0);
-//			DcmObject *waveformSequence = stack.elem(0);
-			uint16_t US;
-			uint32_t UL;
-			//  (003a, 0005) Number of Waveform Channels         US: 23
-		        key.set(OFstatic_cast(Uint16, 0x003a), OFstatic_cast(Uint16, 0x0005));
-			if (waveformSequence->findAndGetUint16(key, US).good())
-				hdr->NS=US;
+			// Number of samples
+			Uint32 numSamples;
+			if (item->findAndGetUint32(DCM_NumberOfWaveformSamples, numSamples).good())
+				hdr->SPR=numSamples;
 
-		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d): %d \n",__func__,__LINE__,US);
-
-			//  (003a, 0010) Number of Waveform Samples
-		        key.set(OFstatic_cast(Uint16, 0x003a), OFstatic_cast(Uint16, 0x0010));
-			if (waveformSequence->findAndGetUint32(key, UL).good())
-				hdr->SPR=UL;
-
-		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d): %d \n",__func__,__LINE__,UL);
-
-			//   (003a, 001a) Sampling Frequency                  DS: "256"
-		        key.set(OFstatic_cast(Uint16, 0x003a), OFstatic_cast(Uint16, 0x001a));
-			if (waveformSequence->findAndGetString(key, str).good())
+			// Sampling Frequency
+			if (item->findAndGetString(DCM_SamplingFrequency, str).good())
 				hdr->SampleRate = strtod(str, NULL);
 
-		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d): %s \n",__func__,__LINE__,str);
-#if 0
-		        if (waveformSequence->search(key, stack, ESM_fromHere, OFTrue) == EC_Normal) {
-				if (VERBOSE_LEVEL>7) fprintf(stdout,"# %s (line %d): #%ld/%ld  (%04x,%04x) %d\n",__func__,__LINE__,-1, stack.card(),dobj->getGTag(),dobj->getETag(),dobj->isaString());
-			}
-#endif
-	        }
+			// read the channels
+			hdr->CHANNEL = (CHANNEL_TYPE*)realloc(hdr->CHANNEL, hdr->NS * sizeof(CHANNEL_TYPE));
 
-		/***** TODO: extract header2 and header 3 fields *****/
+			DcmSequenceOfItems *channelSeq;
+			item->findAndGetSequence(DCM_ChannelDefinitionSequence, channelSeq);
+			assert(hdr->NS == channelSeq->card()); // should be identical to numChannels !
 
-		hdr->CHANNEL = (CHANNEL_TYPE*)realloc(hdr->CHANNEL, hdr->NS * sizeof(CHANNEL_TYPE));
-		for (uint16_t k=0; k < hdr->NS; k++) {
-			CHANNEL_TYPE* hc = hdr->CHANNEL+k;
-			// FIXME: extract corresponding fields from DICOM
-			hc->OnOff    = 1;
-			hc->GDFTYP   = 3;
-			hc->SPR      = hdr->SPR;
-			hc->Cal      = 0.1;
-			hc->Off      = 0.0;
-			hc->Transducer[0] = '\0';
-			hc->LowPass  = NAN;
-			hc->HighPass = NAN;
-			hc->PhysMax  =  3276.7;
-			hc->PhysMin  = -3276.8;
-			hc->DigMax   =  32767;
-			hc->DigMin   = -32768;
-			hc->LeadIdCode  = 0;
-			hc->PhysDimCode = 4275;	//uV
-			hc->bi   = k*hdr->SPR*2;
 
-			char *label = (char*)(hdr->AS.Header+1034+k*512);
-			if ( (hdr->AS.Header[1025+k*512]=='E') && strlen(label)<13) {
-				strcpy(hc->Label, "EEG ");
-				strcat(hc->Label, label);
+			/***** extract header2 and header 3 fields *****/
+
+			// Read channel attributes
+			size_t bi=0;
+			hdr->NRec = 1;
+			for (uint32_t k=0; k < hdr->NS; k++) {
+
+				DcmItem *channelItem = channelSeq->getItem(k);
+
+				CHANNEL_TYPE* hc = hdr->CHANNEL + k;
+
+				hc->SPR      = hdr->SPR;
+				hc->Cal      = 1.0;
+				hc->Off      = 0.0;
+				hc->Transducer[0] = '\0';
+				hc->LowPass  = 0.0/0.0;
+				hc->HighPass = 0.0/0.0;
+
+				hc->DigMax   = (1<<15)-1;
+				hc->DigMin   = -1<<15;
+				hc->LeadIdCode  = 0;
+				hc->PhysDimCode = 0;	// undefined
+
+				// channel label
+				if (channelItem->findAndGetString(DCM_ChannelLabel, str).good())
+					strncpy(hc->Label, str, MAX_LENGTH_LABEL);
+
+				// channel sensitivity
+				if (channelItem->findAndGetString(DCM_ChannelSensitivity, str).good()) {
+					hc->Cal = strtod(str, NULL);
+				}
+				if (channelItem->findAndGetString(DCM_ChannelBaseline, str).good()) {
+					hc->Off = strtod(str, NULL);
+				}
+				if (channelItem->findAndGetString(DCM_FilterLowFrequency, str).good()) {
+					hc->HighPass = strtod(str, NULL);
+				}
+				if (channelItem->findAndGetString(DCM_FilterHighFrequency, str).good()) {
+					hc->LowPass = strtod(str, NULL);
+				}
+				if (channelItem->findAndGetString(DCM_NotchFilterFrequency, str).good()) {
+					hc->Notch = strtod(str, NULL);
+				}
+
+
+				Uint16 gdftyp;
+				if (channelItem->findAndGetUint16(DCM_WaveformBitsStored, gdftyp).good()) {
+					hc->bi   = bi;
+					switch (gdftyp) {
+					case 32: hc->GDFTYP = 5;
+						hc->DigMax   = (1<<31)-1;
+						hc->DigMin   = -1<<31;
+						break;
+					case 24: hc->GDFTYP = 3+256;
+						hc->DigMax   = (1<<23)-1;
+						hc->DigMin   = -1<<23;
+						break;
+					case 16: hc->GDFTYP = 3;
+						hc->DigMax   = (1<<15)-1;
+						hc->DigMin   = -1<<15;
+						break;
+					case  8: hc->GDFTYP = 1;
+						hc->DigMax   = (1<<7)-1;
+						hc->DigMin   = -1<<7;
+						break;
+					default: hc->GDFTYP = 3;
+						hc->DigMax   = (1<<15)-1;
+						hc->DigMin   = -1<<15;
+					}
+					hc->PhysMax  = hc->DigMax*hc->Cal+hc->Off;
+					hc->PhysMin  = hc->DigMin*hc->Cal+hc->Off;
+					bi += hc->SPR * GDFTYP_BITS[hc->GDFTYP] >> 3;
+					hdr->AS.bpb = bi;
+				}
+
+				// TODO: LeadIdCode
+				DcmSequenceOfItems *channelSourceSeq;
+				channelItem->findAndGetSequence(DCM_ChannelSourceSequence, channelSourceSeq);
+
+				// TODO: Physical Units
+				DcmSequenceOfItems *channelUnitsSeq;
+				channelItem->findAndGetSequence(DCM_ChannelSensitivityUnitsSequence, channelUnitsSeq);
+
+		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d): card <%d>\n",__func__,__LINE__,channelSourceSeq->card());
 			}
-			else {
-				size_t len = MAX_LENGTH_LABEL;
-				strncpy(hc->Label, label, len);
-				hc->Label[len]=0;
-			}
+
+			// TODO: waveform data
+			DcmElement *wvfData;
+			result = item->findAndGetElement(DCM_WaveformData, wvfData);
+			wvfData->getVR(); // OB, OW,ox
+
+		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d)\n",__func__,__LINE__);
+			hdr->AS.rawdata = (uint8_t*)realloc(hdr->AS.rawdata, hdr->AS.bpb*hdr->NRec);
+			void *ptr=hdr->AS.rawdata;
+
+			wvfData->getUint8Array((Uint8*&)ptr);
+			hdr->AS.length = 1;
+
+		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d) %d %d\n",__func__,__LINE__,hdr->AS.bpb,hdr->NRec);
+
+			memcpy(hdr->AS.rawdata,ptr,hdr->AS.bpb*hdr->NRec);
+
+		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d)\n",__func__,__LINE__);
+
 		}
 
 		/***** TODO: extract event information  *****/
@@ -326,58 +391,7 @@ extern "C" int sopen_dcmtk_read(HDRTYPE* hdr) {
 			hdr->EVENT.LenCodeDesc =
 		*/
 
-		/***** TODO: extract data  *****/
-		/*
-			hdr->data.block =
-			hdr->data.size =
-		*/
-	}
-	else {
-		fprintf(stderr,"# %s (line %d): DCMTK failed to read dicom file %s.\n",__func__,__LINE__, hdr->FileName);
-		biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "DICOM support not completed");
-	}
-
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"# %s (line %d): DCMTK is used to read dicom files.\n",__func__,__LINE__);
-
-
-#if 0
-        searchKey.set(OFstatic_cast(Uint16, 0x0010), OFstatic_cast(Uint16, 0x0010));	// Patient Name
-        if (dset->search(searchKey, stack, ESM_fromHere, OFTrue) == EC_Normal) {
-		DcmObject *dobj = stack.top();
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"# %s (line %d): #%ld/%ld  len=%ld (%04x,%04x) %d\n",__func__,__LINE__,-1, stack.card(),dobj->getLengthField(),dobj->getGTag(),dobj->getETag(),dobj->isaString());
-/*
-		if (dobj->isaString())
-			strncpy(hdr->AS.PID,,MAX_LENGTH_PID); dobj->getLengthField)=
- */
-        }
-
-	/* walk through whole stack */
-        while (dset->nextObject(stack, 1) == EC_Normal) {
-		DcmObject *dobj = stack.top();
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"# %s (line %d): #%d/%d  len=%ld (%04x,%04x)\n",__func__,__LINE__,-1, stack.card(),dobj->getLengthField(),dobj->getGTag(),dobj->getETag());
-
-		for (int k=0; k<stack.card(); k++) {
-			DcmObject *dobj = stack.elem(k);
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"# %s (line %d): 		#%d/%d  len=%ld (%04x,%04x)\n",__func__,__LINE__,k, stack.card(),dobj->getLengthField(),dobj->getGTag(),dobj->getETag());
-		}
-        }
-
-        if (dset->search(searchKey, stack, ESM_fromHere, OFTrue) == EC_Normal) {
-
-	if (VERBOSE_LEVEL>7) fprintf(stdout,"# %s (line %d): DCMTK was used to read dicom files. size of stack is %d\n",__func__,__LINE__,stack.card());
-
-//                printResult(out, stack, printFlags, pixelFileName, &pixelCounter);
-                if (0) // (printAllInstances)
-                {
-                    //while (dset->search(searchKey, stack, ESM_afterStackTop, OFTrue) == EC_Normal) {
-                    while (dset->search(searchKey, stack) == EC_Normal) {
-                      //printResult(out, stack, printFlags, pixelFileName, &pixelCounter);
-	if (VERBOSE_LEVEL>7) fprintf(stdout,"# %s (line %d): DCMTK was used to read dicom files. size of stack is %d\n",__func__,__LINE__,stack.card());
-
-                    }
-                }
-        }
-#endif
 
 	hdr2ascii(hdr,stdout,4);
 	biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, ( "DICOM support not completed (see TOOD's and FIXME's in function SOPEN_DCMTK_READ) " ));
