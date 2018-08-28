@@ -74,25 +74,6 @@ extern "C" int sopen_dcmtk_read(HDRTYPE* hdr) {
 
         OFCondition status;
 
-	/* approach 1 */
-	DcmMetaInfo metainfo;
-	status = metainfo.loadFile(hdr->FileName);
-	if (status.good()) {
-		OFString sopClassUID, xferUID;
-		if (metainfo.findAndGetOFString(DCM_MediaStorageSOPClassUID, sopClassUID).good())
-			COUT << "SOP Class UID: " << sopClassUID << OFendl;
-		if (metainfo.findAndGetOFString(DCM_TransferSyntaxUID, xferUID).good())
-			COUT << "Transfer Syntax UID: " << xferUID << OFendl;
-		metainfo.print(COUT);
-	}
-	else {
-		biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "cannot read dicom file");
-	}
-
-	if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d): DCMTK is used to read dicom files.\n",__func__,__LINE__);
-
-	const char *opt_ifname = hdr->FileName;
-
 	E_FileReadMode opt_readMode = ERM_autoDetect;
 	E_TransferSyntax opt_ixfer = EXS_Unknown;
 	E_TransferSyntax opt_oxfer = EXS_Unknown;
@@ -153,25 +134,16 @@ extern "C" int sopen_dcmtk_read(HDRTYPE* hdr) {
 	        DcmTagKey key;
 		const char *str;
 
-		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d): \n",__func__,__LINE__);
-
-		// Patient Name
-	        key.set(OFstatic_cast(Uint16, 0x0010), OFstatic_cast(Uint16, 0x0010));
-		if (dset->findAndGetString(key, str).good())
+		if (dset->findAndGetString(DCM_PatientName, str).good())
 			strncpy(hdr->Patient.Name, str, MAX_LENGTH_NAME+1);
 
-		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d): \n",__func__,__LINE__);
-
-		// Patient ID
-	        key.set(OFstatic_cast(Uint16, 0x0010), OFstatic_cast(Uint16, 0x0020));
-		if (dset->findAndGetString(key, str).good())
+		if (dset->findAndGetString(DCM_PatientID, str).good())
 			strncpy(hdr->Patient.Id, str, MAX_LENGTH_PID+1);
 
-		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d): \n",__func__,__LINE__);
+		if (dset->findAndGetString(DCM_PatientWeight, str).good())
+			hdr->Patient.Weight = atol(str);
 
-		// (0010, 0040) Patient's Birthday                       CS: ''
-	        key.set(OFstatic_cast(Uint16, 0x0010), OFstatic_cast(Uint16, 0x0030));
-		if (dset->findAndGetString(key, str).good()) {
+		if (dset->findAndGetString(DCM_PatientBirthDate, str).good()) {
 		        if ( (str != NULL) && (strlen(str) == 8)) {
 				char *datestr = strdup(str);
 				struct tm t;
@@ -188,9 +160,7 @@ extern "C" int sopen_dcmtk_read(HDRTYPE* hdr) {
 			}
 		}
 
-		// (0010, 0040) Patient's Sex                       CS: ''
-	        key.set(OFstatic_cast(Uint16, 0x0010), OFstatic_cast(Uint16, 0x0040));
-		if (dset->findAndGetString(key, str).good() && str!=NULL) {
+		if (dset->findAndGetString(DCM_PatientSex, str).good() && str!=NULL) {
 			if (strlen(str)==0)
 				hdr->Patient.Sex = 0; // unknown
 			else if (str[0]=='m' || str[0]=='M')
@@ -199,11 +169,7 @@ extern "C" int sopen_dcmtk_read(HDRTYPE* hdr) {
 				hdr->Patient.Sex = 2; // female
 		}
 
-		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d): \n",__func__,__LINE__);
-
-		// AcquisitionDateTime
-	        key.set(OFstatic_cast(Uint16, 0x0008), OFstatic_cast(Uint16, 0x002a));
-		if (dset->findAndGetString(key, str).good() && str!=NULL) {
+		if (dset->findAndGetString(DCM_AcquisitionDateTime, str).good() && str!=NULL) {
 		        if ( (str != NULL) && (strlen(str) == 8)) {
 				char *datestr = strdup(str);
 				struct tm t0;
@@ -227,11 +193,11 @@ extern "C" int sopen_dcmtk_read(HDRTYPE* hdr) {
 			}
 		}
 
-		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d): \n",__func__,__LINE__);
-		// Manufacturer
-	        key.set(OFstatic_cast(Uint16, 0x0008), OFstatic_cast(Uint16, 0x0070));
-		if (dset->findAndGetString(key, str).good())
+		if (dset->findAndGetString(DCM_Manufacturer, str).good())
 			if (str) strncpy(hdr->ID.Manufacturer._field, str, MAX_LENGTH_MANUF+1);
+
+		if (dset->findAndGetString(DCM_InstitutionName, str).good())
+			hdr->ID.Hospital = strdup(str);
 
 		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d): read H1 successful.\n",__func__,__LINE__);
 
@@ -248,9 +214,6 @@ extern "C" int sopen_dcmtk_read(HDRTYPE* hdr) {
 		}
 		for (uint32_t i = 0; i < numGroups; i++) {
 			DcmItem *item = seq->getItem(i);
-			DcmStack stack;
-			DcmElement *el;
-			OFCondition result;
 
 			// Number Of Waveform Channels
 			Uint16 numChannels;
@@ -260,7 +223,7 @@ extern "C" int sopen_dcmtk_read(HDRTYPE* hdr) {
 			// Number of samples
 			Uint32 numSamples;
 			if (item->findAndGetUint32(DCM_NumberOfWaveformSamples, numSamples).good())
-				hdr->SPR=numSamples;
+				hdr->NRec=numSamples;
 
 			// Sampling Frequency
 			if (item->findAndGetString(DCM_SamplingFrequency, str).good())
@@ -273,18 +236,16 @@ extern "C" int sopen_dcmtk_read(HDRTYPE* hdr) {
 			item->findAndGetSequence(DCM_ChannelDefinitionSequence, channelSeq);
 			assert(hdr->NS == channelSeq->card()); // should be identical to numChannels !
 
-
 			/***** extract header2 and header 3 fields *****/
 
 			// Read channel attributes
-			size_t bi=0;
-			hdr->NRec = 1;
+			size_t bi = 0;
+			hdr->SPR  = 1;
 			for (uint32_t k=0; k < hdr->NS; k++) {
-
 				DcmItem *channelItem = channelSeq->getItem(k);
-
 				CHANNEL_TYPE* hc = hdr->CHANNEL + k;
 
+				hc->OnOff    = 1;
 				hc->SPR      = hdr->SPR;
 				hc->Cal      = 1.0;
 				hc->Off      = 0.0;
@@ -296,32 +257,28 @@ extern "C" int sopen_dcmtk_read(HDRTYPE* hdr) {
 				hc->DigMin   = -1<<15;
 				hc->LeadIdCode  = 0;
 				hc->PhysDimCode = 0;	// undefined
+				hc->bi   = bi;
 
-				// channel label
 				if (channelItem->findAndGetString(DCM_ChannelLabel, str).good())
-					strncpy(hc->Label, str, MAX_LENGTH_LABEL);
+					strncpy(hc->Label, str, MAX_LENGTH_LABEL+1);
 
-				// channel sensitivity
-				if (channelItem->findAndGetString(DCM_ChannelSensitivity, str).good()) {
+				if (channelItem->findAndGetString(DCM_ChannelSensitivity, str).good())
 					hc->Cal = strtod(str, NULL);
-				}
-				if (channelItem->findAndGetString(DCM_ChannelBaseline, str).good()) {
-					hc->Off = strtod(str, NULL);
-				}
-				if (channelItem->findAndGetString(DCM_FilterLowFrequency, str).good()) {
-					hc->HighPass = strtod(str, NULL);
-				}
-				if (channelItem->findAndGetString(DCM_FilterHighFrequency, str).good()) {
-					hc->LowPass = strtod(str, NULL);
-				}
-				if (channelItem->findAndGetString(DCM_NotchFilterFrequency, str).good()) {
-					hc->Notch = strtod(str, NULL);
-				}
 
+				if (channelItem->findAndGetString(DCM_ChannelBaseline, str).good())
+					hc->Off = strtod(str, NULL);
+
+				if (channelItem->findAndGetString(DCM_FilterLowFrequency, str).good())
+					hc->HighPass = strtod(str, NULL);
+
+				if (channelItem->findAndGetString(DCM_FilterHighFrequency, str).good())
+					hc->LowPass = strtod(str, NULL);
+
+				if (channelItem->findAndGetString(DCM_NotchFilterFrequency, str).good())
+					hc->Notch = strtod(str, NULL);
 
 				Uint16 gdftyp;
 				if (channelItem->findAndGetUint16(DCM_WaveformBitsStored, gdftyp).good()) {
-					hc->bi   = bi;
 					switch (gdftyp) {
 					case 32: hc->GDFTYP = 5;
 						hc->DigMax   = (1<<31)-1;
@@ -349,35 +306,40 @@ extern "C" int sopen_dcmtk_read(HDRTYPE* hdr) {
 					hdr->AS.bpb = bi;
 				}
 
-				// TODO: LeadIdCode
+				// LeadIdCode
 				DcmSequenceOfItems *channelSourceSeq;
-				channelItem->findAndGetSequence(DCM_ChannelSourceSequence, channelSourceSeq);
+				if (channelItem->findAndGetSequence(DCM_ChannelSourceSequence, channelSourceSeq).good()) {
+					DcmItem *channelSourceItem = channelSourceSeq->getItem(0);
+					if ( (channelSourceItem != NULL) && channelSourceItem->findAndGetString(DCM_CodeValue, str).good())
+						hc->LeadIdCode = atol(strchr(str,':') + 1);
+				}
 
-				// TODO: Physical Units
+				// Physical Units
 				DcmSequenceOfItems *channelUnitsSeq;
-				channelItem->findAndGetSequence(DCM_ChannelSensitivityUnitsSequence, channelUnitsSeq);
-
-		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d): card <%d>\n",__func__,__LINE__,channelSourceSeq->card());
+				if (channelItem->findAndGetSequence(DCM_ChannelSensitivityUnitsSequence, channelUnitsSeq).good()) {
+					DcmItem *channelUnitsItem = channelUnitsSeq->getItem(0);
+					if ( (channelUnitsItem != NULL) && channelUnitsItem->findAndGetString(DCM_CodeValue, str).good())
+						hc->PhysDimCode = PhysDimCode(str);
+				}
 			}
 
-			// TODO: waveform data
-			DcmElement *wvfData;
-			result = item->findAndGetElement(DCM_WaveformData, wvfData);
-			wvfData->getVR(); // OB, OW,ox
-
-		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d)\n",__func__,__LINE__);
-			hdr->AS.rawdata = (uint8_t*)realloc(hdr->AS.rawdata, hdr->AS.bpb*hdr->NRec);
-			void *ptr=hdr->AS.rawdata;
-
-			wvfData->getUint8Array((Uint8*&)ptr);
-			hdr->AS.length = 1;
-
-		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d) %d %d\n",__func__,__LINE__,hdr->AS.bpb,hdr->NRec);
-
-			memcpy(hdr->AS.rawdata,ptr,hdr->AS.bpb*hdr->NRec);
-
-		if (VERBOSE_LEVEL > 7) fprintf(stdout,"# %s (line %d)\n",__func__,__LINE__);
-
+			// waveform data
+			const Uint8* waveformData8 = NULL;
+			const Uint16* waveformData16 = NULL;
+			unsigned long count = 0;
+			if (item->findAndGetUint16Array(DCM_WaveformData, waveformData16, &count ).good()) {
+				count *= sizeof(uint16_t);
+				hdr->NRec = count/hdr->AS.bpb;
+				hdr->AS.rawdata = (uint8_t*)realloc(hdr->AS.rawdata, count);
+				memcpy(hdr->AS.rawdata, waveformData16, count);
+				hdr->AS.length = count/hdr->AS.bpb;
+			}
+			else if (item->findAndGetUint8Array(DCM_WaveformData, waveformData8, &count ).good()) {
+				hdr->NRec = count/hdr->AS.bpb;
+				hdr->AS.rawdata = (uint8_t*)realloc(hdr->AS.rawdata, count);
+				memcpy(hdr->AS.rawdata, waveformData8, count);
+				hdr->AS.length = count/hdr->AS.bpb;
+			}
 		}
 
 		/***** TODO: extract event information  *****/
@@ -392,9 +354,6 @@ extern "C" int sopen_dcmtk_read(HDRTYPE* hdr) {
 		*/
 
 	if (VERBOSE_LEVEL>7) fprintf(stdout,"# %s (line %d): DCMTK is used to read dicom files.\n",__func__,__LINE__);
-
-	hdr2ascii(hdr,stdout,4);
-	biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, ( "DICOM support not completed (see TOOD's and FIXME's in function SOPEN_DCMTK_READ) " ));
 
 }
 #endif  // DCMTK
