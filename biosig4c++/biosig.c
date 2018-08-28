@@ -2536,10 +2536,12 @@ void struct2gdfbin(HDRTYPE *hdr)
 		if (hdr->CHANNEL[k].OnOff)
 		{
 			const char *tmpstr;
-			if (hdr->CHANNEL[k].LeadIdCode)
-				tmpstr = LEAD_ID_TABLE[hdr->CHANNEL[k].LeadIdCode];
+			CHANNEL_TYPE *hc = hdr->CHANNEL+k;
+
+			if ( (0 < hc->LeadIdCode) && (hc->LeadIdCode * sizeof(&LEAD_ID_TABLE[0]) < sizeof(LEAD_ID_TABLE) ) )
+				tmpstr = LEAD_ID_TABLE[hc->LeadIdCode];
 			else
-				tmpstr = hdr->CHANNEL[k].Label;
+				tmpstr = hc->Label;
 
 			len = strlen(tmpstr)+1;
 		     	memcpy(Header2+16*k2,tmpstr,min(len,16));
@@ -2548,7 +2550,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 		     	len = strlen(hdr->CHANNEL[k].Transducer);
 		     	memcpy(Header2+80*k2 + 16*NS, hdr->CHANNEL[k].Transducer, min(len,80));
 			Header2[80*k2 + min(len,80) + 16*NS] = 0; 
-		     	
+
 			tmpstr = PhysDim3(hdr->CHANNEL[k].PhysDimCode);
 			len = strlen(tmpstr)+1;
 		     	if (hdr->VERSION < 1.9)
@@ -2598,8 +2600,7 @@ void struct2gdfbin(HDRTYPE *hdr)
 
 		if (errno==34) errno = 0; // reset numerical overflow error
 
-		if (VERBOSE_LEVEL>7)
-			fprintf(stdout,"GDFw 444 %i %s\n", errno, strerror(errno));
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %d)  %d %s\n", __func__, __LINE__, errno, strerror(errno));
 
 	     	/***** 
 	     	 *	This is the 2nd scan of Header3 - memory is allocated, now H3 is filled in with content 
