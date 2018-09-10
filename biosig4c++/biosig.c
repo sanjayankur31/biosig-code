@@ -3842,11 +3842,6 @@ else if (!strncmp(MODE,"r",1)) {
 
 		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) count=%i\n", __func__, __LINE__,(int)count);
 
-		if (count < 512) {
-			biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "Error SOPEN(READ): file is too short\n");
-			return(hdr);
-		}
-
 		if (!memcmp(Header1,MAGIC_NUMBER_GZIP,strlen(MAGIC_NUMBER_GZIP))) {
 #ifdef ZLIB_H
 			if (VERBOSE_LEVEL>7) fprintf(stdout,"[221] %i\n",(int)count);
@@ -3874,6 +3869,10 @@ else if (!strncmp(MODE,"r",1)) {
 		;
     	else if (!memcmp(Header1,FileName,strspn(FileName,".")) && (!strcmp(FileExt,"HEA") || !strcmp(FileExt,"hea") ))
 	    	hdr->TYPE = MIT;
+	else if (count < 512) {
+		biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "Error SOPEN(READ): file is too short\n");
+		return(hdr);
+	}
 #endif //ONLYGDF
 
     	if (hdr->TYPE == unknown) {
