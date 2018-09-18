@@ -54,6 +54,10 @@ end;
 % handle (ignore) NaN's  
 c = c(~isnan(d));
 d = d(~isnan(d));
+if isempty(d)
+	AREA=NaN;
+	return;
+end
 
 [d,I] = sort(d);
 x = c(I);
