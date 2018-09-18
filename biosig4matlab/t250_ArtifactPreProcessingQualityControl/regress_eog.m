@@ -57,13 +57,24 @@ function [R,S] = regress_eog(D,ny,nx)
 % along with this program; if not, write to the Free Software
 % Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-%	$Id$
-%	(C) 1997-2007,2008,2009 by Alois Schloegl <alois.schloegl@gmail.com>
+%	(C) 1997-2007,2008,2009,2018 by Alois Schloegl <alois.schloegl@gmail.com>
 %    	This is part of the BIOSIG-toolbox http://biosig.sf.net/
 
 if ischar(D),
-        [D,H] = sload(D);
-        C = covm(D,'E');
+	[D,H] = sload(D);
+	if exist('covm', 'file')
+	        C = covm(D,'E');
+	else
+		% if covm from NaN-toolbox is not available
+		tmpNV = isnan(D);
+		D(tmpNV) = 0;
+		S  = sum(D,1);
+		nS = sum(double(~tmpNV),1);
+		C  = D'*D;
+		nC = double(~tmpNV)' * double(~tmpNV);
+		C  = [1, S./nS; [S./nS]', C./nC];
+		D(tmpNV) = NaN;	% restore NaNs
+	end
         if (nargin<3)
         	nx = identify_eog_channels(H); 
        	end; 
@@ -76,8 +87,20 @@ elseif size(D,1)==size(D,2)
         H.NS = size(C,2)-1;
 
 else
-        H.NS = size(D,2);
-        C = covm(D,'E');
+	H.NS = size(D,2);
+	if exist('covm', 'file')
+	        C = covm(D,'E');
+	else
+		% if covm from NaN-toolbox is not available
+		tmpNV = isnan(D);
+		D(tmpNV) = 0;
+		S  = sum(D,1);
+		nS = sum(double(~tmpNV),1);
+		C  = D'*D;
+		nC = double(~tmpNV)' * double(~tmpNV);
+		C  = [1, S./nS; [S./nS]', C./nC];
+		D(tmpNV) = NaN;	% restore NaNs
+	end
 end
 
 R.datatype = 'ArtifactCorrection_Regression';

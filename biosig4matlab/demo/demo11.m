@@ -29,9 +29,6 @@ end;
 if ~exist('regress_eog','file') || ~exist('mexSLOAD','file')
         fprintf(2,'error: toolbox "biosig for matlab" is missing, its available from http://biosig.sourceforge.net/download.html')
 end;        
-if ~exist('covm','file') 
-        fprintf(2,'error: NaN-toolbox is missing, its available from https://pub.ist.ac.at/~schloegl/matlab/NaN/')
-end;        
 
 % load data     
 [data,HDR]=mexSLOAD('PRIME_266.cnt');
