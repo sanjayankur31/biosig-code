@@ -1,22 +1,43 @@
 ####### Makefile for "BioSig for C/C++" #####################
 ###
-###  $Id: Makefile 2526 2010-08-27 21:46:28Z schloegl $
-###  Copyright (C) 2010 Alois Schloegl <a.schloegl@ieee.org>
+###  Copyright (C) 2010,2018 Alois Schloegl <alois.schloegl@gmail.com>
 ###  This file is part of the "BioSig for C/C++" repository
 ###  (biosig4c++) at http://biosig.sf.net/
 ###
 ##############################################################
 
-# More information on SWIG-Java interface is available here
-# http://www.swig.org/Doc1.3/Java.html
+### JNI ###
+# https://stackoverflow.com/questions/5963266/call-c-function-from-java
 
-all:
-	swig -c++ -java biosig.i
-	g++ -fPIC -c biosig_wrap.cxx  -I/usr/lib/gcc/x86_64-linux-gnu/4.4/include/ -I/usr/lib/jvm/java-1.5.0-gcj-4.4/include
-	ld -G biosig_wrap.o  -o libbiosig4java.so
+
+#JAVAC ?= /usr/lib/jvm/java-1.5.0-gcj-6-amd64/bin/javac
+JAVAC ?= /usr/lib/jvm/java-8-openjdk-amd64/bin/javac
+JAVAC ?= /usr/lib/jvm/java-9-openjdk-amd64/bin/javac
+JAVAC ?= /usr/lib/jvm/java-10-openjdk-amd64/bin/javac
+JAVAC ?= /usr/lib/jvm/java-11-openjdk-amd64/bin/javac
+
+#JAVAH ?= /usr/lib/jvm/java-1.5.0-gcj-6-amd64/bin/javah
+#JAVAH ?= /usr/bin/gjavah
+JAVAH ?= /usr/lib/jvm/java-8-openjdk-amd64/bin/javah
+JAVAH ?= /usr/lib/jvm/java-9-openjdk-amd64/bin/javah
+
+
+
+run: libBiosig.so
+	#LD_LIBRARY_PATH=. java biosig
+	java -Djava.library.path=. Biosig "/home/as/data/test/edf/Mischa.edf"
+
+libBiosig.so: Biosig.h Biosig.c
+	$(CXX) -shared -fPIC -I/java/include Biosig.c -lbiosig -o libBiosig.so
+
+Biosig.h: Biosig.class Biosig.java
+	$(JAVAC) Biosig.java -h .
+
+Biosig.class: Biosig.java
+	$(JAVAC) Biosig.java
 
 clean: 
-	-rm *.java
+	-rm *.h
 	-rm *.o 
 	-rm *.cxx 
 	-rm *.so
