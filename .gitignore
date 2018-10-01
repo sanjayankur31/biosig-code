@@ -25,6 +25,12 @@ biosig4c++/mex/*.mex*
 biosig4c++/python/biosig.py
 biosig4c++/python/swig_wrap.cxx
 #
+biosig4c++/java/*.class
+biosig4c++/java/*.h
+#
+biosig4c++/magic/file.list
+biosig4c++/magic/*.mgc
+#
 # autoconf generated files
 biosig4c++/autom4te.cache/
 biosig4c++/config.h
