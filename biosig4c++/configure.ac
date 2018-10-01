@@ -104,6 +104,7 @@ AC_CONFIG_FILES([Makefile
                  examples/Makefile
                  igor/Makefile
                  java/Makefile
+                 magic/Makefile
                  mex/Makefile
                  mma/Makefile
                  perl/Makefile

@@ -1,0 +1,14 @@
+biosig.mgc: biosig
+	file  -C -m biosig
+
+test: biosig.mgc file.list
+	file -m biosig.mgc -f file.list
+	
+file.list:
+	echo "set up file.list containing list files for testing. this can done like"
+	echo "	ls -1 >file.list"
+	echo "  find . >file.list"
+	
+clean: 
+	rm *.mgc
+	

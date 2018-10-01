@@ -1,0 +1,94 @@
+########################################################################################################
+#
+#    Magic ids for biomedical signal file formats 
+#    Copyright (C) 2018 Alois Schloegl <alois.schloegl@gmail.com>
+#    This file is part of the "BioSig" repository at http://biosig.sf.net/
+#
+#    BioSig is free software; you can redistribute it and/or
+#    modify it under the terms of the GNU General Public License
+#    as published by the Free Software Foundation; either version 3
+#    of the License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#  
+########################################################################################################
+#
+0	string  ABF\x20					Biosig/Axon Binary format
+0	string  ABF2\0\0				Biosig/Axon Binary format
+#
+0	string  ALPHA-TRACE-MEDICAL			Biosig/alpha trace 
+#
+0       string  AxGr					Biosig/AXG
+0       string  axgx					Biosig/AXG
+#
+0	string  HeaderLen=				Biosig/BCI2000
+0	string  BCI2000V				Biosig/BCI2000
+#
+0	string  \xffBIOSEMI				Biosig/Biosemi data format
+#
+0	string  CEDFILE					Biosig/CFS: Cambridge Electronic devices File format 
+#
+0	string	0\x20\x20\x20\x20\x20\x20\x20		Biosig/EDF: European Data format
+#
+0	string  GDF					Biosig/GDF: General data format for biosignals
+#
+0	string  DATA\0\0\0\0				Biosig/Heka Patchmaster
+0	string  DAT1\0\0\0\0				Biosig/Heka Patchmaster
+0	string  DAT2\0\0\0\0				Biosig/Heka Patchmaster
+#
+0	string  (C)\x20CED\x2087			Biosig/CED SMR 
+#
+0	string  CFWB\1\0\0\0				Biosig/CFWB
+#
+0	string  DEMG					Biosig/DEMG
+#
+0	string  EBS\x94\x0a\x13\x1a\x0d			Biosig/EBS
+#
+0	string  Embla\x20data\x20file			Biosig/Embla
+#
+0	string  Header\r\nFile Version			Biosig/ETG4000
+#
+0	string  GALILEO\x20EEG\x20TRACE\x20FILE		Biosig/Galileo 
+#
+0	string  IGOR					Biosig/IgorPro ITX file
+#
+0	string  ISHNE1.0				Biosig/ISHNE
+#
+0	string  @\x20\x20MFER\x20			Biosig/MFER
+0	string  @\x20MFR\x20				Biosig/MFER
+#
+0	string  NEURALEV				Biosig/NEV
+0	string  N.EV.\0					Biosig/NEV
+#
+0	string  NEX1					Biosig/NEX
+#
+0	string  PLEX 					Biosig/Plexon v1.0
+10	string  PLEXON 					Biosig/Plexon v2.0
+#
+0	string  \x02\x27\x91\xC6			Biosig/RHD2000: Intan RHD2000 format
+#
+16	string  SCPECG\0\0 				Biosig/SCP-ECG format CEN 1064:2005/ISO 11073:91064
+#
+0	string  IAvSFo									Biosig/SIGIF
+#
+0	string  POLY\x20SAMPLE\x20FILEversion\x20					Biosig/TMS32
+#
+0	string  FileId=TMSi\x20PortiLab\x20sample\x20log\x20file\x0a\x0dVersion=	Biosig/TMSiLOG
+#
+0	string  V3.0\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20
+>32	string  [PatInfo]								Biosig/Sigma
+#
+0	string  \067\069\078\013\010\0x1a\04\0x84					Biosig/File exchange format (FEF)
+0	string  \67\69\78\0x13\0x10\0x1a\4\0x84						Biosig/File exchange format (FEF)
+#
+0	string  \0\0\0\x64\0\0\0\x1f\0\0\0\x14\0\0\0\0\0\1
+>36  	string  \0\0\0\x65\0\0\0\3\0\0\0\4\0\0
+>>56	string  \0\0\0\x6a\0\0\0\3\0\0\0\4\0\0\0\0\xff\xff\xff\xff\0\0			Biosig/FIFF
+#
+
