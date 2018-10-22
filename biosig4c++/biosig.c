@@ -6346,6 +6346,8 @@ if (VERBOSE_LEVEL > 7) fprintf(stdout,"biosig/%s (line %d): #%d label <%s>\n", _
 				return (hdr);
 			};
 
+			hdr->EVENT.DUR=NULL;
+			hdr->EVENT.CHN=NULL;
 			for  (k = 0; k < hdr->EVENT.N; k++) {
 				hdr->EVENT.TYP[k] = leu16p(buf+k*fieldsize);	// stimulus type
 				uint8_t tmp8 = buf[k*fieldsize+3];
