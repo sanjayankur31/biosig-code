@@ -32,6 +32,7 @@ end;
 
 % load data     
 [data,HDR]=mexSLOAD('PRIME_266.cnt');
+[HDR.FILE.Path,HDR.FILE.Name,HDR.FILE.Ext]=fileparts(HDR.FileName);
 
 % identify EEG and EOG channels 
 eegchan=1:HDR.NS; 
@@ -49,7 +50,18 @@ R = regress_eog(x, eegchan, eogchan);
 % correct for EOG artifcts
 data_corrected = data * R.r0; 
 
-% display result 
+
+%%%%% Write EOG correction matrix %%%%%
+LDR.datatype='REREF_MATRIX';
+LDR.RR=full(R.r0);
+LDR.Label_In=char(HDR.Label);
+LDR.Label_Out=char(HDR.Label);
+LDR.FileName=[HDR.FILE.Name,'.ldr'];
+LDR = openldr(LDR, 'w');
+
+
+%%%%% display result %%%%%
+figure(1)
 subplot(211)
 plot([1:size(data,1)]'/HDR.SampleRate, [data(:,eegchan)+500, data_corrected(:,eegchan)-500, data(:,eogchan)/2])
 set(gca,'xlim',[0,150])

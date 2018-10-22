@@ -121,14 +121,14 @@ if any(PERMISSION=='w');
 
         nc = size(LDR.Label_Out,2);
         if nc<12,
-                LDR.Label_Out = [LDR.Label_Out,abs(' ')*ones(sz(1),12-nc)];
+                LDR.Label_Out = [LDR.Label_Out,repmat(' ',[sz(1),12-nc])];
         elseif nc>12,
                 LDR.Label_Out = LDR.Label_Out(:,1:12);
         end;
         %LDR.Label_In = char(LDR.Label_In);
         nc = size(LDR.Label_In,2);
         if nc<12,
-                LDR.Label_In = [LDR.Label_In,abs(' ')*ones(sz(1),12-nc)];
+                LDR.Label_In = [LDR.Label_In,repmat(' ',[sz(1),12-nc])];
         elseif nc>12,
                 LDR.Label_In = LDR.Label_In(:,1:12);
         end;
@@ -144,7 +144,8 @@ if any(PERMISSION=='w');
         for k = 1:sz(1),
                 fprintf(fid,'\n');
                 fwrite(fid,abs(LDR.Label_In(k,1:12)),'uint8');
-                fprintf(fid,'%12.5f',LDR.RR(k,:));
+                fprintf(fid,'\t%.10g',LDR.RR(k,:));
         end;
+        fprintf(fid,'\n');
         fclose(fid);
 end;
