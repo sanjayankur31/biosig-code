@@ -226,7 +226,8 @@ enum FileFormat {
 	TDMS, TIFF, TMS32, TMSiLOG, TRC, UNIPRO, VRML, VTK,
 	WAV, WCP, WG1, WinEEG, WMF, XML, XPM,
 	Z, ZIP, ZIP2, RHD2000,
-	invalid=0xffff
+	EBNEURO, SigViewerEventsCSV, XDF,
+	LastPlaceHolder, invalid=0xffff
 };
 
 

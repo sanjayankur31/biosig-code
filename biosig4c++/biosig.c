@@ -1720,6 +1720,8 @@ HDRTYPE* getfiletype(HDRTYPE* hdr)
     	}
 	else if (*(uint32_t*)(Header1) == htobe32(0x7f454c46))
 	    	hdr->TYPE = ELF;
+	else if ( (hdr->HeadLen > 64) && !memcmp(Header1+0x30,"GALNT EEG DATA",14))
+		hdr->TYPE = EBNEURO;
     	else if ( (hdr->HeadLen > 14) && !memcmp(Header1,"Embla data file",15))
 	    	hdr->TYPE = EMBLA;
     	else if ( (hdr->HeadLen > 4) && ( !memcmp(Header1,"PBJ",3) || !memcmp(Header1,"BPC",3) ) )
@@ -1963,6 +1965,8 @@ HDRTYPE* getfiletype(HDRTYPE* hdr)
 		hdr->TYPE = STATA;
 	else if (!memcmp(Header1,"IAvSFo",6))
 		hdr->TYPE = SIGIF;
+	else if (!memcmp(Header1,"position,duration,channel,type,name\n",35))
+		hdr->TYPE = SigViewerEventsCSV;
 	else if ((hdr->HeadLen>23) && !memcmp(Header1,"SQLite format 3\000",16) && Header1[21]==64 && Header1[22]==32 && Header1[23]==32 )
 		hdr->TYPE = SQLite;
 	else if ((hdr->HeadLen>23) && !memcmp(Header1,"\"Snap-Master Data File\"",24))
@@ -2017,6 +2021,10 @@ HDRTYPE* getfiletype(HDRTYPE* hdr)
 		hdr->TYPE = ZIP;
 	else if (!strncmp(Header1,"!<arch>\n",8))
 		hdr->TYPE = MSVCLIB;
+/*
+	else if (!strncmp(Header1,"XDF",3))
+		hdr->TYPE = XDF;
+ */
 	else if (!strncmp(Header1,"ZIP2",4))
 		hdr->TYPE = ZIP2;
 	else if ((hdr->HeadLen>13) && !memcmp(Header1,"<?xml version",13))
@@ -2108,6 +2116,7 @@ const struct FileFormatStringTable_t FileFormatStringTable[] = {
 	{ CTF,    	"CTF" },
 	{ DEMG,    	"DEMG" },
 	{ DICOM,    	"DICOM" },
+	{ EBNEURO,	"EBNEURO"},
 	{ EBS,    	"EBS" },
 	{ EDF,    	"EDF" },
 	{ EEG1100,    	"EEG1100" },
@@ -2167,6 +2176,7 @@ const struct FileFormatStringTable_t FileFormatStringTable[] = {
 	{ SCP_ECG,    	"SCP" },
 	{ SIGIF,    	"SIGIF" },
 	{ Sigma,    	"Sigma" },
+	{ SigViewerEventsCSV, "SigViewer's CSV event table"},
 	{ SMA,    	"SMA" },
 	{ SMR,    	"SON/SMR" },
 	{ SND,    	"SND" },
@@ -2187,6 +2197,7 @@ const struct FileFormatStringTable_t FileFormatStringTable[] = {
 	{ WCP,    	"WCP" },
 	{ WG1,    	"Walter Graphtek" },
 	{ WMF,    	"WMF" },
+	{ XDF,    	"XDF" },
 	{ XML,    	"XML" },
 	{ ZIP,    	"ZIP" },
 	{ ZIP2,    	"ZIP2" },
