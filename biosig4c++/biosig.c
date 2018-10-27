@@ -7805,6 +7805,72 @@ if (VERBOSE_LEVEL > 7) fprintf(stdout,"biosig/%s (line %d): #%d label <%s>\n", _
 		hdr->T0 = tm_time2gdf_time(&t); 
 	}
 
+	else if (hdr->TYPE==SigViewerEventsCSV) {
+		while (!ifeof(hdr)) {
+			size_t bufsiz = max(2*count,1<<16);
+			hdr->AS.Header = (uint8_t*)realloc(hdr->AS.Header, bufsiz+1);
+			count  += ifread(hdr->AS.Header+count, 1, bufsiz-count, hdr);
+		}
+		hdr->AS.Header[count]=0;
+		hdr->HeadLen = count;
+		ifclose(hdr);
+
+		// position,duration,channel,type,name
+		size_t N_EVENT=0,N=0;
+		char *nextLine=NULL;
+		char *line = strtok_r(hdr->AS.Header, "\n\r", &nextLine);	// skip first line
+		while (line != NULL) {
+			line = strtok_r(NULL, "\n\r" ,&nextLine);
+			if (line==NULL) break;
+
+			char *nextToken=NULL;
+			char *tok1 = strtok_r(line, ",", &nextToken);
+			char *tok2 = strtok_r(NULL, ",", &nextToken);
+			char *tok3 = strtok_r(NULL, ",", &nextToken);
+			char *tok4 = strtok_r(NULL, ",", &nextToken);
+			char *tok5 = strtok_r(NULL, ",", &nextToken);
+
+			if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %d): <%s> <%s> <%s> <%s> <%s>\n",__FILE__,__LINE__, tok1,tok2,tok3,tok4,tok5);
+
+			if (!tok1 || !tok2 || !tok3 || !tok4) continue;
+
+			if (N_EVENT <= N) {
+				N_EVENT = reallocEventTable(hdr, max(256,N_EVENT*2));
+				if (N_EVENT == SIZE_MAX) {
+					biosigERROR(hdr, B4C_MEMORY_ALLOCATION_FAILED, "Allocating memory for event table failed.");
+					return (hdr);
+				};
+			}
+
+			hdr->EVENT.POS[N] = (uint32_t)atol(tok1);
+			hdr->EVENT.DUR[N] = (uint32_t)atol(tok2);
+			hdr->EVENT.CHN[N] = (uint16_t)atoi(tok3);
+			int TYP = (uint16_t)atoi(tok4);
+			hdr->EVENT.TYP[N] = TYP;
+
+			// read free text event description
+			if ((0 < TYP) && (TYP < 255)) {
+				if (hdr->EVENT.LenCodeDesc==0) {
+					// allocate memory
+					hdr->EVENT.LenCodeDesc = 257;
+					hdr->EVENT.CodeDesc = (typeof(hdr->EVENT.CodeDesc)) realloc(hdr->EVENT.CodeDesc,257*sizeof(*hdr->EVENT.CodeDesc));
+					hdr->EVENT.CodeDesc[0] = "";	// typ==0, is always empty
+					for (k==0; k<=256; k++)
+						hdr->EVENT.CodeDesc[k] = NULL;
+				}
+				if (hdr->EVENT.CodeDesc[TYP]==NULL)
+					hdr->EVENT.CodeDesc[TYP] = tok5;
+			}
+			if (TYP>0) N++;		// skip events with TYP==0
+		}
+		hdr->AS.auxBUF=hdr->AS.Header;
+		hdr->AS.Header=NULL;
+		hdr->EVENT.SampleRate = NAN;
+		hdr->EVENT.N = N;
+		hdr->TYPE    = EVENT;
+		hdr->NS      = 0;
+	}
+
     	else if (hdr->TYPE==ET_MEG) {
 		biosigERROR(hdr, B4C_FORMAT_UNSUPPORTED, "FLT/ET-MEG format not supported");
 	}
