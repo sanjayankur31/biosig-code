@@ -281,24 +281,21 @@ extern "C" int sopen_dcmtk_read(HDRTYPE* hdr) {
 				if (channelItem->findAndGetUint16(DCM_WaveformBitsStored, gdftyp).good()) {
 					switch (gdftyp) {
 					case 32: hc->GDFTYP = 5;
-						hc->DigMax   = (1<<31)-1;
-						hc->DigMin   = -1<<31;
+						hc->DigMax   =  ldexp(1.0,31)-1.0;
+						hc->DigMin   = -ldexp(1.0,31);
 						break;
 					case 24: hc->GDFTYP = 3+256;
-						hc->DigMax   = (1<<23)-1;
-						hc->DigMin   = -1<<23;
-						break;
-					case 16: hc->GDFTYP = 3;
-						hc->DigMax   = (1<<15)-1;
-						hc->DigMin   = -1<<15;
+						hc->DigMax   =  ldexp(1.0,23)-1.0;
+						hc->DigMin   = -ldexp(1.0,23);
 						break;
 					case  8: hc->GDFTYP = 1;
-						hc->DigMax   = (1<<7)-1;
-						hc->DigMin   = -1<<7;
+						hc->DigMax   =  127;
+						hc->DigMin   = -128;
 						break;
+					case 16: hc->GDFTYP = 3;
 					default: hc->GDFTYP = 3;
-						hc->DigMax   = (1<<15)-1;
-						hc->DigMin   = -1<<15;
+						hc->DigMax   =  ldexp(1.0,15)-1.0;
+						hc->DigMin   = -ldexp(1.0,15);
 					}
 					hc->PhysMax  = hc->DigMax*hc->Cal+hc->Off;
 					hc->PhysMin  = hc->DigMin*hc->Cal+hc->Off;

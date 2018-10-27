@@ -6162,7 +6162,7 @@ if (VERBOSE_LEVEL>8)
 
 	else if (hdr->TYPE==CNT) {
 
-		if (VERBOSE_LEVEL>7) fprintf(stdout, "%s: Neuroscan format (count=%i)\n",__func__,count);
+		if (VERBOSE_LEVEL>7) fprintf(stdout, "%s: Neuroscan format (count=%d)\n",__func__, (int)count);
 
 		// TODO: fix handling of AVG and EEG files
 		if (count < 900) {
@@ -6295,7 +6295,7 @@ if (VERBOSE_LEVEL>8)
 
 		    	const size_t len = min(10, MAX_LENGTH_LABEL);
 
-if (VERBOSE_LEVEL > 7) fprintf(stdout,"biosig/%s (line %d): #%d label <%s>\n", __func__,__LINE__,k, (char*) Header2 );
+if (VERBOSE_LEVEL > 7) fprintf(stdout,"biosig/%s (line %d): #%d label <%s>\n", __func__,__LINE__,(int)k, (char*) Header2 );
 
 		    	strncpy(hc->Label, (char*)Header2, len);
 		    	hc->Label[len]  = 0;

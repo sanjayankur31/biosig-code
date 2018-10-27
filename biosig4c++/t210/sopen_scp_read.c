@@ -1495,7 +1495,7 @@ int sopen_SCP_read(HDRTYPE* hdr) {
 			hdr->SCP.Section8Length = leu32p(PtrCurSect+4)-curSectPos;
 			hdr->SCP.Section8 = PtrCurSect+curSectPos;
 
-		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %p %d %d %d\n", __func__, __LINE__, hdr->AS.Header, hdr->SCP.Section8Length, curSectPos, hdr->SCP.Section8-hdr->AS.Header);
+		if (VERBOSE_LEVEL>7) fprintf(stdout,"%s (line %i) %p %d %d %d\n", __func__, __LINE__, hdr->AS.Header, hdr->SCP.Section8Length, (int)curSectPos, (int)(hdr->SCP.Section8-hdr->AS.Header));
 
 #else
 			aECG->Section8.Confirmed = *(char*)(PtrCurSect+curSectPos);
