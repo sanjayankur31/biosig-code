@@ -7844,8 +7844,12 @@ if (VERBOSE_LEVEL > 7) fprintf(stdout,"biosig/%s (line %d): #%d label <%s>\n", _
 
 			hdr->EVENT.POS[N] = (uint32_t)atol(tok1);
 			hdr->EVENT.DUR[N] = (uint32_t)atol(tok2);
-			hdr->EVENT.CHN[N] = (uint16_t)atoi(tok3);
-			int TYP = (uint16_t)atoi(tok4);
+
+			int CHN = atoi(tok3);
+			hdr->EVENT.CHN[N] = (CHN < 0) ? 0 : CHN+1;
+			if (hdr->NS < CHN) hdr->NS = CHN+1;
+
+			uint16_t TYP = (uint16_t)atoi(tok4);
 			hdr->EVENT.TYP[N] = TYP;
 
 			// read free text event description
@@ -7855,7 +7859,7 @@ if (VERBOSE_LEVEL > 7) fprintf(stdout,"biosig/%s (line %d): #%d label <%s>\n", _
 					hdr->EVENT.LenCodeDesc = 257;
 					hdr->EVENT.CodeDesc = (typeof(hdr->EVENT.CodeDesc)) realloc(hdr->EVENT.CodeDesc,257*sizeof(*hdr->EVENT.CodeDesc));
 					hdr->EVENT.CodeDesc[0] = "";	// typ==0, is always empty
-					for (k==0; k<=256; k++)
+					for (k=0; k<=256; k++)
 						hdr->EVENT.CodeDesc[k] = NULL;
 				}
 				if (hdr->EVENT.CodeDesc[TYP]==NULL)
