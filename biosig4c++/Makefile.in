@@ -149,10 +149,11 @@ ifeq (Darwin,$(shell uname))
 	##	brew install homebrew/science/suite-sparse
 	##
 	TAR	       = gtar
+	LD	       = $(CXX) -shared
 	CFLAGS        += -I$(prefix)/include
-	CFLAGS        += -mmacosx-version-min=10.7
+	CFLAGS        += -mmacosx-version-min=10.9
 	LDLIBS        += -liconv -lstdc++
-	SHAREDLIB      = -dylib -arch x86_64 -macosx_version_min 10.7
+	SHAREDLIB      = -dylib -arch x86_64 #-macosx_version_min 10.9
 	LDFLAGS       += -L$(prefix)/lib/
 	DLEXT          = dylib
 	FULLDLEXT      = ${SONAMEVERSION}.dylib
@@ -693,7 +694,9 @@ win64: mexw64
 
 libbiosig.${DLEXT}: $(OBJECTS)
 	$(LD) ${SONAME_PREFIX}"$@" $(OBJECTS) $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o libbiosig${FULLDLEXT}
+ifneq (Darwin,$(shell uname))
 	ln -sf libbiosig${FULLDLEXT} libbiosig.${DLEXT}
+endif
 
 libgdf.${DLEXT}: gdf.o gdftime.o physicalunits.o getlogin.o
 	$(LD) ${SONAME_PREFIX}"$@" $^ $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
@@ -1020,8 +1023,10 @@ install_libbiosig.a: libbiosig.a libphysicalunits.a libbiosig.pc
 install_libbiosig.$(DLEXT): libbiosig$(FULLDLEXT) libbiosig.$(DLEXT)
 	install -d 			$(LIB)/pkgconfig/
 	install libbiosig$(FULLDLEXT)  $(LIB)
-	ln -sf  $(LIB)/libbiosig$(FULLDLEXT) $(LIB)/libbiosig.$(DLEXT)
 	ln -sf  $(LIB)/libbiosig$(FULLDLEXT) $(LIB)/libbiosig2.$(DLEXT)
+ifneq (Darwin,$(shell uname))
+	ln -sf  $(LIB)/libbiosig$(FULLDLEXT) $(LIB)/libbiosig.$(DLEXT)
+endif
 
 install: install_libbiosig.$(DLEXT) install_libbiosig.a install_headers install_tools
 
@@ -1055,7 +1060,7 @@ install_mexbiosig install_octave: mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz
 	PKG_CONFIG_LIBDIR=$(LIB)/pkgconfig octave$(VERSION) --eval "pkg install $<"
 
 uninstall_mexbiosig:
-	PKG_CONFIG_LIBDIR=$(LIB)/pkgconfig octave$(VERSION) --eval "pkg uninstall mexbiosig"
+	-PKG_CONFIG_LIBDIR=$(LIB)/pkgconfig octave$(VERSION) --eval "pkg uninstall mexbiosig"
 
 ### Install mexbiosig for Matlab and Octave
 install_mex: mex4m mex4o
