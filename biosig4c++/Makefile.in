@@ -140,7 +140,8 @@ else
 	endif
 endif
 
-SONAMEVERSION := 2
+SONAMEVERSION ?= 1.9.3
+
 ifeq (Darwin,$(shell uname))
 	## Homebrew:
 	##	brew install gawk
@@ -692,18 +693,21 @@ win64: mexw64
 #	GNU/Linux - Shared Libaries
 #############################################################
 
-libbiosig.${DLEXT}: $(OBJECTS)
-	$(LD) ${SONAME_PREFIX}"$@" $(OBJECTS) $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o libbiosig${FULLDLEXT}
 ifneq (Darwin,$(shell uname))
-	ln -sf libbiosig${FULLDLEXT} libbiosig.${DLEXT}
+%.${DLEXT}:%${FULLDLEXT}
+	ln -sf "$<" "$@"
 endif
 
-libgdf.${DLEXT}: gdf.o gdftime.o physicalunits.o getlogin.o
+libbiosig${FULLDLEXT}:$(OBJECTS)
 	$(LD) ${SONAME_PREFIX}"$@" $^ $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
 
-#libgdftime.${DLEXT}: gdftime.o
-#	$(LD) ${SONAME_PREFIX}"$@" $^ $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
-libphysicalunits.${DLEXT}: physicalunits.o
+libgdf${FULLDLEXT}: gdf.o gdftime.o physicalunits.o getlogin.o
+	$(LD) ${SONAME_PREFIX}"$@" $^ $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
+
+libgdftime${FULLDLEXT}:gdftime.o
+	$(LD) ${SONAME_PREFIX}"$@" $^ $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
+
+libphysicalunits${FULLDLEXT}:physicalunits.o
 	$(LD) ${SONAME_PREFIX}"$@" $^ $(SHAREDLIB) $(LDFLAGS) $(LDLIBS) -o "$@"
 
 
@@ -1023,9 +1027,9 @@ install_libbiosig.a: libbiosig.a libphysicalunits.a libbiosig.pc
 install_libbiosig.$(DLEXT): libbiosig$(FULLDLEXT) libbiosig.$(DLEXT)
 	install -d 			$(LIB)/pkgconfig/
 	install libbiosig$(FULLDLEXT)  $(LIB)
-	ln -sf  $(LIB)/libbiosig$(FULLDLEXT) $(LIB)/libbiosig2.$(DLEXT)
+	(cd $(LIB) && ln -sf libbiosig$(FULLDLEXT) libbiosig2.$(DLEXT))
 ifneq (Darwin,$(shell uname))
-	ln -sf  $(LIB)/libbiosig$(FULLDLEXT) $(LIB)/libbiosig.$(DLEXT)
+	cd $(LIB) && ln -sf libbiosig$(FULLDLEXT) libbiosig.$(DLEXT)
 endif
 
 install: install_libbiosig.$(DLEXT) install_libbiosig.a install_headers install_tools
