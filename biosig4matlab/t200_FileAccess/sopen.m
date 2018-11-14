@@ -9849,14 +9849,13 @@ elseif strncmp(HDR.TYPE,'CSE',3),  % axon text file
 
 
 elseif strcmp(HDR.TYPE,'EMBLA')
-	fn = dir(fullfile(HDR.FILE.Path,'*.ebm'));
+
 	HDR.NS = 0; 
 	k = 0; 
 	HDR.SPR = 1; 
 	HDR.NRec = 1; 
-	for k1 = 1:length(fn),
-		[p,f,e]= fileparts(fn(k1).name);
-		fid = fopen(fullfile(HDR.FILE.Path,fn(k1).name),'rb','ieee-le');
+
+		fid = fopen(HDR.FileName,'rb','ieee-le');
 		[ss,c] = fread(fid,[1,48],'uint8=>char');
                 if strncmp(ss,'Embla data file',15) && (c==48),
 		tag = fread(fid,[1],'uint32');
@@ -9968,7 +9967,7 @@ elseif strcmp(HDR.TYPE,'EMBLA')
 		fclose(fid);
 		HDR.Embla{k}=Embla;
 		end;
-	end; 
+
 	HDR.NS=k;	
 	HDR.Calib = sparse(2:HDR.NS+1,1:HDR.NS,HDR.Cal,HDR.NS+1,HDR.NS);
 	HDR.Filter.Notch = repmat(NaN,1,HDR.NS); 
