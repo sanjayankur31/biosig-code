@@ -107,6 +107,10 @@ CXXFLAGS     += $(CFLAGS)
 prefix        = @prefix@
 datarootdir   = @datarootdir@
 datadir       = @datadir@
+libdir        = @libdir@
+includedir    = @includedir@
+bindir        = @bindir@
+mandir        = @mandir@
 
 ## TARGET dependencies
 ifeq (,$(TARGET))
@@ -360,9 +364,6 @@ endif
 
 ####### Output directory
 OBJ	      = ./obj
-INC	      = $(prefix)/include
-BIN	      = $(prefix)/bin
-LIB	      = $(prefix)/lib
 
 ####### Files
 SOURCES      += biosig.c \
@@ -744,8 +745,8 @@ libbiosig.pc :
 	echo "# Defines libbiosig.pc"       > "$@"
 	echo "prefix=$(prefix)"             >>"$@"
 	echo "exec_prefix=$(prefix)"        >>"$@"
-	echo "libdir=$(prefix)/lib"         >>"$@"
-	echo "includedir=$(prefix)/include" >>"$@"
+	echo "libdir=$(libdir)"         >>"$@"
+	echo "includedir=$(includedir)" >>"$@"
 	echo                                >>"$@"
 	echo "Name: libbiosig"		    >>"$@"
 	echo "Description: Biosig library"  >>"$@"
@@ -754,8 +755,8 @@ libbiosig.pc :
 	#
 	echo "Requires: "                   >> "$@"
 	echo "Requires.private: "           >> "$@"
-	echo "Cflags: $(DEFINES) -I$(INC)"  >> "$@"
-	echo "Libs: -L$(LIB) -lbiosig"      >> "$@"
+	echo "Cflags: $(DEFINES) -I$(includedir)"  >> "$@"
+	echo "Libs: -L$(libdir) -lbiosig"      >> "$@"
 	echo "Libs.private: $(LDLIBS)"      >> "$@"
 
 
@@ -1007,106 +1008,106 @@ clean:
 	-$(MAKE) -C tcl clean
 
 install_sigviewer: sigviewer
-	install $(PathToSigViewer)/bin/release/sigviewer $(BIN)
+	install $(PathToSigViewer)/bin/release/sigviewer $(DESTDIR)$(bindir)
 
 install_ttl2trig: bin/ttl2trig
-	install bin/ttl2trig $(BIN)
+	install bin/ttl2trig $(DESTDIR)$(bindir)
 
 install_headers: biosig-dev.h biosig.h biosig2.h gdftime.h physicalunits.h
-	install -d 			$(INC)
-	install $?		    	$(INC)
+	install -d 			$(DESTDIR)$(includedir)
+	install $?		    	$(DESTDIR)$(includedir)
 
 install_libbiosig: install_libbiosig.$(DLEXT) install_libbiosig.a
 
 install_libbiosig.a: libbiosig.a libphysicalunits.a libbiosig.pc
-	install -d 			$(LIB)/pkgconfig/
-	install libbiosig.a		$(LIB)
-	install libphysicalunits.a 	$(LIB)
-	install libbiosig.pc		$(LIB)/pkgconfig/
+	install -d 			$(DESTDIR)$(libdir)/pkgconfig/
+	install libbiosig.a		$(DESTDIR)$(libdir)
+	install libphysicalunits.a 	$(DESTDIR)$(libdir)
+	install libbiosig.pc		$(DESTDIR)$(libdir)/pkgconfig/
 
 install_libbiosig.$(DLEXT): libbiosig$(FULLDLEXT) libbiosig.$(DLEXT)
-	install -d 			$(LIB)/pkgconfig/
-	install libbiosig$(FULLDLEXT)  $(LIB)
-	(cd $(LIB) && ln -sf libbiosig$(FULLDLEXT) libbiosig2.$(DLEXT))
+	install -d 			$(DESTDIR)$(libdir)/pkgconfig/
+	install libbiosig$(FULLDLEXT)  $(DESTDIR)$(libdir)
+	(cd $(DESTDIR)$(libdir) && ln -sf libbiosig$(FULLDLEXT) libbiosig2.$(DLEXT))
 ifneq (Darwin,$(shell uname))
-	cd $(LIB) && ln -sf libbiosig$(FULLDLEXT) libbiosig.$(DLEXT)
+	cd $(DESTDIR)$(libdir) && ln -sf libbiosig$(FULLDLEXT) libbiosig.$(DLEXT)
 endif
 
 install: install_libbiosig.$(DLEXT) install_libbiosig.a install_headers install_tools
 
 install_tools: tools doc/save2gdf.1
-	install -d 			$(BIN)
-	install save2gdf${BINEXT}	$(BIN)
-	install heka2itx  		$(BIN)
-	install save2aecg 		$(BIN)
-	install save2scp  		$(BIN)
-	install pu${BINEXT}		$(BIN)
-	-install biosig_fhir${BINEXT}	$(BIN)   # not available on MacOSX because libb64 required
-	mkdir -p  			$(datarootdir)/man/man1
-	install doc/*.1  		$(datarootdir)/man/man1
-	#install libbiosig.man 		$(datarootdir)
+	install -d 			$(DESTDIR)$(bindir)
+	install save2gdf${BINEXT}	$(DESTDIR)$(bindir)
+	install heka2itx  		$(DESTDIR)$(bindir)
+	install save2aecg 		$(DESTDIR)$(bindir)
+	install save2scp  		$(DESTDIR)$(bindir)
+	install pu${BINEXT}		$(DESTDIR)$(bindir)
+	-install biosig_fhir${BINEXT}	$(DESTDIR)$(bindir)   # not available on MacOSX because libb64 required
+	mkdir -p  			$(DESTDIR)$(mandir)/man1
+	install doc/*.1  		$(DESTDIR)$(mandir)/man1
+	#install libbiosig.man 		$(mandir)
 	#$(MAKE)  install_sigviewer
 	#$(MAKE)  install_octave
 
 uninstall_tools:
-	${RM} $(BIN)/save2gdf${BINEXT}
-	${RM} $(BIN)/pu${BINEXT}
-	${RM} $(BIN)/heka2itx
-	${RM} $(BIN)/save2aecg
-	${RM} $(BIN)/save2scp
-	${RM} $(BIN)/biosig_fhir${BINEXT}
-	${RM} $(datarootdir)/man/man1/pu.1
-	${RM} $(datarootdir)/man/man1/save2gdf.1
-	${RM} $(datarootdir)/man/man1/heka2itx.1
+	${RM} $(DESTDIR)$(bindir)/save2gdf${BINEXT}
+	${RM} $(DESTDIR)$(bindir)/pu${BINEXT}
+	${RM} $(DESTDIR)$(bindir)/heka2itx
+	${RM} $(DESTDIR)$(bindir)/save2aecg
+	${RM} $(DESTDIR)$(bindir)/save2scp
+	${RM} $(DESTDIR)$(bindir)/biosig_fhir${BINEXT}
+	${RM} $(DESTDIR)$(mandir)/man1/pu.1
+	${RM} $(DESTDIR)$(mandir)/man1/save2gdf.1
+	${RM} $(DESTDIR)$(mandir)/man1/heka2itx.1
 
 ### Install mexbiosig for Octave
 install_mexbiosig install_octave: mex/mexbiosig-$(BIOSIG_VERSION).src.tar.gz
-	PKG_CONFIG_LIBDIR=$(LIB)/pkgconfig octave$(VERSION) --eval "pkg install $<"
+	PKG_CONFIG_LIBDIR=$(libdir)/pkgconfig octave$(VERSION) --eval "pkg install $<"
 
 uninstall_mexbiosig:
-	-PKG_CONFIG_LIBDIR=$(LIB)/pkgconfig octave$(VERSION) --eval "pkg uninstall mexbiosig"
+	-PKG_CONFIG_LIBDIR=$(libdir)/pkgconfig octave$(VERSION) --eval "pkg uninstall mexbiosig"
 
 ### Install mexbiosig for Matlab and Octave
 install_mex: mex4m mex4o
-	mkdir -p $(SHARE)/biosig/mex
-	install mex/mex*.mex*	$(SHARE)/biosig/mex
-	@echo "  mexBiosig for Matlab is installed in $(SHARE)/biosig/mex";
+	mkdir -p $(DESTDIR)$(datadir)/biosig/mex
+	install mex/mex*.mex*   $(DESTDIR)$(datadir)/biosig/mex
+	@echo "  mexBiosig for Matlab is installed in $(datadir)/biosig/mex";
 	@echo "  Usage: Start Matlab and addpath ";
-	@echo "\taddpath(\"$(SHARE)/biosig/mex)";
+	@echo "\taddpath(\"$(datadir)/biosig/mex)";
 	@echo "\tmexSLOAD";
 
 uninstall_mex:
-	${RM} $(SHARE)/biosig/mex/*
-	cd $(SHARE) && rmdir -p biosig/mex
+	${RM} $(DESTDIR)$(datadir)/biosig/mex/*
+	cd $(DESTDIR)$(datadir) && rmdir -p biosig/mex
 
 ### Install Biosig for Mathematica
 install_mma : mma/sload.exe
-	mkdir -p $(SHARE)/biosig/mathematica
-	install mma/sload.exe	$(SHARE)/biosig/mathematica/
-	@echo "  Biosig for Mathematica is installed in $(SHARE)/biosig/mathematica/sload.exe";
+	mkdir -p $(DESTDIR)$(datadir)/biosig/mathematica
+	install mma/sload.exe	$(DESTDIR)$(datadir)/biosig/mathematica/
+	@echo "  Biosig for Mathematica is installed in $(datadir)/biosig/mathematica/sload.exe";
 	@echo "  Usage: Start Mathematica and run";
-	@echo "\tlink=Install[\"$(SHARE)/biosig/mathematica/sload.exe\"];";
+	@echo "\tlink=Install[\"$(datadir)/biosig/mathematica/sload.exe\"];";
 	@echo "\t?sload";
 
 uninstall_mma:
-	${RM} $(SHARE)/biosig/mathematica/sload.exe
-	cd $(SHARE) && rmdir -p biosig/mathematica
+	${RM} $(DESTDIR)$(datadir)/biosig/mathematica/sload.exe
+	cd $(DESTDIR)$(datadir) && rmdir -p biosig/mathematica
 
 uninstall remove: uninstall_mexbiosig uninstall_tools
-	-$(DELETE) $(BIN)/ttl2trig
-	#-$(DELETE) $(BIN)/rec2bin
-	#-$(DELETE) $(BIN)/bin2rec
-	-$(DELETE) $(BIN)/sigviewer
-	-$(DELETE) $(BIN)/eventcodes.txt
-	-$(DELETE) $(INC)/biosig.h
-	-$(DELETE) $(INC)/biosig-dev.h
-	-$(DELETE) $(INC)/biosig2.h
-	-$(DELETE) $(INC)/gdftime.h
-	-$(DELETE) $(INC)/physicalunits.h
-	-$(DELETE) $(LIB)/libbiosig.*
-	-$(DELETE) $(LIB)/libbiosig2.*
-	-$(DELETE) $(LIB)/libphysicalunits.*
-	-$(DELETE) $(LIB)/pkgconfig/libbiosig.pc
+	-$(DELETE) $(DESTDIR)$(bindir)/ttl2trig
+	#-$(DELETE) $(DESTDIR)$(bindir)/rec2bin
+	#-$(DELETE) $(DESTDIR)$(bindir)/bin2rec
+	-$(DELETE) $(DESTDIR)$(bindir)/sigviewer
+	-$(DELETE) $(DESTDIR)$(bindir)/eventcodes.txt
+	-$(DELETE) $(DESTDIR)$(includedir)/biosig.h
+	-$(DELETE) $(DESTDIR)$(includedir)/biosig-dev.h
+	-$(DELETE) $(DESTDIR)$(includedir)/biosig2.h
+	-$(DELETE) $(DESTDIR)$(includedir)/gdftime.h
+	-$(DELETE) $(DESTDIR)$(includedir)/physicalunits.h
+	-$(DELETE) $(DESTDIR)$(libdir)/libbiosig.*
+	-$(DELETE) $(DESTDIR)$(libdir)/libbiosig2.*
+	-$(DELETE) $(DESTDIR)$(libdir)/libphysicalunits.*
+	-$(DELETE) $(DESTDIR)$(libdir)/pkgconfig/libbiosig.pc
 
 
 #############################################################
