@@ -105,6 +105,7 @@ CFLAGS       += -D_DEFAULT_SOURCE
 CXXFLAGS     += $(CFLAGS)
 
 prefix        = @prefix@
+exec_prefix   = @exec_prefix@
 datarootdir   = @datarootdir@
 datadir       = @datadir@
 libdir        = @libdir@
@@ -118,17 +119,14 @@ ifeq (,$(TARGET))
 	CXX     ?= g++
 	AR      := ar rcs
 	PKGCONF := pkg-config
-	prefix  ?= /usr/local
 	SHAREDLIB = -shared
 else ifeq (intel,$(TARGET))
 	CC      := /opt/intel/bin/icc
 	CXX     := /opt/intel/bin/icc
 	LD      := /opt/intel/bin/xild
 	AR      := /opt/intel/bin/xiar crs
-	prefix  ?= /usr/local
 else 
 	PREFIX  := $(subst /bin/,/,$(dir $(shell which $(TARGET)-gcc)))
-	prefix	?= $(dir $(dir $(PREFIX)))$(TARGET)
 	CC      := $(TARGET)-gcc
 	CXX     := $(TARGET)-g++
 	LD      := $(TARGET)-ld
@@ -161,7 +159,7 @@ ifeq (Darwin,$(shell uname))
 	SHAREDLIB      = -dylib -arch x86_64 #-macosx_version_min 10.9
 	LDFLAGS       += -L$(prefix)/lib/
 	DLEXT          = dylib
-	FULLDLEXT      = ${SONAMEVERSION}.dylib
+	FULLDLEXT      = .dylib
 	SONAME_PREFIX  = -install_name # the last space character is crucial
 
 else ifneq (,$(findstring CYGWIN, $(shell uname)))
