@@ -270,11 +270,11 @@ if ~isfield(BIOSIG_GLOBAL,'ISLOADED_EVENTCODES')
 	BIOSIG_GLOBAL.ISLOADED_EVENTCODES = 0;
 end; 
 if ~BIOSIG_GLOBAL.ISLOADED_EVENTCODES,
-	H=sopen('eventcodes.txt');
-	if (H.FILE.FID<0)
+	H=sopen('eventcodes.txt');	% if successful, it will set BIOSIG_GLOBAL.ISLOADED_EVENTCODES
+	sclose(H);
+	if ~BIOSIG_GLOBAL.ISLOADED_EVENTCODES,
 		fprintf(2,'Error: unable to load definition of EventCodes - in order to fix this, include the directory  .../biosig4matlab/doc/ in your path');
 	end
-	sclose(H);
 end;
 
 
